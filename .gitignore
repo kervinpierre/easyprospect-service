@@ -1,3 +1,5 @@
 .vs
 Debug
 /easyprospect-service/build
+/easyprospect-service/easyprospect-config.vcxproj.user
+/easyprospect-service/easyprospect-web.vcxproj.user
