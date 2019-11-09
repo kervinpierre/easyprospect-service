@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="epsrv.cpp">
+    <ClCompile Include="..\src\epsrv\epsrv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

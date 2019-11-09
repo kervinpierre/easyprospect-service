@@ -1,7 +1,7 @@
 #include <iostream>
-#include "../libEpWeb/libEpWeb.h"
+#include <easyprospect-web.h>
 
-int main()
+int main(int argc, char *argv[])
 {
     try
     {

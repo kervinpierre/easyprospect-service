@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "epsrv", "epsrv\epsrv.vcxproj", "{C5F2A28D-631C-4626-8CAF-2ED6653897AD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libEpWeb", "libEpWeb\libEpWeb.vcxproj", "{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-web", "easyprospect-web.vcxproj", "{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D9F48611-0E4E-4056-A78D-A2AA23FFA502}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-config", "easyprospect-config.vcxproj", "{3EF75984-9598-49D6-B4DC-AB71734E9CBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,6 +35,14 @@ Global
 		{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}.Release|x64.Build.0 = Release|x64
 		{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}.Release|x86.ActiveCfg = Release|Win32
 		{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}.Release|x86.Build.0 = Release|Win32
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Debug|x64.ActiveCfg = Debug|x64
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Debug|x64.Build.0 = Debug|x64
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Debug|x86.ActiveCfg = Debug|Win32
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Debug|x86.Build.0 = Debug|Win32
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Release|x64.ActiveCfg = Release|x64
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Release|x64.Build.0 = Release|x64
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Release|x86.ActiveCfg = Release|Win32
+		{3EF75984-9598-49D6-B4DC-AB71734E9CBC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
