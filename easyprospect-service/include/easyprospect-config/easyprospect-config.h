@@ -4,6 +4,10 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
+#include <spdlog/spdlog.h>
+#include <spdlog/async.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 namespace easyprospect
 {
     namespace service
@@ -22,14 +26,14 @@ namespace easyprospect
 
             enum class EpDebugLevelType : int
             {
-                NONE = 0,
-                OFF = 1,
-                FATAL = 2,
-                ERROR = 3,
-                WARN   = 4,
-                INFO = 5,
-                DEBUG = 6,
-                ALL = 7
+                EPNONE = 0,
+                EPOFF = 1,
+                EPFATAL = 2,
+                EPERROR = 3,
+                EPWARN   = 4,
+                EPINFO = 5,
+                EPDEBUG = 6,
+                EPALL = 7
             };
 
             enum class EpConfigType : int
@@ -79,12 +83,26 @@ namespace easyprospect
                     outFile(of), logFile(lf), argFile(af), cnfFile(cf),
                     pidFile(pf){};
 
+                /**********************************************************************************************//**
+                 * @fn  template <typename C, typename... T> static ::std::shared_ptr<C> EasyProspectConfigCore::Create(T&&... args)
+                 *
+                 * @brief   Static constructor.  https://stackoverflow.com/questions/8147027/how-do-i-call-stdmake-shared-on-a-class-with-only-protected-or-private-const
+                 *
+                 * @author  Kervin
+                 * @date    2019-11-09
+                 *
+                 * @tparam  C   Type of the c.
+                 * @tparam  T   Generic type parameter.
+                 * @param   args    Variable arguments providing [in,out] The arguments.
+                 **************************************************************************************************/
+
                 template <typename C, typename... T>
                 static ::std::shared_ptr<C> Create(T&&... args)
                 {
                     return ::std::make_shared<C>(make_shared_enabler{ 0 },
                         ::std::forward<T>(args)...);
                 }
+
 
                 const EpVerbosityType  GetVerbosity()  const { return verbosity; }
                 const EpDebugLevelType GetDebugLevel() const { return debugLevel; }
@@ -126,7 +144,7 @@ namespace easyprospect
                     displayHelp    = false;
                     displayVersion = false;
                     verbosity      = EpVerbosityType::NONE;
-                    debugLevel     = EpDebugLevelType::NONE;
+                    debugLevel     = EpDebugLevelType::EPNONE;
                     remainderArgs  = boost::none;
 
                     outFile = boost::none;

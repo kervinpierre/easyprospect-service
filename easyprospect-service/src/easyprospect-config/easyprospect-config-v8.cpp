@@ -40,7 +40,7 @@ easyprospect::service::config::EasyProspectConfigV8CoreBuilder::toConfig()
 {
     EasyProspectConfigV8CoreBuilder builder;
      
-    EasyProspectConfigV8Core res(displayHelp,
+    EasyProspectConfigV8Core res(EasyProspectConfigCore::make_shared_enabler{ 0 }, displayHelp,
         displayVersion, verbosity,debugLevel, remainderArgs,outFile,
         logFile,argFile,cnfFile,pidFile,sourceFiles);
 

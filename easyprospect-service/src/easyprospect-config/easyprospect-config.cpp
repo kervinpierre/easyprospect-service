@@ -39,6 +39,15 @@ EasyProspectConfigCmd::GetOptions(EasyProspectConfigCmd config)
     
     // Global options
     desc.add_options()("help", "produce help message");
+    desc.add_options()("version", "Display the program version");
+    desc.add_options()("verbosity", boost::program_options::value<std::string>(), "Verbosity level");
+    desc.add_options()("debug-level", boost::program_options::value<std::string>(), "Debug level");
+    desc.add_options()("log-file", boost::program_options::value<std::string>(), "Output logs to this file");
+    desc.add_options()("output-file", boost::program_options::value<std::string>(), "Regular output goes into this file");
+    desc.add_options()("arg-file", boost::program_options::value<std::string>(), "Contains regular command line arguments");
+    desc.add_options()("config-file", boost::program_options::value<std::string>(), "Contains confuration options");
+    desc.add_options()("pid-file", boost::program_options::value<std::string>(), "File keeps the PID of the running instance");
+    desc.add_options()("--", "Options after this are sent to the called application or script");
 
     // Component options
     config.AddOptions(desc);
@@ -50,13 +59,66 @@ const EasyProspectConfigCore
 easyprospect::service::config::EasyProspectConfigCmd::ParseOptions(EasyProspectConfigCmd config,
     boost::program_options::options_description desc, int argc , char* argv[] )
 {
+    spdlog::trace("ParseOptions() called\n");
+
     boost::program_options::variables_map vm;
 
     boost::program_options::store(
         boost::program_options::parse_command_line(argc, argv, desc), vm);
     boost::program_options::notify(vm);
 
-    return vm;
+    EasyProspectConfigCoreBuilder builder;
+    
+    if (vm.count("help"))
+    {
+        builder.SetDisplayHelp(true);
+
+        //spdlog::trace("Compression level was set to '{}'", vm["compression"].as<int>());
+    }
+
+    if (vm.count("version"))
+    {
+        builder.SetDisplayVersion(true);
+    }
+
+    if (vm.count("verbosity"))
+    {
+        builder.SetVerbosity(vm["verbosity"].as<std::string>());
+    }
+
+    if (vm.count("debug-level"))
+    {
+        builder.SetVerbosity(vm["debug-level"].as<std::string>());
+    }
+
+    if (vm.count("log-file"))
+    {
+        builder.SetLogFile(vm["log-file"].as<std::string>());
+    }
+
+    if (vm.count("output-file"))
+    {
+        builder.SetOutFile(vm["output-file"].as<std::string>());
+    }
+
+    if (vm.count("arg-file"))
+    {
+        builder.SetArgFile(vm["arg-file"].as<std::string>());
+    }
+
+    if (vm.count("config-file"))
+    {
+        builder.SetCnfFile(vm["config-file"].as<std::string>());
+    }
+
+    if (vm.count("pid-file"))
+    {
+        builder.SetPidFile(vm["pid-file"].as<std::string>());
+    }
+
+    auto res = builder.toConfigCore();
+
+    return res;
 }
 
 void 
@@ -201,35 +263,35 @@ easyprospect::service::config::EasyProspectConfigCore::toString(const EpDebugLev
 
     switch (d)
     {
-    case EpDebugLevelType::NONE:
+    case EpDebugLevelType::EPNONE:
         res = "NONE";
         break;
 
-    case EpDebugLevelType::ALL:
+    case EpDebugLevelType::EPALL:
         res = "ALL";
         break;
 
-    case EpDebugLevelType::DEBUG:
+    case EpDebugLevelType::EPDEBUG:
         res = "DEBUG";
         break;
 
-    case EpDebugLevelType::INFO:
+    case EpDebugLevelType::EPINFO:
         res = "INFO";
         break;
 
-    case EpDebugLevelType::WARN:
+    case EpDebugLevelType::EPWARN:
         res = "WARN";
         break;
 
-    case EpDebugLevelType::ERROR:
+    case EpDebugLevelType::EPERROR:
         res = "ERROR";
         break;
 
-    case EpDebugLevelType::FATAL:
+    case EpDebugLevelType::EPFATAL:
         res = "FATAL";
         break;
 
-    case EpDebugLevelType::OFF:
+    case EpDebugLevelType::EPOFF:
         res = "OFF";
         break;
 
@@ -285,35 +347,35 @@ easyprospect::service::config::EasyProspectConfigCore::debugLevelFrom(std::strin
 
     if (boost::iequals(d, "NONE"))
     {
-        res = EpDebugLevelType::NONE;
+        res = EpDebugLevelType::EPNONE;
     }
     else if (boost::iequals(d, "ALL"))
     {
-        res = EpDebugLevelType::ALL;
+        res = EpDebugLevelType::EPALL;
     }
     else if (boost::iequals(d, "DEBUG"))
     {
-        res = EpDebugLevelType::DEBUG;
+        res = EpDebugLevelType::EPDEBUG;
     }
     else if (boost::iequals(d, "INFO"))
     {
-        res = EpDebugLevelType::INFO;
+        res = EpDebugLevelType::EPINFO;
     }
     else if (boost::iequals(d, "WARN"))
     {
-        res = EpDebugLevelType::WARN;
+        res = EpDebugLevelType::EPWARN;
     }
     else if (boost::iequals(d, "ERROR"))
     {
-        res = EpDebugLevelType::ERROR;
+        res = EpDebugLevelType::EPERROR;
     }
     else if (boost::iequals(d, "FATAL"))
     {
-        res = EpDebugLevelType::FATAL;
+        res = EpDebugLevelType::EPFATAL;
     }
     else if (boost::iequals(d, "OFF"))
     {
-        res = EpDebugLevelType::OFF;
+        res = EpDebugLevelType::EPOFF;
     }
     else
     {
