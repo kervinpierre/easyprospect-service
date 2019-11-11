@@ -21,6 +21,14 @@
   <ItemGroup>
     <ClCompile Include="..\src\epsrv\epsrv.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\easyprospect-config.vcxproj">
+      <Project>{3ef75984-9598-49d6-b4dc-ab71734e9cbc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\easyprospect-web.vcxproj">
+      <Project>{1e3be921-ab36-49f7-980b-cde7cc3dbf61}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{C5F2A28D-631C-4626-8CAF-2ED6653897AD}</ProjectGuid>
@@ -114,6 +122,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\include\$(ProjectName);$(SolutionDir)\include\easyprospect-web;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

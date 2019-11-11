@@ -102,7 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
@@ -111,6 +111,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp14</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)\include\$(ProjectName)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,16 +157,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\easyprospect-web\db_layer.h" />
-    <ClInclude Include="include\easyprospect-web\easyprospect-web.h" />
-    <ClInclude Include="include\easyprospect-web\multithreading.h" />
-    <ClInclude Include="include\easyprospect-web\pet_data_types.h" />
-    <ClInclude Include="include\easyprospect-web\request_processor.h" />
+    <ClCompile Include="src\easyprospect-web\easyprospect-web.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\easyprospect-web\db_layer.cpp" />
-    <ClCompile Include="src\easyprospect-web\easyprospect-web.cpp" />
-    <ClCompile Include="src\easyprospect-web\request_processor.cpp" />
+    <ClInclude Include="include\easyprospect-web\easyprospect-web.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
