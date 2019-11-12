@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{17034538-93F4-3AFF-BFF3-1F030D1578D1}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <Keyword>Win32Proj</Keyword>
+    <Platform>x64</Platform>
+    <ProjectName>EP_CPP_TEST_main</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\build\msvc\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\build\msvc\$(Configuration)\IntDir\$(ProjectName)\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EP_CPP_TEST_main</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">easyprospect-v8-test.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">easyprospect-v8-test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">easyprospect-v8-test.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">easyprospect-v8-test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">easyprospect-v8-test.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">easyprospect-v8-test</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\packages\v8-v141-x64.7.4.288.26\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;EASY_PROJECT_LIBRARY;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;EASY_PROJECT_LIBRARY;CMAKE_INTDIR=\"Debug\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)\build\msvc\$(Configuration)\;$(SolutionDir)/packages/v8-v141-x64.7.4.288.26/lib;$(SolutionDir)/packages/v8-v141-x64.7.4.288.26/lib/$(Configuration);$(SolutionDir)/tests/;$(SolutionDir)/data/;$(SolutionDir)/data/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <ProjectReference />
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\include;..\packages\v8-v141-x64.7.4.288.26\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>Release/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;EASY_PROJECT_LIBRARY;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;EASY_PROJECT_LIBRARY;CMAKE_INTDIR=\"Release\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\Release\easyprospect-v8.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../packages/v8-v141-x64.7.4.288.26/lib;../packages/v8-v141-x64.7.4.288.26/lib/$(Configuration);../build;../build/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>Release/easyprospect-v8-test.lib</ImportLibrary>
+      <ProgramDataBaseFile>Release/easyprospect-v8-test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>MinSizeRel/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;EASY_PROJECT_LIBRARY;CMAKE_INTDIR="MinSizeRel";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;EASY_PROJECT_LIBRARY;CMAKE_INTDIR=\"MinSizeRel\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\MinSizeRel\easyprospect-v8.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Lang/Programs/easyprospect-v8/easyprospect-v8/packages/v8-v141-x64.7.4.288.26/lib;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/packages/v8-v141-x64.7.4.288.26/lib/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/easyprospect-v8-test;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/easyprospect-v8-test/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../bin;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../bin/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../packages/v8-v141-x64.7.4.288.26/lib;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../packages/v8-v141-x64.7.4.288.26/lib/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../build;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../build/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/MinSizeRel/easyprospect-v8-test.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/MinSizeRel/easyprospect-v8-test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>RelWithDebInfo/</AssemblerListingLocation>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;EASY_PROJECT_LIBRARY;CMAKE_INTDIR="RelWithDebInfo";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;EASY_PROJECT_LIBRARY;CMAKE_INTDIR=\"RelWithDebInfo\";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\include\easyprospect-v8;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\..\packages\v8-v141-x64.7.4.288.26\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8\tests\include;C:\Lang\Programs\easyprospect-v8\easyprospect-v8;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>..\RelWithDebInfo\easyprospect-v8.lib;v8_libbase.dll.lib;v8_libplatform.dll.lib;v8.dll.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/Lang/Programs/easyprospect-v8/easyprospect-v8/packages/v8-v141-x64.7.4.288.26/lib;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/packages/v8-v141-x64.7.4.288.26/lib/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/easyprospect-v8-test;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/easyprospect-v8-test/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../bin;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../bin/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../packages/v8-v141-x64.7.4.288.26/lib;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../packages/v8-v141-x64.7.4.288.26/lib/$(Configuration);C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../build;C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/../build/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/RelWithDebInfo/easyprospect-v8-test.lib</ImportLibrary>
+      <ProgramDataBaseFile>C:/Lang/Programs/easyprospect-v8/easyprospect-v8/tests/RelWithDebInfo/easyprospect-v8-test.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="EPCT_Utils.cpp" />
+    <ClCompile Include="EP_CPP_TEST_main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="EPCT_Utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\easyprospect-config.vcxproj">
+      <Project>{3ef75984-9598-49d6-b4dc-ab71734e9cbc}</Project>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\easyprospect-web.vcxproj">
+      <Project>{1e3be921-ab36-49f7-980b-cde7cc3dbf61}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\epsrv\epsrv.vcxproj">
+      <Project>{c5f2a28d-631c-4626-8caf-2ed6653897ad}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

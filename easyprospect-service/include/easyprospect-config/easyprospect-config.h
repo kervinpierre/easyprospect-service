@@ -127,9 +127,9 @@ namespace easyprospect
             class easyprospect_config_core_builder
             {
             protected:
-                bool             display_help_;
-                bool             display_version_;
-                ep_verbosity_type  verbosity_;
+                bool                display_help_;
+                bool                display_version_;
+                ep_verbosity_type   verbosity_;
                 ep_debug_level_type debug_level_;
                 boost::optional<std::string>      remainder_args_;
                 boost::optional<boost::filesystem::path> out_file_;
@@ -180,11 +180,17 @@ namespace easyprospect
             class easyprospect_config_cmd
             {
             public:
-                virtual std::string 
-                    get_description();
-                virtual boost::program_options::options_description 
-                    add_options(boost::program_options::options_description desc);
-                virtual void validate_options(boost::program_options::variables_map vm);
+               std::string 
+                   get_description() { return "";  };
+                boost::program_options::options_description 
+                    add_options(boost::program_options::options_description desc)
+                {
+                    return boost::program_options::options_description();
+                };
+                void validate_options(boost::program_options::variables_map vm)
+                {
+                    
+                };
 
                 static easyprospect_config_cmd
                     get_config(ep_config_type type);

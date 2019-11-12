@@ -1,5 +1,5 @@
-#include <easyprospect-config.h>
-#include <easyprospect-config-v8.h>
+#include <easyprospect-config/easyprospect-config.h>
+#include <easyprospect-config/easyprospect-config-v8.h>
 
 #include <boost/convert.hpp>
 #include <boost/convert/stream.hpp>

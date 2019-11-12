@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <easyprospect-config.h>
+#include <easyprospect-config/easyprospect-config.h>
 
 #include <boost/program_options.hpp>
 
@@ -71,12 +71,12 @@ namespace easyprospect
             class easyprospect_config_v8_shell : public easyprospect_config_cmd
             {
             public:
-                virtual std::string get_description() override;
+                std::string get_description();
                 
-                virtual boost::program_options::options_description 
-                    add_options(boost::program_options::options_description desc) override;
+                boost::program_options::options_description 
+                    add_options(boost::program_options::options_description desc);
 
-                virtual void validate_options(boost::program_options::variables_map vm) override;
+                void validate_options(boost::program_options::variables_map vm);
             };
         }
     }

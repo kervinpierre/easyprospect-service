@@ -1,6 +1,6 @@
 #include <string>
 #include <vector>
-#include <easyprospect-config-v8.h>
+#include <easyprospect-config/easyprospect-config-v8.h>
 
 using namespace easyprospect::service::config;
 
