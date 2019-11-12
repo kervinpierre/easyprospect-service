@@ -11,21 +11,21 @@ namespace easyprospect
     {
         namespace config
         {
-            class EasyProspectConfigV8CoreBuilder;
+            class easyprospect_config_v8_core_builder;
 
             /************************************************************************/
             /* EpV8 core configuration object                                  */
             /************************************************************************/
-            class EasyProspectConfigV8Core final : public EasyProspectConfigCore
+            class easyprospect_config_v8_core final : public easyprospect_config_core
             {
             private:
                 const boost::optional<std::vector<boost::filesystem::path>>
-                    sourceFiles;
+                    source_files_;
 
-                friend class EasyProspectConfigV8CoreBuilder;
+                friend class easyprospect_config_v8_core_builder;
 
             protected:
-                EasyProspectConfigV8Core(const make_shared_enabler &mse, bool dh, bool dv, EpVerbosityType verb, EpDebugLevelType db,
+                easyprospect_config_v8_core(const make_shared_enabler &mse, bool dh, bool dv, ep_verbosity_type verb, ep_debug_level_type db,
                     boost::optional<std::string> remArgs, 
                     boost::optional<boost::filesystem::path> of,
                     boost::optional<boost::filesystem::path> lf,
@@ -33,50 +33,50 @@ namespace easyprospect
                     boost::optional<boost::filesystem::path> cf,
                     boost::optional<boost::filesystem::path> pf,
                     boost::optional<std::vector<boost::filesystem::path>> sf) 
-                        :EasyProspectConfigCore( mse, dh, dv, verb, db, remArgs, of, 
-                            lf, af, cf, pf), sourceFiles(sf)
+                        :easyprospect_config_core( mse, dh, dv, verb, db, remArgs, of, 
+                            lf, af, cf, pf), source_files_(sf)
                 { };
 
             public:
                 const boost::optional<std::vector<boost::filesystem::path>> 
-                    GetSourceFiles() const { return sourceFiles; }
+                    get_source_files() const { return source_files_; }
             };
 
             /************************************************************************/
             /* EpV8 core configuration object                                  */
             /************************************************************************/
-            class EasyProspectConfigV8CoreBuilder final : public EasyProspectConfigCoreBuilder
+            class easyprospect_config_v8_core_builder final : public easyprospect_config_core_builder
             {
                 boost::optional<std::vector<boost::filesystem::path>>
-                    sourceFiles;
+                    source_files_;
 
             public:
-                EasyProspectConfigV8CoreBuilder()
-                    : EasyProspectConfigCoreBuilder()
+                easyprospect_config_v8_core_builder()
+                    : easyprospect_config_core_builder()
                 {
-                    sourceFiles = boost::none;
+                    source_files_ = boost::none;
                 };
 
-                void setSourceFiles(boost::optional<std::vector<boost::filesystem::path>> sf)
+                void set_source_files(boost::optional<std::vector<boost::filesystem::path>> sf)
                 {
-                    sourceFiles = sf;
+                    source_files_ = sf;
                 }
 
-                const EasyProspectConfigV8Core toConfig();
+                const easyprospect_config_v8_core to_config();
             };
 
             /************************************************************************/
             /* EpV8Shell configuration                                         */
             /************************************************************************/
-            class EasyProspectConfigV8Shell : public EasyProspectConfigCmd
+            class easyprospect_config_v8_shell : public easyprospect_config_cmd
             {
             public:
-                virtual std::string GetDescription() override;
+                virtual std::string get_description() override;
                 
                 virtual boost::program_options::options_description 
-                    AddOptions(boost::program_options::options_description desc) override;
+                    add_options(boost::program_options::options_description desc) override;
 
-                virtual void ValidateOptions(boost::program_options::variables_map vm) override;
+                virtual void validate_options(boost::program_options::variables_map vm) override;
             };
         }
     }

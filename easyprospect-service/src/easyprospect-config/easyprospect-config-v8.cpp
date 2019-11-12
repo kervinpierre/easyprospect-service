@@ -5,7 +5,7 @@
 using namespace easyprospect::service::config;
 
 boost::program_options::options_description 
-easyprospect::service::config::EasyProspectConfigV8Shell::AddOptions(boost::program_options::options_description desc)
+easyprospect::service::config::easyprospect_config_v8_shell::add_options(boost::program_options::options_description desc)
 {
     desc.add_options()("source-file", 
         boost::program_options::value< std::vector<std::string> >(), 
@@ -15,7 +15,7 @@ easyprospect::service::config::EasyProspectConfigV8Shell::AddOptions(boost::prog
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigV8Shell::ValidateOptions(boost::program_options::variables_map vm)
+easyprospect::service::config::easyprospect_config_v8_shell::validate_options(boost::program_options::variables_map vm)
 {
     if (vm.count("source-file"))
     {
@@ -28,21 +28,21 @@ easyprospect::service::config::EasyProspectConfigV8Shell::ValidateOptions(boost:
 }
 
 std::string 
-easyprospect::service::config::EasyProspectConfigV8Shell::GetDescription()
+easyprospect::service::config::easyprospect_config_v8_shell::get_description()
 {
     std::string res = "EasyProspect V8 Shell Configuration.";
 
     return res;
 }
 
-const EasyProspectConfigV8Core 
-easyprospect::service::config::EasyProspectConfigV8CoreBuilder::toConfig()
+const easyprospect_config_v8_core 
+easyprospect::service::config::easyprospect_config_v8_core_builder::to_config()
 {
-    EasyProspectConfigV8CoreBuilder builder;
+    easyprospect_config_v8_core_builder builder;
      
-    EasyProspectConfigV8Core res(EasyProspectConfigCore::make_shared_enabler{ 0 }, displayHelp,
-        displayVersion, verbosity,debugLevel, remainderArgs,outFile,
-        logFile,argFile,cnfFile,pidFile,sourceFiles);
+    easyprospect_config_v8_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_,
+        display_version_, verbosity_,debug_level_, remainder_args_,out_file_,
+        log_file_,arg_file_,cnf_file_,pid_file_,source_files_);
 
     return res;
 }

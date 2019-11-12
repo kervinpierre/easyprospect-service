@@ -10,17 +10,17 @@
 
 using namespace easyprospect::service::config;
 
-EasyProspectConfigCmd
-EasyProspectConfigCmd::GetConfig(EpConfigType type)
+easyprospect_config_cmd
+easyprospect_config_cmd::get_config(ep_config_type type)
 {
     //auto currName = boost::typeindex::type_id<T>().pretty_name();
 
-    EasyProspectConfigCmd config;
+    easyprospect_config_cmd config;
 
     switch (type)
     {
-    case EpConfigType::EPV8:
-        config = EasyProspectConfigV8Shell();
+    case ep_config_type::ep_v8:
+        config = easyprospect_config_v8_shell();
         break;
 
     default:
@@ -31,16 +31,16 @@ EasyProspectConfigCmd::GetConfig(EpConfigType type)
 }
 
 boost::program_options::options_description 
-EasyProspectConfigCmd::GetOptions(EasyProspectConfigCmd config)
+easyprospect_config_cmd::get_options(easyprospect_config_cmd config)
 {
-    boost::program_options::options_description desc(config.GetDescription());
+    boost::program_options::options_description desc(config.get_description());
     
     // https://stackoverflow.com/questions/32822076/boost-program-options-forward-parameters-after-to-another-program
     
     // Global options
     desc.add_options()("help", "produce help message");
     desc.add_options()("version", "Display the program version");
-    desc.add_options()("verbosity", boost::program_options::value<std::string>(), "Verbosity level");
+    desc.add_options()("verbosity_", boost::program_options::value<std::string>(), "Verbosity level");
     desc.add_options()("debug-level", boost::program_options::value<std::string>(), "Debug level");
     desc.add_options()("log-file", boost::program_options::value<std::string>(), "Output logs to this file");
     desc.add_options()("output-file", boost::program_options::value<std::string>(), "Regular output goes into this file");
@@ -50,16 +50,16 @@ EasyProspectConfigCmd::GetOptions(EasyProspectConfigCmd config)
     desc.add_options()("--", "Options after this are sent to the called application or script");
 
     // Component options
-    config.AddOptions(desc);
+    config.add_options(desc);
 
     return desc;
 }
 
-const EasyProspectConfigCore
-easyprospect::service::config::EasyProspectConfigCmd::ParseOptions(EasyProspectConfigCmd config,
+const easyprospect_config_core
+easyprospect::service::config::easyprospect_config_cmd::parse_options(easyprospect_config_cmd config,
     boost::program_options::options_description desc, int argc , char* argv[] )
 {
-    spdlog::trace("ParseOptions() called\n");
+    spdlog::trace("parse_options() called\n");
 
     boost::program_options::variables_map vm;
 
@@ -67,139 +67,139 @@ easyprospect::service::config::EasyProspectConfigCmd::ParseOptions(EasyProspectC
         boost::program_options::parse_command_line(argc, argv, desc), vm);
     boost::program_options::notify(vm);
 
-    EasyProspectConfigCoreBuilder builder;
+    easyprospect_config_core_builder builder;
     
     if (vm.count("help"))
     {
-        builder.SetDisplayHelp(true);
+        builder.set_display_help(true);
 
         //spdlog::trace("Compression level was set to '{}'", vm["compression"].as<int>());
     }
 
     if (vm.count("version"))
     {
-        builder.SetDisplayVersion(true);
+        builder.set_display_version(true);
     }
 
-    if (vm.count("verbosity"))
+    if (vm.count("verbosity_"))
     {
-        builder.SetVerbosity(vm["verbosity"].as<std::string>());
+        builder.set_verbosity(vm["verbosity_"].as<std::string>());
     }
 
     if (vm.count("debug-level"))
     {
-        builder.SetVerbosity(vm["debug-level"].as<std::string>());
+        builder.set_verbosity(vm["debug-level"].as<std::string>());
     }
 
     if (vm.count("log-file"))
     {
-        builder.SetLogFile(vm["log-file"].as<std::string>());
+        builder.set_log_file(vm["log-file"].as<std::string>());
     }
 
     if (vm.count("output-file"))
     {
-        builder.SetOutFile(vm["output-file"].as<std::string>());
+        builder.set_out_file(vm["output-file"].as<std::string>());
     }
 
     if (vm.count("arg-file"))
     {
-        builder.SetArgFile(vm["arg-file"].as<std::string>());
+        builder.set_arg_file(vm["arg-file"].as<std::string>());
     }
 
     if (vm.count("config-file"))
     {
-        builder.SetCnfFile(vm["config-file"].as<std::string>());
+        builder.set_cnf_file(vm["config-file"].as<std::string>());
     }
 
     if (vm.count("pid-file"))
     {
-        builder.SetPidFile(vm["pid-file"].as<std::string>());
+        builder.set_pid_file(vm["pid-file"].as<std::string>());
     }
 
-    auto res = builder.toConfigCore();
+    auto res = builder.to_config_core();
 
     return res;
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCmd::ValidateOptions(EasyProspectConfigCmd config,
+easyprospect::service::config::easyprospect_config_cmd::validate_options(easyprospect_config_cmd config,
     boost::program_options::variables_map vm)
 {
-    config.ValidateOptions(vm);
+    config.validate_options(vm);
 }
 
-const EasyProspectConfigCore 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::toConfigCore()
+const easyprospect_config_core 
+easyprospect::service::config::easyprospect_config_core_builder::to_config_core()
 {
-    EasyProspectConfigCore res(EasyProspectConfigCore::make_shared_enabler{ 0 }, displayHelp, displayVersion,
-        verbosity, debugLevel, remainderArgs, outFile, logFile, argFile, cnfFile,
-        pidFile);
+    easyprospect_config_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_, display_version_,
+        verbosity_, debug_level_, remainder_args_, out_file_, log_file_, arg_file_, cnf_file_,
+        pid_file_);
 
     return res;
 }
 
 void
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetVerbosity(std::string verbosity)
+easyprospect::service::config::easyprospect_config_core_builder::set_verbosity(std::string verbosity)
 {
-    auto v = EasyProspectConfigCore::verbosityFrom(verbosity);
+    auto v = easyprospect_config_core::verbosity_from(verbosity);
 
-    SetVerbosity(v);
+    set_verbosity(v);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetDebugLevel(std::string debugLevel)
+easyprospect::service::config::easyprospect_config_core_builder::set_debug_level(std::string debug_level)
 {
-    auto d = EasyProspectConfigCore::debugLevelFrom(debugLevel);
+    auto d = easyprospect_config_core::debug_level_from(debug_level);
 
-    SetDebugLevel(d);
+    set_debug_level(d);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetLogFile(std::string logFile)
+easyprospect::service::config::easyprospect_config_core_builder::set_log_file(std::string log_file)
 {
-    auto l = boost::filesystem::path(logFile);
-    SetLogFile(l);
+    auto l = boost::filesystem::path(log_file);
+    set_log_file(l);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetOutFile(std::string outFile)
+easyprospect::service::config::easyprospect_config_core_builder::set_out_file(std::string out_file)
 {
-    auto o = boost::filesystem::path(outFile);
+    auto o = boost::filesystem::path(out_file);
 
-    SetOutFile(o);
+    set_out_file(o);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetArgFile(std::string argFile)
+easyprospect::service::config::easyprospect_config_core_builder::set_arg_file(std::string argFile)
 {
     auto a = boost::filesystem::path(argFile);
 
-    SetArgFile(a);
+    set_arg_file(a);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetCnfFile(std::string cnfFile)
+easyprospect::service::config::easyprospect_config_core_builder::set_cnf_file(std::string cnf_file)
 {
-    auto c = boost::filesystem::path(cnfFile);
+    auto c = boost::filesystem::path(cnf_file);
 
-    SetCnfFile(c);
+    set_cnf_file(c);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetPidFile(std::string pidFile)
+easyprospect::service::config::easyprospect_config_core_builder::set_pid_file(std::string pid_file)
 {
-    auto p = boost::filesystem::path(pidFile);
+    auto p = boost::filesystem::path(pid_file);
 
-    SetPidFile(p);
+    set_pid_file(p);
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetDisplayHelp(std::string displayHelp)
+easyprospect::service::config::easyprospect_config_core_builder::set_display_help(std::string display_help)
 {
-    auto d = boost::convert<bool>(displayHelp, boost::cnv::cstream());
+    auto d = boost::convert<bool>(display_help, boost::cnv::cstream());
     if (d.has_value())
     {
-        SetDisplayHelp(d.get());
+        set_display_help(d.get());
     }
     else
     {
@@ -208,12 +208,12 @@ easyprospect::service::config::EasyProspectConfigCoreBuilder::SetDisplayHelp(std
 }
 
 void 
-easyprospect::service::config::EasyProspectConfigCoreBuilder::SetDisplayVersion(std::string displayVersion)
+easyprospect::service::config::easyprospect_config_core_builder::set_display_version(std::string display_version)
 {
-    auto v = boost::convert<bool>(displayVersion, boost::cnv::cstream());
+    auto v = boost::convert<bool>(display_version, boost::cnv::cstream());
     if (v.has_value())
     {
-        SetDisplayHelp(v.get());
+        set_display_help(v.get());
     }
     else
     {
@@ -222,30 +222,30 @@ easyprospect::service::config::EasyProspectConfigCoreBuilder::SetDisplayVersion(
 }
 
 const std::string 
-easyprospect::service::config::EasyProspectConfigCore::toString(const EpVerbosityType v)
+easyprospect::service::config::easyprospect_config_core::to_string(const ep_verbosity_type v)
 {
     std::string res;
 
     switch (v)
     {
-    case EpVerbosityType::NONE:
-        res = "NONE";
+    case ep_verbosity_type::none:
+        res = "none";
         break;
 
-    case EpVerbosityType::QUIET:
-        res = "QUIET";
+    case ep_verbosity_type::quiet:
+        res = "quiet";
         break;
 
-    case EpVerbosityType::NORMAL:
-        res = "NORMAL";
+    case ep_verbosity_type::normal:
+        res = "normal";
         break;
 
-    case EpVerbosityType::MINIMUM:
-        res = "MINIMUM";
+    case ep_verbosity_type::minimum:
+        res = "minimum";
         break;
 
-    case EpVerbosityType::MAXIMUM:
-        res = "MAXIMUM";
+    case ep_verbosity_type::maximum:
+        res = "maximum";
         break;
 
     default:
@@ -257,41 +257,41 @@ easyprospect::service::config::EasyProspectConfigCore::toString(const EpVerbosit
 }
 
 const std::string 
-easyprospect::service::config::EasyProspectConfigCore::toString(const EpDebugLevelType d)
+easyprospect::service::config::easyprospect_config_core::to_string(const ep_debug_level_type d)
 {
     std::string res;
 
     switch (d)
     {
-    case EpDebugLevelType::EPNONE:
-        res = "NONE";
+    case ep_debug_level_type::ep_none:
+        res = "none";
         break;
 
-    case EpDebugLevelType::EPALL:
+    case ep_debug_level_type::ep_all:
         res = "ALL";
         break;
 
-    case EpDebugLevelType::EPDEBUG:
-        res = "DEBUG";
+    case ep_debug_level_type::ep_debug:
+        res = "debug";
         break;
 
-    case EpDebugLevelType::EPINFO:
+    case ep_debug_level_type::ep_info:
         res = "INFO";
         break;
 
-    case EpDebugLevelType::EPWARN:
+    case ep_debug_level_type::ep_warn:
         res = "WARN";
         break;
 
-    case EpDebugLevelType::EPERROR:
+    case ep_debug_level_type::ep_error:
         res = "ERROR";
         break;
 
-    case EpDebugLevelType::EPFATAL:
+    case ep_debug_level_type::ep_fatal:
         res = "FATAL";
         break;
 
-    case EpDebugLevelType::EPOFF:
+    case ep_debug_level_type::ep_off:
         res = "OFF";
         break;
 
@@ -303,79 +303,79 @@ easyprospect::service::config::EasyProspectConfigCore::toString(const EpDebugLev
     return res;
 }
 
-const EpVerbosityType 
-easyprospect::service::config::EasyProspectConfigCore::verbosityFrom(std::string v)
+const ep_verbosity_type 
+easyprospect::service::config::easyprospect_config_core::verbosity_from(std::string v)
 {
-    EpVerbosityType res;
+    ep_verbosity_type res;
 
-    if (boost::iequals(v, "NONE"))
+    if (boost::iequals(v, "none"))
     {
-        res = EpVerbosityType::NONE;
+        res = ep_verbosity_type::none;
     }
-    else if (boost::iequals(v, "QUIET"))
+    else if (boost::iequals(v, "quiet"))
     {
-        res = EpVerbosityType::QUIET;
+        res = ep_verbosity_type::quiet;
     }
-    else if (boost::iequals(v, "MINIMUM"))
+    else if (boost::iequals(v, "minimum"))
     {
-        res = EpVerbosityType::MINIMUM;
+        res = ep_verbosity_type::minimum;
     }
-    else if (boost::iequals(v, "NORMAL"))
+    else if (boost::iequals(v, "normal"))
     {
-        res = EpVerbosityType::NORMAL;
+        res = ep_verbosity_type::normal;
     }
-    else if (boost::iequals(v, "MAXIMUM"))
+    else if (boost::iequals(v, "maximum"))
     {
-        res = EpVerbosityType::MAXIMUM;
+        res = ep_verbosity_type::maximum;
     }
-    else if (boost::iequals(v, "DEBUG"))
+    else if (boost::iequals(v, "debug"))
     {
-        res = EpVerbosityType::DEBUG;
+        res = ep_verbosity_type::debug;
     }
     else
     {
-        throw new std::logic_error("Invalid verbosity");
+        throw new std::logic_error("Invalid verbosity_");
     }
 
     return res;
 }
 
-const EpDebugLevelType
-easyprospect::service::config::EasyProspectConfigCore::debugLevelFrom(std::string d)
+const ep_debug_level_type
+easyprospect::service::config::easyprospect_config_core::debug_level_from(std::string d)
 {
-    EpDebugLevelType res;
+    ep_debug_level_type res;
 
-    if (boost::iequals(d, "NONE"))
+    if (boost::iequals(d, "none"))
     {
-        res = EpDebugLevelType::EPNONE;
+        res = ep_debug_level_type::ep_none;
     }
     else if (boost::iequals(d, "ALL"))
     {
-        res = EpDebugLevelType::EPALL;
+        res = ep_debug_level_type::ep_all;
     }
-    else if (boost::iequals(d, "DEBUG"))
+    else if (boost::iequals(d, "debug"))
     {
-        res = EpDebugLevelType::EPDEBUG;
+        res = ep_debug_level_type::ep_debug;
     }
     else if (boost::iequals(d, "INFO"))
     {
-        res = EpDebugLevelType::EPINFO;
+        res = ep_debug_level_type::ep_info;
     }
     else if (boost::iequals(d, "WARN"))
     {
-        res = EpDebugLevelType::EPWARN;
+        res = ep_debug_level_type::ep_warn;
     }
     else if (boost::iequals(d, "ERROR"))
     {
-        res = EpDebugLevelType::EPERROR;
+        res = ep_debug_level_type::ep_error;
     }
     else if (boost::iequals(d, "FATAL"))
     {
-        res = EpDebugLevelType::EPFATAL;
+        res = ep_debug_level_type::ep_fatal;
     }
     else if (boost::iequals(d, "OFF"))
     {
-        res = EpDebugLevelType::EPOFF;
+        res = ep_debug_level_type::ep_off;
     }
     else
     {
