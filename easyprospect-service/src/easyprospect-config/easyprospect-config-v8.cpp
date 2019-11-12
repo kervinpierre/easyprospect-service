@@ -5,7 +5,7 @@
 using namespace easyprospect::service::config;
 
 boost::program_options::options_description 
-easyprospect::service::config::easyprospect_config_v8_shell::add_options(boost::program_options::options_description desc)
+easyprospect::service::config::easyprospect_config_v8_shell::add_options(boost::program_options::options_description desc) const
 {
     desc.add_options()("source-file", 
         boost::program_options::value< std::vector<std::string> >(), 
@@ -15,7 +15,7 @@ easyprospect::service::config::easyprospect_config_v8_shell::add_options(boost::
 }
 
 void 
-easyprospect::service::config::easyprospect_config_v8_shell::validate_options(boost::program_options::variables_map vm)
+easyprospect::service::config::easyprospect_config_v8_shell::validate_options(boost::program_options::variables_map vm) const
 {
     if (vm.count("source-file"))
     {
@@ -28,7 +28,7 @@ easyprospect::service::config::easyprospect_config_v8_shell::validate_options(bo
 }
 
 std::string 
-easyprospect::service::config::easyprospect_config_v8_shell::get_description()
+easyprospect::service::config::easyprospect_config_v8_shell::get_description() const
 {
     std::string res = "EasyProspect V8 Shell Configuration.";
 

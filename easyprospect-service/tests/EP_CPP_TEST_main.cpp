@@ -29,8 +29,6 @@ using namespace easyprospect::service::config;
 
 TEST_CASE("CmdLine.Simple Display help")
 {
-    easyprospect_config_cmd cmd;
-
     char* argv[] = { "EP_CPP_TEST_main", "--help", NULL };
     int argc = sizeof(argv) / sizeof(char*) - 1;
 

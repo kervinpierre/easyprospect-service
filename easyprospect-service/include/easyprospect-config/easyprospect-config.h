@@ -180,14 +180,14 @@ namespace easyprospect
             class easyprospect_config_cmd
             {
             public:
-               std::string 
-                   get_description() { return "";  };
-                boost::program_options::options_description 
-                    add_options(boost::program_options::options_description desc)
+               virtual std::string 
+                   get_description() const { return "";  };
+                virtual boost::program_options::options_description 
+                    add_options(boost::program_options::options_description desc) const
                 {
                     return boost::program_options::options_description();
                 };
-                void validate_options(boost::program_options::variables_map vm)
+                virtual void validate_options(boost::program_options::variables_map vm) const
                 {
                     
                 };

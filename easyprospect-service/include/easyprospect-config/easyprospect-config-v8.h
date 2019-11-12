@@ -71,12 +71,12 @@ namespace easyprospect
             class easyprospect_config_v8_shell : public easyprospect_config_cmd
             {
             public:
-                std::string get_description();
+                std::string get_description() const override;
                 
                 boost::program_options::options_description 
-                    add_options(boost::program_options::options_description desc);
+                    add_options(boost::program_options::options_description desc) const override;
 
-                void validate_options(boost::program_options::variables_map vm);
+                void validate_options(boost::program_options::variables_map vm) const override;
             };
         }
     }

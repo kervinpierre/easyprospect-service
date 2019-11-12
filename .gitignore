@@ -3,3 +3,4 @@ Debug
 /easyprospect-service/build
 /easyprospect-service/easyprospect-config.vcxproj.user
 /easyprospect-service/easyprospect-web.vcxproj.user
+/easyprospect-service/tests/EP_CPP_TEST_main.vcxproj.user
