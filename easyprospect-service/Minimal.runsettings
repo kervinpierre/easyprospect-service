@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+
+  <Catch2Adapter>
+    <DebugBreak>on</DebugBreak>
+    <DiscoverCommandLine>--list-tests</DiscoverCommandLine>
+    <FilenameFilter>^EP_CPP_TEST_</FilenameFilter>
+	<Logging>debug</Logging>
+  </Catch2Adapter>
+
+</RunSettings>
