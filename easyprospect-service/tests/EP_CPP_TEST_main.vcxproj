@@ -265,6 +265,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="EPCT_Utils.cpp" />
+    <ClCompile Include="EP_CPP_TEST_CmdlineV801.cpp" />
     <ClCompile Include="EP_CPP_TEST_main.cpp" />
   </ItemGroup>
   <ItemGroup>

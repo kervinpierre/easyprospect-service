@@ -26,7 +26,7 @@ namespace easyprospect
 
             protected:
                 easyprospect_config_v8_core(const make_shared_enabler &mse, bool dh, bool dv, ep_verbosity_type verb, ep_debug_level_type db,
-                    boost::optional<std::string> remArgs, 
+                    boost::optional<std::vector<std::string>> remArgs,
                     boost::optional<boost::filesystem::path> of,
                     boost::optional<boost::filesystem::path> lf,
                     boost::optional<boost::filesystem::path> af,

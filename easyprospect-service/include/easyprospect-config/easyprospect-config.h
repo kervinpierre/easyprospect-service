@@ -54,7 +54,7 @@ namespace easyprospect
                 const bool                display_version_;
                 const ep_verbosity_type   verbosity_;
                 const ep_debug_level_type debug_level_;
-                const boost::optional<std::string>             remainder_args_;
+                const boost::optional<std::vector<std::string>>             remainder_args_;
                 const boost::optional<boost::filesystem::path> out_file_;
                 const boost::optional<boost::filesystem::path> log_file_;
                 const boost::optional<boost::filesystem::path> arg_file_;
@@ -72,7 +72,7 @@ namespace easyprospect
             public:
                 easyprospect_config_core(const make_shared_enabler &,
                     bool dh, bool dv, ep_verbosity_type verb, ep_debug_level_type db,
-                    boost::optional<std::string> rem_args,
+                    boost::optional<std::vector<std::string>> rem_args,
                     boost::optional <boost::filesystem::path> of,
                     boost::optional <boost::filesystem::path> lf, 
                     boost::optional <boost::filesystem::path> af,
@@ -113,7 +113,7 @@ namespace easyprospect
                 const boost::optional<boost::filesystem::path> get_pid_file() const { return pid_file_; }
                 const bool get_display_help() const { return display_help_; }
                 const bool get_display_version() const { return display_version_; }
-                const boost::optional<std::string> get_remainder_args() const { return remainder_args_; }
+                const boost::optional<std::vector<std::string>> get_remainder_args() const { return remainder_args_; }
 
                 static const std::string to_string(const ep_verbosity_type v);
                 static const std::string to_string(const ep_debug_level_type d);
@@ -131,7 +131,7 @@ namespace easyprospect
                 bool                display_version_;
                 ep_verbosity_type   verbosity_;
                 ep_debug_level_type debug_level_;
-                boost::optional<std::string>      remainder_args_;
+                boost::optional<std::vector<std::string>>      remainder_args_;
                 boost::optional<boost::filesystem::path> out_file_;
                 boost::optional<boost::filesystem::path> log_file_;
                 boost::optional<boost::filesystem::path> arg_file_;
@@ -174,7 +174,7 @@ namespace easyprospect
                 void set_display_help(std::string display_help);
                 void set_display_version(bool display_version) { this->display_version_ = display_version; }
                 void set_display_version(std::string display_version);
-                void set_remainder_args(std::string remainder_args) { this->remainder_args_ = remainder_args; }
+                void set_remainder_args(std::vector<std::string> remainder_args);
             };
 
             class easyprospect_config_cmd

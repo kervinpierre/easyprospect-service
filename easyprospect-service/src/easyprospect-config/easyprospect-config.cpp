@@ -45,9 +45,11 @@ easyprospect_config_cmd::get_options(easyprospect_config_cmd config)
     desc.add_options()("log-file", boost::program_options::value<std::string>(), "Output logs to this file");
     desc.add_options()("output-file", boost::program_options::value<std::string>(), "Regular output goes into this file");
     desc.add_options()("arg-file", boost::program_options::value<std::string>(), "Contains regular command line arguments");
-    desc.add_options()("config-file", boost::program_options::value<std::string>(), "Contains confuration options");
+    desc.add_options()("config-file", boost::program_options::value<std::string>(), "Contains configuration options");
     desc.add_options()("pid-file", boost::program_options::value<std::string>(), "File keeps the PID of the running instance");
-    desc.add_options()("--", "Options after this are sent to the called application or script");
+    desc.add_options()("--", boost::program_options::value<std::vector<std::string>>(), "Options after this are sent to the called application or script");
+
+
 
     // Component options
     config.add_options(desc);
@@ -61,10 +63,16 @@ easyprospect::service::config::easyprospect_config_cmd::parse_options(easyprospe
 {
     spdlog::trace("parse_options() called\n");
 
+    boost::program_options::positional_options_description p;
+    p.add("--", -1);
+
     boost::program_options::variables_map vm;
 
-    boost::program_options::store(
-        boost::program_options::parse_command_line(argc, argv, desc), vm);
+    boost::program_options::parsed_options parsed
+        = boost::program_options::command_line_parser(argc, argv)
+            .options(desc).positional(p).run();
+
+    boost::program_options::store(parsed, vm);
     boost::program_options::notify(vm);
 
     easyprospect_config_core_builder builder;
@@ -114,6 +122,12 @@ easyprospect::service::config::easyprospect_config_cmd::parse_options(easyprospe
     if (vm.count("pid-file"))
     {
         builder.set_pid_file(vm["pid-file"].as<std::string>());
+    }
+
+    if (vm.count("--"))
+    {
+        builder.set_remainder_args(
+            vm["--"].as<std::vector<std::string>>());
     }
 
     auto res = builder.to_config_core();
@@ -219,6 +233,11 @@ easyprospect::service::config::easyprospect_config_core_builder::set_display_ver
     {
         throw new std::logic_error("Invalid display version option");
     }
+}
+
+void easyprospect::service::config::easyprospect_config_core_builder::set_remainder_args(std::vector<std::string> remainder_args)
+{
+    this->remainder_args_ = remainder_args;
 }
 
 const std::string 

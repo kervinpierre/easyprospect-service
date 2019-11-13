@@ -27,30 +27,6 @@ using namespace easyprospect::service::config;
 //
 //CATCH_REGISTER_LISTENER(CatchListener)
 
-TEST_CASE("CmdLine.V8. Simple Display help")
-{
-    char* test_argv[] = { "EP_CPP_TEST_main", "--help", NULL };
-    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
-
-    //std::vector<std::string> arguments = { "EP_CPP_TEST_main", "--help" };
-
-    //std::vector<char*> argv;
-    //for (const auto& arg : arguments)
-    //    argv.push_back((char*)arg.data());
-    //argv.push_back(nullptr);
-
-    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
-    auto opts = easyprospect_config_v8_shell::get_options(cnf);
-    auto res = easyprospect_config_v8_shell
-                ::parse_options(cnf, opts, test_argc, test_argv);
-   
-    REQUIRE(res.get_display_help());
-    REQUIRE_FALSE(res.get_display_version());
-    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
-    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
-
-}
-
 int main(int argc, char* argv[])
 {
     spdlog::info("EP_CPP_TEST_main");

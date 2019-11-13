@@ -15,6 +15,9 @@
     <ClCompile Include="EPCT_Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EP_CPP_TEST_CmdlineV801.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EPCT_Utils.h">
