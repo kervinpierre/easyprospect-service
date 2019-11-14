@@ -1,5 +1,6 @@
 #include <catch.hpp>
 #include <iostream>
+#include <cstdio>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/async.h>
@@ -46,6 +47,232 @@ TEST_CASE("CmdLine.V8. Simple Display version")
     REQUIRE_FALSE(res.get_display_help());
     REQUIRE(res.get_display_version());
     REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
+}
+
+TEST_CASE("CmdLine.V8. Simple Out File")
+{
+   // auto p1 = boost::filesystem::temp_directory_path() / boost::filesystem::unique_path();
+
+    auto p1 = std::tmpnam(nullptr);
+
+    char* test_argv[] = { "EP_CPP_TEST_main", "--output-file",
+        p1, NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    auto f1 = res.get_out_file().get();
+    auto f2 = boost::filesystem::path(p1);
+
+    auto eres = false;
+
+    {
+        boost::filesystem::ofstream f3(f1);
+        boost::system::error_code& ec = boost::system::error_code();
+        eres = boost::filesystem::equivalent(
+            res.get_out_file().get(),
+            boost::filesystem::path(p1),
+            ec);
+        boost::filesystem::remove(f1, ec);
+    }
+
+    REQUIRE(eres);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
+}
+
+TEST_CASE("CmdLine.V8. Simple Log File")
+{
+    auto p1 = std::tmpnam(nullptr);
+
+    char* test_argv[] = { "EP_CPP_TEST_main", "--log-file",
+        p1, NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    auto f1 = res.get_log_file().get();
+    auto f2 = boost::filesystem::path(p1);
+
+    boost::filesystem::ofstream f3(f1);
+
+    auto eres = false;
+
+    {
+        boost::filesystem::ofstream f3(f1);
+        boost::system::error_code& ec = boost::system::error_code();
+        eres = boost::filesystem::equivalent(
+            res.get_log_file().get(),
+            boost::filesystem::path(p1),
+            ec);
+        boost::filesystem::remove(f1, ec);
+    }
+
+    REQUIRE(eres);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
+}
+
+TEST_CASE("CmdLine.V8. Simple Argument File")
+{
+    auto p1 = std::tmpnam(nullptr);
+
+    char* test_argv[] = { "EP_CPP_TEST_main", "--arg-file",
+        p1, NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    auto f1 = res.get_arg_file().get();
+    auto f2 = boost::filesystem::path(p1);
+
+    boost::filesystem::ofstream f3(f1);
+
+    auto eres = false;
+
+    {
+        boost::filesystem::ofstream f3(f1);
+        boost::system::error_code& ec = boost::system::error_code();
+        eres = boost::filesystem::equivalent(
+            res.get_arg_file().get(),
+            boost::filesystem::path(p1),
+            ec);
+        boost::filesystem::remove(f1, ec);
+    }
+
+    REQUIRE(eres);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
+}
+
+TEST_CASE("CmdLine.V8. Simple Config File")
+{
+    auto p1 = std::tmpnam(nullptr);
+
+    char* test_argv[] = { "EP_CPP_TEST_main", "--config-file",
+        p1, NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    auto f1 = res.get_cnf_file().get();
+    auto f2 = boost::filesystem::path(p1);
+
+    boost::filesystem::ofstream f3(f1);
+
+    auto eres = false;
+
+    {
+        boost::filesystem::ofstream f3(f1);
+        boost::system::error_code& ec = boost::system::error_code();
+        eres = boost::filesystem::equivalent(
+            res.get_cnf_file().get(),
+            boost::filesystem::path(p1),
+            ec);
+        boost::filesystem::remove(f1, ec);
+    }
+
+    REQUIRE(eres);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
+}
+
+TEST_CASE("CmdLine.V8. Simple PID File")
+{
+    auto p1 = std::tmpnam(nullptr);
+
+    char* test_argv[] = { "EP_CPP_TEST_main", "--pid-file",
+        p1, NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    auto f1 = res.get_pid_file().get();
+    auto f2 = boost::filesystem::path(p1);
+
+    boost::filesystem::ofstream f3(f1);
+
+    auto eres = false;
+
+    {
+        boost::filesystem::ofstream f3(f1);
+        boost::system::error_code& ec = boost::system::error_code();
+        eres = boost::filesystem::equivalent(
+            res.get_pid_file().get(),
+            boost::filesystem::path(p1),
+            ec);
+        boost::filesystem::remove(f1, ec);
+    }
+
+    REQUIRE(eres);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
+}
+
+TEST_CASE("CmdLine.V8. Verbosity")
+{
+    char* test_argv[] = { "EP_CPP_TEST_main", "--verbosity",
+                          "maximum",
+                            NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_verbosity() == ep_verbosity_type::maximum);
+}
+
+TEST_CASE("CmdLine.V8. Debug Level")
+{
+    char* test_argv[] = { "EP_CPP_TEST_main", "--debug-level",
+                          "ep_fatal",
+                            NULL };
+    int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
+
+    auto cnf = easyprospect_config_v8_shell::get_config(ep_config_type::none);
+    auto opts = easyprospect_config_v8_shell::get_options(cnf);
+    auto res = easyprospect_config_v8_shell
+        ::parse_options(cnf, opts, test_argc, test_argv);
+
+    REQUIRE_FALSE(res.get_display_help());
+    REQUIRE_FALSE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_fatal);
     REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
 }
 

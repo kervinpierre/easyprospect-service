@@ -40,7 +40,7 @@ easyprospect_config_cmd::get_options(easyprospect_config_cmd config)
     // Global options
     desc.add_options()("help", "produce help message");
     desc.add_options()("version", "Display the program version");
-    desc.add_options()("verbosity_", boost::program_options::value<std::string>(), "Verbosity level");
+    desc.add_options()("verbosity", boost::program_options::value<std::string>(), "Verbosity level");
     desc.add_options()("debug-level", boost::program_options::value<std::string>(), "Debug level");
     desc.add_options()("log-file", boost::program_options::value<std::string>(), "Output logs to this file");
     desc.add_options()("output-file", boost::program_options::value<std::string>(), "Regular output goes into this file");
@@ -89,14 +89,14 @@ easyprospect::service::config::easyprospect_config_cmd::parse_options(easyprospe
         builder.set_display_version(true);
     }
 
-    if (vm.count("verbosity_"))
+    if (vm.count("verbosity"))
     {
-        builder.set_verbosity(vm["verbosity_"].as<std::string>());
+        builder.set_verbosity(vm["verbosity"].as<std::string>());
     }
 
     if (vm.count("debug-level"))
     {
-        builder.set_verbosity(vm["debug-level"].as<std::string>());
+        builder.set_debug_level(vm["debug-level"].as<std::string>());
     }
 
     if (vm.count("log-file"))
@@ -283,35 +283,35 @@ easyprospect::service::config::easyprospect_config_core::to_string(const ep_debu
     switch (d)
     {
     case ep_debug_level_type::ep_none:
-        res = "none";
+        res = "ep_none";
         break;
 
     case ep_debug_level_type::ep_all:
-        res = "ALL";
+        res = "ep_all";
         break;
 
     case ep_debug_level_type::ep_debug:
-        res = "debug";
+        res = "ep_debug";
         break;
 
     case ep_debug_level_type::ep_info:
-        res = "INFO";
+        res = "ep_info";
         break;
 
     case ep_debug_level_type::ep_warn:
-        res = "WARN";
+        res = "ep_warn";
         break;
 
     case ep_debug_level_type::ep_error:
-        res = "ERROR";
+        res = "ep_error";
         break;
 
     case ep_debug_level_type::ep_fatal:
-        res = "FATAL";
+        res = "ep_fatal";
         break;
 
     case ep_debug_level_type::ep_off:
-        res = "OFF";
+        res = "ep_off";
         break;
 
     default:
@@ -353,7 +353,7 @@ easyprospect::service::config::easyprospect_config_core::verbosity_from(std::str
     }
     else
     {
-        throw new std::logic_error("Invalid verbosity_");
+        throw new std::logic_error("Invalid verbosity");
     }
 
     return res;
@@ -364,35 +364,35 @@ easyprospect::service::config::easyprospect_config_core::debug_level_from(std::s
 {
     ep_debug_level_type res;
 
-    if (boost::iequals(d, "none"))
+    if (boost::iequals(d, "ep_none"))
     {
         res = ep_debug_level_type::ep_none;
     }
-    else if (boost::iequals(d, "ALL"))
+    else if (boost::iequals(d, "ep_all"))
     {
         res = ep_debug_level_type::ep_all;
     }
-    else if (boost::iequals(d, "debug"))
+    else if (boost::iequals(d, "ep_debug"))
     {
         res = ep_debug_level_type::ep_debug;
     }
-    else if (boost::iequals(d, "INFO"))
+    else if (boost::iequals(d, "ep_info"))
     {
         res = ep_debug_level_type::ep_info;
     }
-    else if (boost::iequals(d, "WARN"))
+    else if (boost::iequals(d, "ep_warn"))
     {
         res = ep_debug_level_type::ep_warn;
     }
-    else if (boost::iequals(d, "ERROR"))
+    else if (boost::iequals(d, "ep_error"))
     {
         res = ep_debug_level_type::ep_error;
     }
-    else if (boost::iequals(d, "FATAL"))
+    else if (boost::iequals(d, "ep_fatal"))
     {
         res = ep_debug_level_type::ep_fatal;
     }
-    else if (boost::iequals(d, "OFF"))
+    else if (boost::iequals(d, "ep_off"))
     {
         res = ep_debug_level_type::ep_off;
     }
