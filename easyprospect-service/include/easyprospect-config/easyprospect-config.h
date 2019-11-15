@@ -119,6 +119,8 @@ namespace easyprospect
                 static const std::string to_string(const ep_debug_level_type d);
                 static const ep_verbosity_type verbosity_from(std::string v);
                 static const ep_debug_level_type debug_level_from(std::string d);
+
+
             };
 
             /************************************************************************/
@@ -154,7 +156,7 @@ namespace easyprospect
                     pid_file_ = boost::none;
                 }
 
-                const easyprospect_config_core to_config_core();
+                std::unique_ptr<easyprospect_config_core> to_config_core();
 
                 void set_verbosity(const ep_verbosity_type verbosity) { this->verbosity_ = verbosity; }
                 void set_verbosity(std::string verbosity);
@@ -182,28 +184,27 @@ namespace easyprospect
             public:
                virtual std::string 
                    get_description() const { return "";  };
-                virtual boost::program_options::options_description 
-                    add_options(boost::program_options::options_description desc) const
-                {
-                    return boost::program_options::options_description();
-                };
+
                 virtual void validate_options(boost::program_options::variables_map vm) const
                 {
                     
                 };
 
-                static easyprospect_config_cmd
-                    get_config(ep_config_type type);
-
                 static boost::program_options::options_description
-                    get_options(easyprospect_config_cmd config);
+                    get_options(easyprospect_config_cmd &config);
 
-                static const easyprospect_config_core
-                    parse_options(easyprospect_config_cmd config,
+                static boost::program_options::variables_map
+                    get_map(
                         boost::program_options::options_description desc,
                         int argc, char* argv[]);
 
-                static void validate_options(easyprospect_config_cmd config,
+                void
+                parse_options(
+                    easyprospect_config_core_builder& builder, 
+                    boost::program_options::variables_map vm,
+                    boost::program_options::options_description desc) const;
+
+                static void validate_options(easyprospect_config_cmd &config,
                     boost::program_options::variables_map vm);
             };
         }

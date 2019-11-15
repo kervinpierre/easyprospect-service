@@ -62,6 +62,19 @@ namespace easyprospect
                     source_files_ = sf;
                 }
 
+                void set_source_files(std::vector<std::string> sf)
+                {
+                    boost::optional<std::vector<boost::filesystem::path>>
+                        res = std::vector<boost::filesystem::path>();
+
+                    for(auto i : sf)
+                    {
+                        res->push_back(boost::filesystem::path(i));
+                    }
+
+                    set_source_files(res);
+                }
+
                 const easyprospect_config_v8_core to_config();
             };
 
@@ -73,10 +86,15 @@ namespace easyprospect
             public:
                 std::string get_description() const override;
                 
-                boost::program_options::options_description 
-                    add_options(boost::program_options::options_description desc) const override;
-
                 void validate_options(boost::program_options::variables_map vm) const override;
+
+                static boost::program_options::options_description
+                    get_options(easyprospect_config_v8_shell& config);
+
+                void  parse_options(
+                    easyprospect_config_v8_core_builder& builder,
+                    boost::program_options::variables_map vm,
+                    boost::program_options::options_description desc) const;
             };
         }
     }
