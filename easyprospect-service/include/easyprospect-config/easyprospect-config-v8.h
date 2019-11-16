@@ -81,13 +81,11 @@ namespace easyprospect
             /************************************************************************/
             /* EpV8Shell configuration                                         */
             /************************************************************************/
-            class easyprospect_config_v8_shell : public easyprospect_config_cmd
+            class easyprospect_config_v8_shell final : public easyprospect_config_cmd
             {
             public:
                 std::string get_description() const override;
                 
-                void validate_options(boost::program_options::variables_map vm) const override;
-
                 static boost::program_options::options_description
                     get_options(easyprospect_config_v8_shell& config);
 

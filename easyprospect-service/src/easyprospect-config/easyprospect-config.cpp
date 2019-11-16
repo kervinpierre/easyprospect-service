@@ -1,6 +1,7 @@
 #include <easyprospect-config/easyprospect-config.h>
 #include <easyprospect-config/easyprospect-config-v8.h>
 
+#include <boost/tokenizer.hpp>
 #include <boost/convert.hpp>
 #include <boost/convert/stream.hpp>
 
@@ -47,6 +48,39 @@ easyprospect_config_cmd::get_map(
         .options(desc).positional(p).run();
 
     boost::program_options::store(parsed, vm);
+
+    if (vm.count("arg-file"))
+    {
+        std::string argFile
+                    = vm["arg-file"].as<std::string>();
+
+        std::ifstream ifs(argFile);
+        if (!ifs)
+        {
+            std::string errMsg
+                = fmt::format("Could not open the response file '{}'",
+                argFile);
+
+            spdlog::trace(errMsg);
+
+            throw std::logic_error(errMsg);
+        }
+
+        // Read the whole file into a string
+        std::stringstream ss;
+        ss << ifs.rdbuf();
+        // Split the file content
+        boost::char_separator<char> sep(" \n\r");
+        std::string sstr = ss.str();
+        boost::tokenizer<boost::char_separator<char> > tok(sstr, sep);
+        std::vector<std::string> args;
+        copy(tok.begin(), tok.end(), back_inserter(args));
+        // Parse the file and store the options
+        boost::program_options::store(
+            boost::program_options::command_line_parser(args)
+                .options(desc).run(), vm);
+    }
+
     boost::program_options::notify(vm);
 
     return vm;
@@ -112,13 +146,6 @@ easyprospect_config_cmd::parse_options(
         builder.set_remainder_args(
             vm["--"].as<std::vector<std::string>>());
     }
-}
-
-void 
-easyprospect_config_cmd::validate_options(easyprospect_config_cmd& config,
-                                                                         boost::program_options::variables_map vm)
-{
-    config.validate_options(vm);
 }
 
 std::unique_ptr<easyprospect_config_core>

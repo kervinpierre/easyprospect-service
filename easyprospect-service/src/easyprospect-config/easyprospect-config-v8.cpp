@@ -4,20 +4,6 @@
 
 using namespace easyprospect::service::config;
 
-void 
-easyprospect::service::config::easyprospect_config_v8_shell::validate_options(boost::program_options::variables_map vm) const
-{
-    if (vm.count("source-file"))
-    {
-        std::string sFile = vm["source-file"].as<std::string>();
-        if (sFile.empty())
-        {
-            throw new std::logic_error("Missing Javascript source file");
-        }
-    }
-}
-
-
 boost::program_options::options_description
 easyprospect_config_v8_shell::get_options(
     easyprospect_config_v8_shell& config)
@@ -39,7 +25,13 @@ easyprospect_config_v8_shell::parse_options(
 {
     if (vm.count("source-files"))
     {
-        builder.set_source_files(vm["source-files"].as<std::vector<std::string>>());
+        auto sFiles = vm["source-files"].as<std::vector<std::string>>();
+        if (sFiles.empty())
+        {
+            throw std::logic_error("Missing Javascript source file");
+        }
+
+        builder.set_source_files(sFiles);
     }
 
     easyprospect_config_cmd::parse_options(builder,vm,desc);

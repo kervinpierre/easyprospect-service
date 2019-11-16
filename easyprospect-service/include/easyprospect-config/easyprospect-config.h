@@ -185,27 +185,19 @@ namespace easyprospect
                virtual std::string 
                    get_description() const { return "";  };
 
-                virtual void validate_options(boost::program_options::variables_map vm) const
-                {
-                    
-                };
-
-                static boost::program_options::options_description
-                    get_options(easyprospect_config_cmd &config);
-
-                static boost::program_options::variables_map
-                    get_map(
-                        boost::program_options::options_description desc,
-                        int argc, char* argv[]);
-
                 void
                 parse_options(
                     easyprospect_config_core_builder& builder, 
                     boost::program_options::variables_map vm,
                     boost::program_options::options_description desc) const;
 
-                static void validate_options(easyprospect_config_cmd &config,
-                    boost::program_options::variables_map vm);
+                static boost::program_options::options_description
+                    get_options(easyprospect_config_cmd& config);
+
+                static boost::program_options::variables_map
+                    get_map(
+                        boost::program_options::options_description desc,
+                        int argc, char* argv[]);
             };
         }
     }

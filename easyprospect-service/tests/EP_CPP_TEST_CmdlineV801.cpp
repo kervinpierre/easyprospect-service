@@ -9,20 +9,21 @@
 #include <easyprospect-config/easyprospect-config.h>
 #include <easyprospect-config/easyprospect-config-v8.h>
 
-
-
 using namespace easyprospect::service::config;
 
 auto init_conf(int test_argc, char* test_argv[])
 {
     easyprospect_config_v8_shell cnf;
-    auto opts = easyprospect_config_v8_shell::get_options(cnf);
-    auto vm = easyprospect_config_v8_shell
-        ::get_map(opts, test_argc, test_argv);
+    boost::program_options::options_description opts
+        = easyprospect_config_v8_shell::get_options(cnf);
+    boost::program_options::variables_map vm
+        = easyprospect_config_v8_shell
+            ::get_map(opts, test_argc, test_argv);
 
-    auto builder = easyprospect_config_v8_core_builder{};
+    easyprospect_config_v8_core_builder builder
+        = easyprospect_config_v8_core_builder{};
     cnf.parse_options(builder, vm, opts);
-    auto res = builder.to_config();
+    easyprospect_config_v8_core res = builder.to_config();
 
     return res;
 }
@@ -132,36 +133,35 @@ TEST_CASE("CmdLine.V8. Simple Log File")
 
 TEST_CASE("CmdLine.V8. Simple Argument File")
 {
-    auto p1 = std::tmpnam(nullptr);
+    auto s1 = std::tmpnam(nullptr);
 
     char* test_argv[] = { "EP_CPP_TEST_main", "--arg-file",
-        p1, NULL };
+        s1, NULL };
     int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
 
+    auto p1 = boost::filesystem::path(s1);
+    boost::filesystem::ofstream f1(p1);
+
+    f1 << "--version --help --debug-level ep_fatal" << std::endl;
+
     auto res = init_conf(test_argc, test_argv);
-
-    auto f1 = res.get_arg_file().get();
-    auto f2 = boost::filesystem::path(p1);
-
-    boost::filesystem::ofstream f3(f1);
 
     auto eres = false;
 
     {
-        boost::filesystem::ofstream f3(f1);
-        boost::system::error_code& ec = boost::system::error_code();
+        boost::system::error_code ec;
         eres = boost::filesystem::equivalent(
             res.get_arg_file().get(),
             boost::filesystem::path(p1),
             ec);
-        boost::filesystem::remove(f1, ec);
+        boost::filesystem::remove(p1, ec);
     }
 
     REQUIRE(eres);
 
-    REQUIRE_FALSE(res.get_display_help());
-    REQUIRE_FALSE(res.get_display_version());
-    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_display_help());
+    REQUIRE(res.get_display_version());
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_fatal);
     REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
 }
 
@@ -347,3 +347,4 @@ TEST_CASE("CmdLine.V8. Source Files")
     REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
     REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
 }
+
