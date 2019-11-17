@@ -89,6 +89,9 @@ namespace easyprospect
                 static boost::program_options::options_description
                     get_options(easyprospect_config_v8_shell& config);
 
+                static easyprospect_config_v8_core_builder
+                    init_args(int test_argc, char* test_argv[]);
+                   
                 void  parse_options(
                     easyprospect_config_v8_core_builder& builder,
                     boost::program_options::variables_map vm,

@@ -45,6 +45,33 @@ easyprospect_config_v8_shell::get_description() const
     return res;
 }
 
+easyprospect_config_v8_core_builder
+easyprospect_config_v8_shell::init_args(int test_argc, char* test_argv[])
+{
+    easyprospect_config_v8_shell cnf;
+    boost::program_options::options_description opts
+        = easyprospect_config_v8_shell::get_options(cnf);
+    boost::program_options::variables_map vm
+        = easyprospect_config_v8_shell
+        ::get_map(opts, test_argc, test_argv);
+
+    easyprospect_config_v8_core_builder builder
+        = easyprospect_config_v8_core_builder{};
+
+    // Get the config file first, so it can set the builder.
+    // Using config first gives it the lowest precedence.
+    if (vm.count("config-file"))
+    {
+        auto cf = vm["config-file"].as<std::string>();
+        builder.set_cnf_file(cf);
+        builder.read_from_file(cf);
+    }
+
+    cnf.parse_options(builder, vm, opts);
+
+    return builder;
+}
+
 const easyprospect_config_v8_core 
 easyprospect_config_v8_core_builder::to_config()
 {
@@ -56,3 +83,4 @@ easyprospect_config_v8_core_builder::to_config()
 
     return res;
 }
+
