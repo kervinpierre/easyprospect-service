@@ -5,7 +5,10 @@
 #include <boost/convert.hpp>
 #include <boost/convert/stream.hpp>
 
-#include <boost/algorithm/string/predicate.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include <boost/algorithm/string.hpp>
 
 //#include <boost/type_index.hpp>
 
@@ -241,13 +244,37 @@ easyprospect::service::config::easyprospect_config_core_builder::set_display_ver
     }
 }
 
-void easyprospect::service::config::easyprospect_config_core_builder::set_remainder_args(std::vector<std::string> remainder_args)
+void easyprospect_config_core_builder::set_remainder_args(std::vector<std::string> remainder_args)
 {
     this->remainder_args_ = remainder_args;
 }
 
+void easyprospect_config_core_builder::read_from_file(std::string filePath)
+{
+    boost::filesystem::path fp(filePath);
+
+    if ( !boost::filesystem::exists(fp) )
+    {
+        // TODO: Throw exception?
+        spdlog::error("Config file {} does not exist", filePath);
+
+        return;
+    }
+
+    boost::property_tree::ptree root;
+    boost::property_tree::read_json(filePath,root);
+
+    auto dl = root.get<std::string>("debug_level");
+    boost::trim(dl);
+
+    if( !dl.empty() )
+    {
+        set_debug_level(dl);
+    }
+}
+
 const std::string 
-easyprospect::service::config::easyprospect_config_core::to_string(const ep_verbosity_type v)
+easyprospect_config_core::to_string(const ep_verbosity_type v)
 {
     std::string res;
 

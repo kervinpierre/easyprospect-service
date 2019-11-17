@@ -22,6 +22,16 @@ auto init_conf(int test_argc, char* test_argv[])
 
     easyprospect_config_v8_core_builder builder
         = easyprospect_config_v8_core_builder{};
+
+    // Get the config file first, so it can set the builder.
+    // Using config first gives it the lowest precedence.
+    if (vm.count("config-file"))
+    {
+        auto cf = vm["config-file"].as<std::string>();
+        builder.set_cnf_file(cf);
+        builder.read_from_file(cf);
+    }
+
     cnf.parse_options(builder, vm, opts);
     easyprospect_config_v8_core res = builder.to_config();
 
@@ -167,36 +177,39 @@ TEST_CASE("CmdLine.V8. Simple Argument File")
 
 TEST_CASE("CmdLine.V8. Simple Config File")
 {
-    auto p1 = std::tmpnam(nullptr);
+    auto s1 = std::tmpnam(nullptr);
 
     char* test_argv[] = { "EP_CPP_TEST_main", "--config-file",
-        p1, NULL };
+        s1, NULL };
     int test_argc = sizeof(test_argv) / sizeof(char*) - 1;
 
+    auto p1 = boost::filesystem::path(s1);
+    boost::filesystem::ofstream f1(p1);
+
+    f1 << 
+R"({
+    "debug_level": "ep_fatal"
+}
+)" << std::endl;
+
     auto res = init_conf(test_argc, test_argv);
-
-    auto f1 = res.get_cnf_file().get();
-    auto f2 = boost::filesystem::path(p1);
-
-    boost::filesystem::ofstream f3(f1);
 
     auto eres = false;
 
     {
-        boost::filesystem::ofstream f3(f1);
-        boost::system::error_code& ec = boost::system::error_code();
+        boost::system::error_code ec;
         eres = boost::filesystem::equivalent(
             res.get_cnf_file().get(),
             boost::filesystem::path(p1),
             ec);
-        boost::filesystem::remove(f1, ec);
+        boost::filesystem::remove(p1, ec);
     }
 
     REQUIRE(eres);
 
     REQUIRE_FALSE(res.get_display_help());
     REQUIRE_FALSE(res.get_display_version());
-    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_none);
+    REQUIRE(res.get_debug_level() == ep_debug_level_type::ep_fatal);
     REQUIRE(res.get_verbosity() == ep_verbosity_type::none);
 }
 

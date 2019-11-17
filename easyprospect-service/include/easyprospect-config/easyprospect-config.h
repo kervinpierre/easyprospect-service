@@ -177,6 +177,8 @@ namespace easyprospect
                 void set_display_version(bool display_version) { this->display_version_ = display_version; }
                 void set_display_version(std::string display_version);
                 void set_remainder_args(std::vector<std::string> remainder_args);
+
+                void read_from_file(std::string filePath);
             };
 
             class easyprospect_config_cmd
