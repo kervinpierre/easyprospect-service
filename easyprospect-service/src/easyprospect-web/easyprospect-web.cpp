@@ -15,7 +15,7 @@
 
 // https://www.boost.org/doc/libs/1_71_0/libs/beast/example/advanced/server-flex/advanced_server_flex.cpp
 // 
-#include <easyprospect-web.h>
+#include <easyprospect-web/easyprospect-web.h>
 
 /*  Load a signed certificate into the ssl context, and configure
     the context for use with a server.

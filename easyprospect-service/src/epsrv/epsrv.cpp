@@ -1,5 +1,5 @@
 #include <iostream>
-#include <easyprospect-web.h>
+#include <easyprospect-web/easyprospect-web.h>
 
 int main(int argc, char *argv[])
 {
