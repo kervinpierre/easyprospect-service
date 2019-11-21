@@ -37,11 +37,13 @@ add_library(EPConfigLib STATIC
         src/easyprospect-config/easyprospect-config.cpp
         include/easyprospect-config/easyprospect-config.h
         )
+set_target_properties(EPConfigLib PROPERTIES PUBLIC_HEADER "include/easyprospect-config/easyprospect-config.h")
 
 add_library(EPWebLib STATIC
         src/easyprospect-web/easyprospect-web.cpp
         include/easyprospect-web/easyprospect-web.h
         )
+set_target_properties(EPWebLib PROPERTIES PUBLIC_HEADER "include/easyprospect-web/easyprospect-web.h")
 
 target_include_directories(EPConfigLib PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(EPWebLib PRIVATE ${Boost_INCLUDE_DIRS})
@@ -61,6 +63,10 @@ target_link_libraries( EPSrv
         EPWebLib
         ${OPENSSL_LIBRARIES}
         ${Boost_LIBRARIES} )
+
+#INSTALL(TARGETS EPConfigLib
+#        LIBRARY DESTINATION some/libpath
+#        PUBLIC_HEADER DESTINATION some/includepath )
 
 #if (UNIX)
 #    target_compile_options(${PROJECT_NAME} PUBLIC -O0 -g --coverage)
