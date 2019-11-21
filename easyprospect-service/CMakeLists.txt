@@ -12,6 +12,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILE
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILER_ID}/${CMAKE_SYSTEM_NAME}/debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILER_ID}/${CMAKE_SYSTEM_NAME}/debug)
 
+#if(DEFINED ENV{TRAVIS})
+#    set (test_parameters ${test_parameters} --allow-run-as-root)
+#endif()
+
 #if (UNIX)
 #    link_directories(libs/)
 #    include_directories(include/v8/)

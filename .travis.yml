@@ -22,7 +22,6 @@ matrix:
             - ubuntu-toolchain-r-test
           packages:
             - g++-8
-            - lcov
 
 install:
   # Create deps dir
@@ -33,21 +32,21 @@ install:
   - export CXX=${CXX_COMPILER}
 
   # Install vcpkg and dependencies
-  - |
-    set -e
-    mkdir -p $HOME/.cache
-    mkdir -p ${DEPS_DIR}/vcpkg
-    pushd ${DEPS_DIR}/vcpkg
-    git init
-    git remote add origin https://github.com/Microsoft/vcpkg.git
-    git fetch origin master
-    git checkout -b master origin/master
-    ./bootstrap-vcpkg.sh
-    popd
+  - if [[ ! -d ${DEPS_DIR}/vcpkg ]]; then
+      mkdir -p $HOME/.cache
+      mkdir -p ${DEPS_DIR}/vcpkg
+      pushd ${DEPS_DIR}/vcpkg
+      git init
+      git remote add origin https://github.com/Microsoft/vcpkg.git
+      git fetch origin master
+      git checkout -b master origin/master
+      ./bootstrap-vcpkg.sh
+      popd
+    fi
     
 cache:
   directories:
-    - ${DEPS_DIR}/vcpkg/installed
+    # - ${DEPS_DIR}/vcpkg/
     - $HOME/.cache
     
 script:
