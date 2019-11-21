@@ -52,7 +52,7 @@ cache:
     
 script:
   - cmake --version
-  - cd easyprospect-v8
+  - cd easyprospect-service
   - mkdir build
   - cd build
   - cmake -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=${CXX_FLAGS} -DCMAKE_TOOLCHAIN_FILE=${DEPS_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON ..
