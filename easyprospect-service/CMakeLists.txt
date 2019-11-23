@@ -1,5 +1,16 @@
 cmake_minimum_required(VERSION 3.5)
 
+find_program(LSB_RELEASE_EXEC lsb_release)
+execute_process(COMMAND ${LSB_RELEASE_EXEC} -is
+        OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
+execute_process(COMMAND ${LSB_RELEASE_EXEC} -cs
+        OUTPUT_VARIABLE LSB_CODE_ID_SHORT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+
 project(easyprospect-service)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -11,6 +22,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILER_ID}/${CMAKE_SYSTEM_NAME}/debug)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILER_ID}/${CMAKE_SYSTEM_NAME}/debug)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILER_ID}/${CMAKE_SYSTEM_NAME}/debug)
+
+set(CPACK_PACKAGE_NAME easyprospect-service)
+set(CPACK_PACKAGE_VENDOR easyprospect)
+set(CPACK_PACKAGE_VERSION_MAJOR 0)
+set(CPACK_PACKAGE_VERSION_MINOR 0)
+set(CPACK_PACKAGE_VERSION_PATCH 1)
+set(CPACK_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH})
+set(CPACK_PACKAGE_DESCRIPTION The EasyProspect software system)
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY The EasyProspect software.)
+set(CPACK_PACKAGE_FILE_NAME ${CPACK_PACKAGE_NAME}-${CMAKE_SYSTEM_NAME}-${LSB_RELEASE_ID_SHORT}-${CMAKE_BUILD_TYPE}-${LSB_CODE_ID_SHORT}-${CPACK_PACKAGE_VERSION})
 
 #if(DEFINED ENV{TRAVIS})
 #    set (test_parameters ${test_parameters} --allow-run-as-root)
@@ -67,6 +88,29 @@ target_link_libraries( EPSrv
         EPWebLib
         ${OPENSSL_LIBRARIES}
         ${Boost_LIBRARIES} )
+
+install(TARGETS EPSrv
+        COMPONENT server
+        DESTINATION "/opt/easy-prospect/"
+        )
+
+install(TARGETS EPConfigLib
+        ARCHIVE
+        COMPONENT libraries
+        DESTINATION "/opt/easy-prospect/"
+        )
+
+install(TARGETS EPWebLib
+        ARCHIVE
+        COMPONENT libraries
+        DESTINATION "/opt/easy-prospect/"
+        )
+
+set(CPACK_COMPONENTS_ALL server libraries)
+
+SET(CPACK_GENERATOR "DEB")
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "KP") #required
+INCLUDE(CPack)
 
 #INSTALL(TARGETS EPConfigLib
 #        LIBRARY DESTINATION some/libpath
