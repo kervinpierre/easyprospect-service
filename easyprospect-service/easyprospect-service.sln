@@ -8,6 +8,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-web", "easyprospect-web.vcxproj", "{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D9F48611-0E4E-4056-A78D-A2AA23FFA502}"
+	ProjectSection(SolutionItems) = preProject
+		tools\buildmsvs01.ps1 = tools\buildmsvs01.ps1
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-config", "easyprospect-config.vcxproj", "{3EF75984-9598-49D6-B4DC-AB71734E9CBC}"
 EndProject
