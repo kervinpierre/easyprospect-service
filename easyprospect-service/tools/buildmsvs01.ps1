@@ -12,7 +12,10 @@ Import-Module -Name "Invoke-MsBuild"
 # Build
 #  /t:Clean,Build 
 $buildResult = Invoke-MsBuild -ShowBuildOutputInCurrentWindow `
-				-Path "..\easyprospect-service.sln"                                   -Params "/verbosity:normal /property:Configuration=Debug /property:DeployAbleCommerce=true /property:PublishProfile=Deploy /property:VisualStudioVersion=14.0 /p:IntermediateOutputPath=c:/temp/ /p:AutoParameterizationWebConfigConnectionStrings=False /property:AspnetMergePath=""C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6 Tools/"""
+				-Path "..\easyprospect-service.sln" `
+				-Params "/target:Clean;Rebuild      `
+				         /verbosity:normal          `
+						 /property:Configuration=Debug"
 
 $buildCodeExit = 0
 
