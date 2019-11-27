@@ -280,9 +280,6 @@
     <ProjectReference Include="..\easyprospect-web.vcxproj">
       <Project>{1e3be921-ab36-49f7-980b-cde7cc3dbf61}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\epsrv\epsrv.vcxproj">
-      <Project>{c5f2a28d-631c-4626-8caf-2ed6653897ad}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

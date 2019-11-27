@@ -5,3 +5,5 @@ Debug
 /easyprospect-service/easyprospect-web.vcxproj.user
 /easyprospect-service/tests/EP_CPP_TEST_main.vcxproj.user
 /easyprospect-service/cmake-build-debug/
+/easyprospect-service/external/EasyProspectServiceDeveloper-cache
+/easyprospect-service/external/EasyProspectServiceDeveloper-SetupFiles
