@@ -1,6 +1,17 @@
 #!/bin/bash -xv
 # E.g. ./pushwin01.sh -p ../external/EasyProspectServiceDeveloper.0.0.1.nupkg -k ../../../nuget.txt
-
+#
+# https://help.sonatype.com/repomanager3/formats/nuget-repositories
+#
+# To pack...
+#  nuget pack EasyProspectServiceDeveloper.nuspec
+# 
+# nuget sources add -name easyprospect -source http://ci01.propsystem.com:8081/repository/easyprospect-service-developer/
+# nuget install EasyProspectServiceDeveloper
+#
+# You may have to clear your cache
+# https://stackoverflow.com/questions/30933277/how-to-clear-nuget-package-cache-using-command-line
+#
 nppath=""
 vtest=0
 
