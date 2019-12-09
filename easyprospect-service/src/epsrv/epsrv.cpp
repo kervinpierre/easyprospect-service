@@ -1,8 +1,14 @@
 #include <iostream>
 #include <easyprospect-web/easyprospect-web.h>
+#include "easyprospect-config/easyprospect-config-v8.h"
 
 int main(int argc, char *argv[])
 {
+    auto builder = easyprospect::service::config
+        ::easyprospect_config_v8_shell
+        ::init_args(argc, argv);
+    auto res = builder.to_config();
+
     try
     {
       //  auto server = std::make_unique<easyprospect::web::server::EpHTTPServer>();
