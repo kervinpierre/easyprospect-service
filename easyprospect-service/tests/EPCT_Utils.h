@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef BOOST_ALL_DYN_LINK
-#   define BOOST_ALL_DYN_LINK
-#endif
-
 #include <string>
 #include <vector>
 
