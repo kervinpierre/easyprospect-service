@@ -21,7 +21,7 @@ namespace easyprospect
                 minimum = 2,
                 normal  = 3,
                 debug   = 4,
-                maximum = 4,
+                maximum = 5,
             };
 
             enum class ep_debug_level_type : int
@@ -33,7 +33,8 @@ namespace easyprospect
                 ep_warn   = 4,
                 ep_info = 5,
                 ep_debug = 6,
-                ep_all = 7
+                ep_trace = 7,
+                ep_all = 8
             };
 
             enum class ep_config_type : int
@@ -120,7 +121,7 @@ namespace easyprospect
                 static const ep_verbosity_type verbosity_from(std::string v);
                 static const ep_debug_level_type debug_level_from(std::string d);
 
-
+                std::string str();
             };
 
             /************************************************************************/
@@ -139,6 +140,8 @@ namespace easyprospect
                 boost::optional<boost::filesystem::path> arg_file_;
                 boost::optional<boost::filesystem::path> cnf_file_;
                 boost::optional<boost::filesystem::path> pid_file_;
+
+                std::string help_str_;
 
             public:
                 easyprospect_config_core_builder()
@@ -178,12 +181,16 @@ namespace easyprospect
                 void set_display_version(std::string display_version);
                 void set_remainder_args(std::vector<std::string> remainder_args);
 
+                void set_help_str(std::string s) { help_str_ = s; }
+                const std::string get_help_str() const { return help_str_; }
+
                 void read_from_file(std::string filePath);
             };
 
             class easyprospect_config_cmd
             {
-            public:
+             public:
+
                virtual std::string 
                    get_description() const { return "";  };
 
@@ -191,7 +198,7 @@ namespace easyprospect
                 parse_options(
                     easyprospect_config_core_builder& builder, 
                     boost::program_options::variables_map vm,
-                    boost::program_options::options_description desc) const;
+                    boost::program_options::options_description desc);
 
                 static boost::program_options::options_description
                     get_options(easyprospect_config_cmd& config);

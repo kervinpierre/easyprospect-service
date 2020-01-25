@@ -44,6 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -106,13 +107,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_ITERATOR_DEBUG_LEVEL=0;BOOST_ALL_NO_LIB;Boost_NO_SYSTEM_PATHS;Boost_USE_STATIC_LIBS;Boost_USE_STATIC_RUNTIME;_WIN32_WINNT=0x0601;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;OPENSSL_USE_STATIC_LIBS;BOOST_ASIO_NO_DEPRECATED=1;BOOST_ASIO_DISABLE_BOOST_ARRAY=1;BOOST_ASIO_DISABLE_BOOST_BIND=1;BOOST_ASIO_DISABLE_BOOST_DATE_TIME=1;BOOST_ASIO_DISABLE_BOOST_REGEX=1;URI_STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\OpenSSL\$(configuration)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\OpenSSL\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\uriparser\$(configuration)\include;$(SolutionDir)\packages\ep\nlohmann-json\$(configuration)\include</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <CompileAs>CompileAsCpp</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -158,10 +160,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\easyprospect-web\easyprospect-web.cpp" />
+    <ClCompile Include="src\easyprospect-web\blackjack.cpp" />
+    <ClCompile Include="src\easyprospect-web\channel.cpp" />
+    <ClCompile Include="src\easyprospect-web\channel_list.cpp" />
+    <ClCompile Include="src\easyprospect-web\http_session.cpp" />
+    <ClCompile Include="src\easyprospect-web\listener.cpp" />
+    <ClCompile Include="src\easyprospect-web\message.cpp" />
+    <ClCompile Include="src\easyprospect-web\room.cpp" />
+    <ClCompile Include="src\easyprospect-web\rpc.cpp" />
+    <ClCompile Include="src\easyprospect-web\server.cpp" />
+    <ClCompile Include="src\easyprospect-web\system.cpp" />
+    <ClCompile Include="src\easyprospect-web\user.cpp" />
+    <ClCompile Include="src\easyprospect-web\ws_user.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\easyprospect-web\easyprospect-web.h" />
+    <ClInclude Include="include\easyprospect-web\channel.hpp" />
+    <ClInclude Include="include\easyprospect-web\channel_list.hpp" />
+    <ClInclude Include="include\easyprospect-web\config.hpp" />
+    <ClInclude Include="include\easyprospect-web\http_message_util.h" />
+    <ClInclude Include="include\easyprospect-web\listener.hpp" />
+    <ClInclude Include="include\easyprospect-web\message.hpp" />
+    <ClInclude Include="include\easyprospect-web\rpc.hpp" />
+    <ClInclude Include="include\easyprospect-web\server.hpp" />
+    <ClInclude Include="include\easyprospect-web\server_certificate.hpp" />
+    <ClInclude Include="include\easyprospect-web\service.hpp" />
+    <ClInclude Include="include\easyprospect-web\session.hpp" />
+    <ClInclude Include="include\easyprospect-web\types.hpp" />
+    <ClInclude Include="include\easyprospect-web\uid.hpp" />
+    <ClInclude Include="include\easyprospect-web\user.hpp" />
+    <ClInclude Include="include\easyprospect-web\utility.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

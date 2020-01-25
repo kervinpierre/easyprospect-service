@@ -21,7 +21,7 @@ void
 easyprospect_config_v8_shell::parse_options(
     easyprospect_config_v8_core_builder& builder,
     boost::program_options::variables_map vm,
-    boost::program_options::options_description desc) const
+    boost::program_options::options_description desc) 
 {
     if (vm.count("source-files"))
     {

@@ -15,12 +15,18 @@
     <ClCompile Include="src\easyprospect-config\easyprospect-config-v8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\easyprospect-config\easyprospect-config-service.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-config\easyprospect-config-v8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-config\easyprospect-config-service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,0 +1,23 @@
+
+
+# First serious test
+--webroot-dir "../../../data/test01/wwwroot" \
+--listener ipv4,0.0.0.0,8080 \
+--debug-level ep_trace       \
+--verbosity maximum
+
+# Comment
+  # More Comment
+--debug-level ep_trace \
+  --verbosity maximum
+
+# --help
+
+--webroot-dir "test\#_dir"
+
+--webroot-dir "\test_dir" # Test
+
+ # Comment
+  # More Comment
+--debug-level ep_all \
+  --verbosity minimum # The verbosity

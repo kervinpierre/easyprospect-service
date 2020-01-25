@@ -7,15 +7,13 @@
 // Official repository: https://github.com/boostorg/beast
 //
 
-//------------------------------------------------------------------------------
-//
-// Example: Advanced server, flex (plain + SSL)
-//
-//------------------------------------------------------------------------------
+#ifndef BOOST_BEAST_EXAMPLE_COMMON_SERVER_CERTIFICATE_HPP
+#define BOOST_BEAST_EXAMPLE_COMMON_SERVER_CERTIFICATE_HPP
 
-// https://www.boost.org/doc/libs/1_71_0/libs/beast/example/advanced/server-flex/advanced_server_flex.cpp
-// 
-#include <easyprospect-web/easyprospect-web.h>
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/ssl/context.hpp>
+#include <cstddef>
+#include <memory>
 
 /*  Load a signed certificate into the ssl context, and configure
     the context for use with a server.
@@ -26,6 +24,7 @@
     depending on your environment Please see the documentation
     accompanying the Beast certificate for more details.
 */
+inline
 void
 load_server_certificate(boost::asio::ssl::context& ctx)
 {
@@ -98,7 +97,7 @@ load_server_certificate(boost::asio::ssl::context& ctx)
         "oEEZdnZWANkkpR/m/pfgdmGPU66S2sXMHgsliViQWpDCYeehrvFRHEdR9NV+XJfC\n"
         "QMUk26jPTIVTLfXmmwU0u8vUkpR7LQKkwwIBAg==\n"
         "-----END DH PARAMETERS-----\n";
-
+    
     ctx.set_password_callback(
         [](std::size_t,
             boost::asio::ssl::context_base::password_purpose)
@@ -122,40 +121,4 @@ load_server_certificate(boost::asio::ssl::context& ctx)
         boost::asio::buffer(dh.data(), dh.size()));
 }
 
-
-//------------------------------------------------------------------------------
-
-// Report a failure
-void
-fail(beast::error_code ec, char const* what)
-{
-    // ssl::error::stream_truncated, also known as an SSL "short read",
-    // indicates the peer closed the connection without performing the
-    // required closing handshake (for example, Google does this to
-    // improve performance). Generally this can be a security issue,
-    // but if your communication protocol is self-terminated (as
-    // it is with both HTTP and WebSocket) then you may simply
-    // ignore the lack of close_notify.
-    //
-    // https://github.com/boostorg/beast/issues/38
-    //
-    // https://security.stackexchange.com/questions/91435/how-to-handle-a-malicious-ssl-tls-shutdown
-    //
-    // When a short read would cut off the end of an HTTP message,
-    // Beast returns the error beast::http::error::partial_message.
-    // Therefore, if we see a short read here, it has occurred
-    // after the message has been completed, so it is safe to ignore it.
-
-    if (ec == net::ssl::error::stream_truncated)
-        return;
-
-    std::cerr << what << ": " << ec.message() << "\n";
-}
-
-//------------------------------------------------------------------------------
-
-
-
-
-//------------------------------------------------------------------------------
-
+#endif

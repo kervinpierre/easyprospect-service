@@ -9,6 +9,8 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #include <boost/algorithm/string.hpp>
+#include <iostream>
+#include <regex>
 
 //#include <boost/type_index.hpp>
 
@@ -46,11 +48,20 @@ easyprospect_config_cmd::get_map(
 
     boost::program_options::variables_map vm;
 
-    boost::program_options::parsed_options parsed
-        = boost::program_options::command_line_parser(argc, argv)
-        .options(desc).positional(p).run();
+    try
+    {
+        boost::program_options::parsed_options parsed
+            = boost::program_options::command_line_parser(argc, argv)
+            .options(desc).positional(p).run();
 
-    boost::program_options::store(parsed, vm);
+        boost::program_options::store(parsed, vm);
+    }
+    catch(boost::wrapexcept<boost::program_options::unknown_option> ex)
+    {
+        std::cout << desc << std::endl;
+
+        throw std::logic_error("invalid option");
+    }
 
     if (vm.count("arg-file"))
     {
@@ -72,16 +83,68 @@ easyprospect_config_cmd::get_map(
         // Read the whole file into a string
         std::stringstream ss;
         ss << ifs.rdbuf();
-        // Split the file content
-        boost::char_separator<char> sep(" \n\r");
+
         std::string sstr = ss.str();
-        boost::tokenizer<boost::char_separator<char> > tok(sstr, sep);
-        std::vector<std::string> args;
-        copy(tok.begin(), tok.end(), back_inserter(args));
-        // Parse the file and store the options
-        boost::program_options::store(
-            boost::program_options::command_line_parser(args)
-                .options(desc).run(), vm);
+
+        // Convert Windows linebreaks
+        std::regex nl1("(\r\n)");
+        sstr = std::regex_replace(sstr, nl1, "\n");
+
+        // Remove escaped newlines
+        std::regex nl2("(\\\\\n)");
+        sstr = std::regex_replace(sstr, nl2, "");
+
+        // Remove comments
+        std::regex nl3("^(.*?)([^\\\\])#.*$");
+        sstr = std::regex_replace(sstr, nl3, "$1$2");
+
+        std::regex nl3b("^#(.*)$");
+        sstr = std::regex_replace(sstr, nl3b, "");
+
+        // Unescape pound
+        std::regex nl4("\\\\#");
+        sstr = std::regex_replace(sstr, nl4, "#");
+
+        // Remove empty lines
+        std::regex nl5("^\\s*\n");
+        sstr = std::regex_replace(sstr, nl5, "");
+
+        // We parse the first line then exit.
+        std::istringstream iss(sstr);
+        for (std::string line; std::getline(iss, line); )
+        {
+            std::regex bl("\\s*");
+            if( std::regex_match(line,bl))
+            {
+                // Blank lines
+                continue;
+            }
+
+            // Split the file content
+            boost::escaped_list_separator<char> sep('\\', ' ', '\"');
+            boost::tokenizer<boost::escaped_list_separator<char> > tok(line, sep);
+            std::vector<std::string> args;
+            std::copy(tok.begin(), tok.end(), std::back_inserter(args));
+
+            try
+            {
+                // Parse the file and store the options
+                 boost::program_options::store(
+                    boost::program_options::command_line_parser(args)
+                    .options(desc).run(), vm);
+            }
+            catch (boost::wrapexcept<boost::program_options::unknown_option> &ex)
+            {
+                std::cout << desc << std::endl;
+
+                std::throw_with_nested( std::logic_error("invalid option") );
+            }
+
+            // Technically we can keep processing options
+            break;
+        }
+
+
     }
 
     boost::program_options::notify(vm);
@@ -93,9 +156,13 @@ void
 easyprospect_config_cmd::parse_options(
     easyprospect_config_core_builder& builder,
     boost::program_options::variables_map vm,
-    boost::program_options::options_description desc) const
+    boost::program_options::options_description desc)
 {
     spdlog::trace("parse_options() called\n");
+
+    std::ostringstream str;
+    str << desc;
+    builder.set_help_str(str.str());
 
     if (vm.count("help"))
     {
@@ -273,6 +340,36 @@ void easyprospect_config_core_builder::read_from_file(std::string filePath)
     }
 }
 
+std::string
+easyprospect_config_core::str()
+{
+    std::stringstream sstr;
+
+    sstr << "display help\t: " << get_display_help() << std::endl
+         << "display version\t: " << get_display_version() << std::endl
+         << "verbosity\t: " << to_string(get_verbosity()) << std::endl
+         << "debug level\t: " << to_string( get_debug_level() ) << std::endl
+         << "remainder args\t: ";
+
+    auto rargs = get_remainder_args();
+    if( rargs )
+    {
+        for (auto arg : *rargs)
+        {
+            sstr << "'" << arg << "', ";
+        }
+    }
+
+    sstr << std::endl
+         << "out file\t: " << (get_out_file()? get_out_file()->generic_string():"") << std::endl
+         << "log file\t: " << (get_log_file()? get_log_file()->generic_string():"") << std::endl
+         << "arg file\t: " << (get_arg_file()? get_arg_file()->generic_string():"") << std::endl
+         << "cnf file\t: " << (get_cnf_file()? get_cnf_file()->generic_string():"") << std::endl
+         << "pid file\t: " << (get_pid_file()? get_pid_file()->generic_string():"") << std::endl;
+
+    return sstr.str();
+}
+
 const std::string 
 easyprospect_config_core::to_string(const ep_verbosity_type v)
 {
@@ -325,6 +422,10 @@ easyprospect::service::config::easyprospect_config_core::to_string(const ep_debu
 
     case ep_debug_level_type::ep_debug:
         res = "ep_debug";
+        break;
+
+    case ep_debug_level_type::ep_trace:
+        res = "ep_trace";
         break;
 
     case ep_debug_level_type::ep_info:
@@ -408,6 +509,10 @@ easyprospect::service::config::easyprospect_config_core::debug_level_from(std::s
     else if (boost::iequals(d, "ep_debug"))
     {
         res = ep_debug_level_type::ep_debug;
+    }
+    else if (boost::iequals(d, "ep_trace"))
+    {
+        res = ep_debug_level_type::ep_trace;
     }
     else if (boost::iequals(d, "ep_info"))
     {

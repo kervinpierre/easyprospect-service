@@ -1,0 +1,23 @@
+{
+    "listeners": [
+        {
+            "name" : "ipv4",
+            "address" : "0.0.0.0",
+            "port_num" : 8080
+        },
+        {
+            "name" : "ipv6",
+            "address" : "[::]",
+            "port_num" : 8080
+        }
+    ],
+
+    "server": {
+      "threads" : 5,
+     "doc-root" : "..\\..\\..\\data\\test01\\wwwroot\\"
+    },
+
+    "log" : {
+      "path" : "log.txt"
+    }
+}
