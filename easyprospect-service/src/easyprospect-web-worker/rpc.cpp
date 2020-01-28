@@ -7,7 +7,8 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include "easyprospect-web/rpc.hpp"
+#include "easyprospect-web-worker/rpc.hpp"
+#include "easyprospect-web-worker/user.hpp"
 #include <boost/beast/core/error.hpp>
 #include <type_traits>
 #include <nlohmann/json.hpp>
@@ -89,7 +90,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
 
 
@@ -237,28 +238,28 @@ namespace easyprospect
                 }
             }
 
-            //void
-            //    rpc_call::
-            //    complete()
-            //{
-            //    if (!id_.has_value())
-            //        return;
-            //    nlohmann::json res;
+            void
+                rpc_call::
+                complete()
+            {
+                if (!id_.has_value())
+                    return;
+                nlohmann::json res;
 
-            //    res.emplace("id", *id_);
-            //    res["result"] = result;
+                res.emplace("id", *id_);
+                res["result"] = result;
 
-            //    u->send(res);
-            //}
+                u->send(res);
+            }
 
-            //void
-            //    rpc_call::
-            //    complete(rpc_error const& e)
-            //{
-            //    if (!id_.has_value())
-            //        return;
-            //    u->send(e.to_json(*id_));
-            //}
+            void
+                rpc_call::
+                complete(rpc_error const& e)
+            {
+                if (!id_.has_value())
+                    return;
+                u->send(e.to_json(*id_));
+            }
 
 
             nlohmann::json&

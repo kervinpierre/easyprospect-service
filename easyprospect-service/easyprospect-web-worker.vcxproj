@@ -18,36 +18,77 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\easyprospect-web-worker\blackjack.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\channel.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\channel_list.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-web-worker.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\http_session.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\listener.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\message.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\room.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\rpc.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\server.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\system.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\system_util.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\user.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\ws_user.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\easyprospect-web-worker\blackjack.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\channel.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\channel_list.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\config.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h" />
+    <ClInclude Include="include\easyprospect-web-worker\listener.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\message.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\room.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\rpc.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\system.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\server.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\server_certificate.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\service.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\session.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\system_util.h" />
+    <ClInclude Include="include\easyprospect-web-worker\types.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\uid.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\user.hpp" />
+    <ClInclude Include="include\easyprospect-web-worker\utility.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="easyprospect-config.vcxproj">
+      <Project>{3ef75984-9598-49d6-b4dc-ab71734e9cbc}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{1E3BE921-AB36-49F7-980B-CDE7CC3DBF61}</ProjectGuid>
+    <ProjectGuid>{33C62223-7936-4376-B14D-FA7BC5E19F17}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>libEpWeb</RootNamespace>
+    <RootNamespace>easyprospectwebworker</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -71,13 +112,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\build\msvc\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\build\msvc\$(Configuration)\IntDir\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -85,56 +126,54 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
-      <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;_WIN32_WINNT=0x0A00;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp14</LanguageStandard>
-    </ClCompile>
-    <Link>
-      <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;_ITERATOR_DEBUG_LEVEL=0;BOOST_ALL_NO_LIB;Boost_NO_SYSTEM_PATHS;Boost_USE_STATIC_LIBS;Boost_USE_STATIC_RUNTIME;_WIN32_WINNT=0x0601;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;OPENSSL_USE_STATIC_LIBS;BOOST_ASIO_NO_DEPRECATED=1;BOOST_ASIO_DISABLE_BOOST_ARRAY=1;BOOST_ASIO_DISABLE_BOOST_BIND=1;BOOST_ASIO_DISABLE_BOOST_DATE_TIME=1;BOOST_ASIO_DISABLE_BOOST_REGEX=1;URI_STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\openssl\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\nlohmann-json\$(configuration)\include;$(SolutionDir)\packages\ep\uriparser\$(configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\OpenSSL\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\uriparser\$(configuration)\include;$(SolutionDir)\packages\ep\nlohmann-json\$(configuration)\include</AdditionalIncludeDirectories>
-      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAs>CompileAsCpp</CompileAs>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;crypt32.lib;uriparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\uriparser\$(configuration)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -142,44 +181,22 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\easyprospect-web\http_session.cpp" />
-    <ClCompile Include="src\easyprospect-web\listener.cpp" />
-    <ClCompile Include="src\easyprospect-web\message.cpp" />
-    <ClCompile Include="src\easyprospect-web\rpc.cpp" />
-    <ClCompile Include="src\easyprospect-web\server.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\easyprospect-web\config.hpp" />
-    <ClInclude Include="include\easyprospect-web\http_message_util.h" />
-    <ClInclude Include="include\easyprospect-web\listener.hpp" />
-    <ClInclude Include="include\easyprospect-web\message.hpp" />
-    <ClInclude Include="include\easyprospect-web\rpc.hpp" />
-    <ClInclude Include="include\easyprospect-web\server.hpp" />
-    <ClInclude Include="include\easyprospect-web\server_certificate.hpp" />
-    <ClInclude Include="include\easyprospect-web\service.hpp" />
-    <ClInclude Include="include\easyprospect-web\session.hpp" />
-    <ClInclude Include="include\easyprospect-web\types.hpp" />
-    <ClInclude Include="include\easyprospect-web\uid.hpp" />
-    <ClInclude Include="include\easyprospect-web\utility.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

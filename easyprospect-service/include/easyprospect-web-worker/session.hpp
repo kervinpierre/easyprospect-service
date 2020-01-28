@@ -12,12 +12,13 @@
 #include "config.hpp"
 #include "utility.hpp"
 #include <boost/beast/ssl/ssl_stream.hpp>
+#include <easyprospect-web-worker/listener.hpp>
 
 namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
             /** Base for polymorphic connections
 

@@ -7,12 +7,12 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include "easyprospect-web/listener.hpp"
-#include "easyprospect-web/server.hpp"
-#include "easyprospect-web/session.hpp"
-#include "easyprospect-web/server_certificate.hpp"
-#include "easyprospect-web/service.hpp"
-#include "easyprospect-web/utility.hpp"
+#include "easyprospect-web-worker/listener.hpp"
+#include "easyprospect-web-worker/server.hpp"
+#include "easyprospect-web-worker/server_certificate.hpp"
+#include "easyprospect-web-worker/service.hpp"
+#include "easyprospect-web-worker/utility.hpp"
+#include "easyprospect-web-worker/session.hpp"
 #include <boost/beast/core/detect_ssl.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/container/flat_set.hpp>
@@ -23,7 +23,7 @@
 #include <vector>
 
 using namespace easyprospect::service::config;
-
+using namespace easyprospect::service::web_worker;
 /*
 
     */
@@ -32,7 +32,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
 
             // Detects the SSL opening handshake and launches either
@@ -122,7 +122,7 @@ namespace easyprospect
                         if (is_tls)
                         {
                             // launch the HTTPS session
-                            return easyprospect::service::web_server::run_https_session(
+                            return easyprospect::service::web_worker::run_https_session(
                                 srv_, lst_, ctx_,
                                 std::move(stream_),
                                 ep_,

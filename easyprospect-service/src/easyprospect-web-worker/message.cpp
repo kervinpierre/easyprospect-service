@@ -7,7 +7,7 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include "easyprospect-web/message.hpp"
+#include "easyprospect-web-worker/message.hpp"
 #include <boost/beast/core/flat_static_buffer.hpp>
 #include <nlohmann/json.hpp>
 
@@ -16,7 +16,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
             message
                 make_message(nlohmann::json const& jv)

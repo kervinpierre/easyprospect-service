@@ -19,7 +19,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
             template<class T>
             struct is_duration : std::false_type

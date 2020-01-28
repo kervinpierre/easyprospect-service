@@ -4,8 +4,8 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
 
-#include <easyprospect-web/server.hpp>
-#include <easyprospect-web/listener.hpp>
+#include <easyprospect-web-worker/server.hpp>
+#include <easyprospect-web-worker/listener.hpp>
 #include <easyprospect-config/easyprospect-config-service.h>
 
 #ifdef BOOST_MSVC
@@ -20,16 +20,15 @@
 
 //------------------------------------------------------------------------------
 
-/** Create a server.
+/** Create a web worker.
 
     The configuration file is loaded,
     and all child objects are created.
 */
 
-
 //------------------------------------------------------------------------------
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     easyprospect::service::config
         ::easyprospect_config_service_shell shell;
@@ -39,16 +38,16 @@ int main(int argc, char *argv[])
     {
         builder = easyprospect::service::config
             ::easyprospect_config_service_shell
-	            ::init_args(argc, argv);
+            ::init_args(argc, argv);
     }
     catch (std::logic_error ex)
     {
-	    return 1;
+        return 1;
     }
 
     auto res = builder.to_config();
 
-    if(res.get_display_help())
+    if (res.get_display_help())
     {
         std::ostringstream disStr{};
 
@@ -106,20 +105,20 @@ int main(int argc, char *argv[])
 
     auto vb = res.get_verbosity();
 
-    spdlog::debug("starting epsrv");
+    spdlog::debug("starting ep-web-worker");
 
-    spdlog::debug( res.str());
+    spdlog::debug(res.str());
 
     std::stringstream sstr;
 
     sstr << "\nexe: '" << boost::filesystem::system_complete(argv[0]) << std::endl
-         << "cwd: '" << boost::filesystem::current_path() << std::endl;
+        << "cwd: '" << boost::filesystem::current_path() << std::endl;
 
     spdlog::debug(sstr.str());
 
     // Create the server
-     beast::error_code ec;
-    auto srv = easyprospect::service::web_server::make_server(
+    beast::error_code ec;
+    auto srv = easyprospect::service::web_worker::make_server(
         res);
     if (!srv)
         return EXIT_FAILURE;

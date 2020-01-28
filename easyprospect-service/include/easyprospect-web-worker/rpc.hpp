@@ -18,9 +18,7 @@
 #include <utility>
 #include <nlohmann/json.hpp>
 
-class user;
-
-/// Codes used in JSON-RPC error responses
+    /// Codes used in JSON-RPC error responses
 enum class rpc_code
 {
     parse_error = -32700,
@@ -83,9 +81,10 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
             //------------------------------------------------------------------------------
+            class user;
 
             class rpc_error
                 : public std::exception
@@ -151,6 +150,7 @@ namespace easyprospect
 
             public:
                 /// The user submitting the request
+                boost::shared_ptr<user> u;
 
                 /// Version of the request (1 or 2)
                 int version = 2;
@@ -181,7 +181,7 @@ namespace easyprospect
                     and version will be 2.
                 */
                 rpc_call(
-        ::user& u);
+                    user& u);
 
                 /** Extract a JSON-RPC request or return an error.
                 */
@@ -195,16 +195,16 @@ namespace easyprospect
                     This function sends the user originating the request
                     a JSON-RPC response object containing the result.
                 */
-                //void
-                //    complete();
+                void
+                    complete();
 
                 /** Complete the RPC request with an error.
 
                     This function sends the user originating the request
                     a JSON-RPC response containing an error object.
                 */
-               // void
-                 //   complete(rpc_error const& e);
+                void
+                    complete(rpc_error const& e);
 
                 /** Respond to a request with an error.
 

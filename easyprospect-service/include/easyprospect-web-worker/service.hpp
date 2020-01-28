@@ -11,12 +11,11 @@
 
 #include "config.hpp"
 
-
 namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
 
             /** Base for polymorphic services

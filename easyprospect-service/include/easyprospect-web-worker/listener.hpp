@@ -22,7 +22,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
             class session;
 
@@ -80,7 +80,6 @@ namespace easyprospect
                 run_listener(
                     server& srv,
                     easyprospect::service::config::easyprospect_config_service_listener_conf cfg);
-
         }
     }
 }

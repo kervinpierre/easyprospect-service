@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="src\easyprospect-web\blackjack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-web\channel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-web\channel_list.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\easyprospect-web\http_session.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -19,22 +10,10 @@
     <ClCompile Include="src\easyprospect-web\message.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\easyprospect-web\room.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\easyprospect-web\rpc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\easyprospect-web\server.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-web\system.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-web\user.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-web\ws_user.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,12 +26,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\easyprospect-web\channel.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\easyprospect-web\channel_list.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\easyprospect-web\config.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -81,9 +54,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-web\uid.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\easyprospect-web\user.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-web\utility.hpp">

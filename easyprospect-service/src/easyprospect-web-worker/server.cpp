@@ -6,11 +6,14 @@
 //
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
- 
-#include "easyprospect-web/listener.hpp"
-#include "easyprospect-web/server.hpp"
-#include "easyprospect-web/service.hpp"
-#include "easyprospect-web/utility.hpp"
+
+#include <easyprospect-web-worker/blackjack.hpp>
+#include "easyprospect-web-worker/channel.hpp"
+#include "easyprospect-web-worker/channel_list.hpp"
+#include "easyprospect-web-worker/listener.hpp"
+#include "easyprospect-web-worker/server.hpp"
+#include "easyprospect-web-worker/service.hpp"
+#include "easyprospect-web-worker/utility.hpp"
 #include <easyprospect-config/easyprospect-config-service.h>
 #include <boost/asio/basic_waitable_timer.hpp>
 #include <boost/asio/basic_signal_set.hpp>
@@ -26,16 +29,42 @@
 #include <vector>
 
 #include <uriparser/Uri.h>
+#include <easyprospect-web-worker/system_util.h>
+
+
+//------------------------------------------------------------------------------
+
+//extern
+//void
+//make_blackjack_service(server&);
+//
+//extern
+//std::unique_ptr<channel_list>
+//make_channel_list(server&);
+//
+//extern
+//void
+//make_system_channel(server&);
+
+//------------------------------------------------------------------------------
+
+
+//listener_config::
+//listener_config(easyprospect::service::config::easyprospect_config_service_listener_conf& conf)
+//    : name(conf.get_name())
+//    , address(json::value_cast<net::ip::address>(conf.get_address()))
+//    , port_num(json::number_cast<unsigned short>(conf.get_port()))
+//{
+//}
+
+//------------------------------------------------------------------------------
 
 namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
-
-            //------------------------------------------------------------------------------
-
             class server_impl_base : public server
             {
             public:
@@ -78,6 +107,8 @@ namespace easyprospect
                 bool running_ = false;
                 std::atomic<bool> stop_;
 
+                std::unique_ptr<easyprospect::service::web_worker::channel_list> channel_list_;
+
                 static
                     std::chrono::steady_clock::time_point
                     never() noexcept
@@ -97,6 +128,7 @@ namespace easyprospect
                         SIGTERM)
                     , shutdown_time_(never())
                     , stop_(false)
+                    , channel_list_(make_channel_list(*this))
                 {
                     timer_.expires_at(never());
 
@@ -108,6 +140,9 @@ namespace easyprospect
                     //{
                     //    ;
                     //}
+
+                    easyprospect::service::web_worker::system_util::
+                    make_system_channel(*this);
                 }
 
                 ~server_impl()
@@ -149,7 +184,6 @@ namespace easyprospect
                         vt.emplace_back(
                             [this]
                             {
-                                // TODO: KP. Link this thread with a process
                                 this->ioc_.run();
                             });
 #endif
@@ -218,7 +252,7 @@ namespace easyprospect
                         return;
 
                     auto const remain =
-                        easyprospect::service::web_server::ceil<std::chrono::seconds>(
+                        easyprospect::service::web_worker::ceil<std::chrono::seconds>(
                             shutdown_time_ - clock_type::now());
 
                     // Countdown finished?
@@ -233,18 +267,14 @@ namespace easyprospect
                         amount = std::chrono::seconds(10);
 
                     // Notify users of impending shutdown
-
-                    // TODO: KP. Replace this shutdown notice?
-
-                    //auto c = this->channel_list().at(1);
-                    //nlohmann::json jv;
-                    //jv["verb"] = "say";
-                    //jv["cid"] = c->cid();
-                    //jv["name"] = c->name();
-                    //jv["message"] = "Server is shutting down in " +
-                    //    std::to_string(remain.count()) + " seconds";
-                    //c->send(jv);
-
+                    auto c = this->channel_list().at(1);
+                    nlohmann::json jv;
+                    jv["verb"] = "say";
+                    jv["cid"] = c->cid();
+                    jv["name"] = c->name();
+                    jv["message"] = "Server is shutting down in " +
+                        std::to_string(remain.count()) + " seconds";
+                    c->send(jv);
                     timer_.expires_after(amount);
                     timer_.async_wait(
                         beast::bind_front_handler(
@@ -312,53 +342,64 @@ namespace easyprospect
                 {
                     return cfg_.get_webroot_dir();
                 }
+
+                easyprospect::service::web_worker::channel_list&
+                    channel_list() override
+                {
+                    return *channel_list_;
+                }
             };
 
-            std::unique_ptr<server>
-                make_server(
-                    easyprospect::service::config::easyprospect_config_service_core curr_config)
+//------------------------------------------------------------------------------
+
+std::unique_ptr<server>
+make_server(
+    easyprospect::service::config::easyprospect_config_service_core curr_config)
+{
+    beast::error_code ec;
+
+    // Read the server configuration
+    std::unique_ptr<server_impl> srv;
+    {
+        try
+        {
+            // Create the server
+            srv = boost::make_unique<server_impl>(
+                curr_config);
+        }
+        catch(beast::system_error const& e)
+        {
+            spdlog::debug("server_config: {}", e.code().message());
+
+            return nullptr;
+        }
+
+    }
+
+    // Add services
+    make_blackjack_service(*srv);
+
+    // Create listeners
+    {
+        auto ls = curr_config.get_listeners();
+        for(auto& e : *ls)
+        {
+            try
             {
-                beast::error_code ec;
-
-                // Read the server configuration
-                std::unique_ptr<server_impl> srv;
-                {
-                    try
-                    {
-                        // Create the server
-                        srv = boost::make_unique<server_impl>(
-                            curr_config);
-                    }
-                    catch (beast::system_error const& e)
-                    {
-                        spdlog::debug("server_config: {}", e.code().message());
-
-                        return nullptr;
-                    }
-
-                }
-
-                // Create listeners
-                {
-                    auto ls = curr_config.get_listeners();
-                    for (auto& e : *ls)
-                    {
-                        try
-                        {
-                            if (!run_listener(*srv, e))
-                                return nullptr;
-                        }
-                        catch (beast::system_error const& ex)
-                        {
-                            spdlog::debug("listener_config: {}", ex.code().message());
-
-                            return nullptr;
-                        }
-                    }
-                }
-
-                return srv;
+                if(! run_listener(*srv, e))
+                    return nullptr;
             }
+            catch(beast::system_error const& ex)
+            {
+                spdlog::debug("listener_config: {}", ex.code().message());
+
+                return nullptr;
+            }
+        }
+    }
+
+    return srv;
+}
 
         }
     }

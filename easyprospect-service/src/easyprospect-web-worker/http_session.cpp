@@ -7,10 +7,10 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include "easyprospect-web/listener.hpp"
-#include "easyprospect-web/server.hpp"
-#include "easyprospect-web/session.hpp"
-#include "easyprospect-web/utility.hpp"
+#include "easyprospect-web-worker/listener.hpp"
+#include "easyprospect-web-worker/server.hpp"
+#include "easyprospect-web-worker/session.hpp"
+#include "easyprospect-web-worker/utility.hpp"
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/http/file_body.hpp>
 #include <boost/beast/http/read.hpp>
@@ -30,7 +30,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
 
             // Return a reasonable mime type based on the extension of a file.

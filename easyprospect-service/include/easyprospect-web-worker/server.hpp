@@ -18,19 +18,20 @@
 #include <memory>
 #include <utility>
 #include "easyprospect-config/easyprospect-config-service.h"
+#include "service.hpp"
+
+//------------------------------------------------------------------------------
 
 namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
-
+            class channel_list;
             class rpc_handler;
             class service;
             class user;
-
-            //------------------------------------------------------------------------------
 
             /** An instance of the lounge server.
             */
@@ -52,7 +53,7 @@ namespace easyprospect
                 virtual
                     void
                     insert(
-                        std::unique_ptr<service> sp) = 0;
+                        std::unique_ptr<easyprospect::service::web_worker::service> sp) = 0;
 
                 //--------------------------------------------------------------------------
                 //
@@ -62,6 +63,7 @@ namespace easyprospect
 
                 virtual const boost::optional<boost::filesystem::path> doc_root() const = 0;
 
+                virtual channel_list& channel_list() = 0;
 
                 //--------------------------------------------------------------------------
 
@@ -92,8 +94,8 @@ namespace easyprospect
             };
 
             std::unique_ptr<server>
-            make_server(
-                easyprospect::service::config::easyprospect_config_service_core config_curr);
+                make_server(
+                    easyprospect::service::config::easyprospect_config_service_core curr_config);
         }
     }
 }

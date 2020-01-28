@@ -22,7 +22,7 @@ namespace easyprospect
 {
     namespace service
     {
-        namespace web_server
+        namespace web_worker
         {
             /** A shared buffer sequence of length 1.
 
