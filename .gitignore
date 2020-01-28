@@ -9,3 +9,4 @@ Debug
 /easyprospect-service/external/EasyProspectServiceDeveloper-SetupFiles
 *.nupkg
 /easyprospect-service/epsrv.vcxproj.user
+*.vcxproj.user
