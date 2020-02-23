@@ -4,10 +4,6 @@
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
 
-#include <spdlog/spdlog.h>
-#include <spdlog/async.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-
 namespace easyprospect
 {
     namespace service
@@ -62,6 +58,8 @@ namespace easyprospect
                 const boost::optional<boost::filesystem::path> cnf_file_;
                 const boost::optional<boost::filesystem::path> pid_file_;
 
+                const boost::optional<boost::filesystem::path> pid_dir_path_;
+
                 friend class easyprospect_config_core_builder;
 
             protected:
@@ -78,11 +76,12 @@ namespace easyprospect
                     boost::optional <boost::filesystem::path> lf, 
                     boost::optional <boost::filesystem::path> af,
                     boost::optional <boost::filesystem::path> cf, 
-                    boost::optional <boost::filesystem::path> pf):
+                    boost::optional <boost::filesystem::path> pf,
+                    boost::optional <boost::filesystem::path> pd):
                     display_help_(dh), display_version_(dv), verbosity_(verb),
                     debug_level_(db), remainder_args_(rem_args),
                     out_file_(of), log_file_(lf), arg_file_(af), cnf_file_(cf),
-                    pid_file_(pf){};
+                    pid_file_(pf),pid_dir_path_(pd){};
 
                 /**********************************************************************************************//**
                  * @fn  template <typename C, typename... T> static ::std::shared_ptr<C> easyprospect_config_core::create(T&&... args)
@@ -112,6 +111,7 @@ namespace easyprospect
                 const boost::optional<boost::filesystem::path> get_arg_file() const { return arg_file_; }
                 const boost::optional<boost::filesystem::path> get_cnf_file() const { return cnf_file_; }
                 const boost::optional<boost::filesystem::path> get_pid_file() const { return pid_file_; }
+                const boost::optional<boost::filesystem::path> get_pid_dir()  const { return pid_dir_path_; }
                 const bool get_display_help() const { return display_help_; }
                 const bool get_display_version() const { return display_version_; }
                 const boost::optional<std::vector<std::string>> get_remainder_args() const { return remainder_args_; }
@@ -140,6 +140,7 @@ namespace easyprospect
                 boost::optional<boost::filesystem::path> arg_file_;
                 boost::optional<boost::filesystem::path> cnf_file_;
                 boost::optional<boost::filesystem::path> pid_file_;
+                boost::optional<boost::filesystem::path> pid_dir_path_;
 
                 std::string help_str_;
 
@@ -157,6 +158,7 @@ namespace easyprospect
                     arg_file_ = boost::none;
                     cnf_file_ = boost::none;
                     pid_file_ = boost::none;
+                    pid_dir_path_ = boost::none;
                 }
 
                 std::unique_ptr<easyprospect_config_core> to_config_core();
@@ -175,6 +177,8 @@ namespace easyprospect
                 void set_cnf_file(std::string cnf_file);
                 void set_pid_file(boost::optional <boost::filesystem::path> pid_file) { this->pid_file_ = pid_file; }
                 void set_pid_file(std::string pid_file);
+                void set_pid_dir_path(boost::optional <boost::filesystem::path> pid_dir_path) { this->pid_dir_path_ = pid_dir_path; }
+                void set_pid_dir_path(std::string pid_dir_path_);
                 void set_display_help(bool display_help) { this->display_help_ = display_help; }
                 void set_display_help(std::string display_help);
                 void set_display_version(bool display_version) { this->display_version_ = display_version; }

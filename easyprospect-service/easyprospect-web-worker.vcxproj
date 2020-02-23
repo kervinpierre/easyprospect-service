@@ -19,46 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\easyprospect-web-worker\blackjack.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\channel.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\channel_list.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\easyprospect-web-worker.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\http_session.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\listener.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\message.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\room.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\rpc.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\server.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\system.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\system_util.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\user.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\ws_user.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\easyprospect-web-worker\blackjack.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\channel.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\channel_list.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\config.hpp" />
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h" />
-    <ClInclude Include="include\easyprospect-web-worker\listener.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\message.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\room.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\rpc.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\system.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\server.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\server_certificate.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\service.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\session.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\system_util.h" />
-    <ClInclude Include="include\easyprospect-web-worker\types.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\uid.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\user.hpp" />
-    <ClInclude Include="include\easyprospect-web-worker\utility.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="easyprospect-config.vcxproj">
-      <Project>{3ef75984-9598-49d6-b4dc-ab71734e9cbc}</Project>
-    </ProjectReference>
+    <ClInclude Include="include\easyprospect-web-worker\server.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -82,7 +48,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -116,6 +82,7 @@
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\build\msvc\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\build\msvc\$(Configuration)\IntDir\$(ProjectName)\</IntDir>
+    <TargetName>$(TargetName)</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -144,7 +111,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libcrypto.lib;libssl.lib;crypt32.lib;uriparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\uriparser\$(configuration)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\uriparser\$(configuration)\libs;$(SolutionDir)\packages\ep\zeromq\$(configuration)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

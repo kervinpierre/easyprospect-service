@@ -160,25 +160,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\easyprospect-web\http_session.cpp" />
-    <ClCompile Include="src\easyprospect-web\listener.cpp" />
-    <ClCompile Include="src\easyprospect-web\message.cpp" />
-    <ClCompile Include="src\easyprospect-web\rpc.cpp" />
     <ClCompile Include="src\easyprospect-web\server.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\easyprospect-web\config.hpp" />
-    <ClInclude Include="include\easyprospect-web\http_message_util.h" />
-    <ClInclude Include="include\easyprospect-web\listener.hpp" />
-    <ClInclude Include="include\easyprospect-web\message.hpp" />
-    <ClInclude Include="include\easyprospect-web\rpc.hpp" />
-    <ClInclude Include="include\easyprospect-web\server.hpp" />
-    <ClInclude Include="include\easyprospect-web\server_certificate.hpp" />
-    <ClInclude Include="include\easyprospect-web\service.hpp" />
-    <ClInclude Include="include\easyprospect-web\session.hpp" />
-    <ClInclude Include="include\easyprospect-web\types.hpp" />
-    <ClInclude Include="include\easyprospect-web\uid.hpp" />
-    <ClInclude Include="include\easyprospect-web\utility.hpp" />
+    <ClInclude Include="include\easyprospect-web\server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

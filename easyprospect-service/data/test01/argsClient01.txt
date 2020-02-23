@@ -1,0 +1,7 @@
+
+
+# First serious test
+--webroot-dir "../../../data/test01/wwwroot" \
+--listener name=ipv4,address=0.0.0.0,min-port=8081,max-port=8090 \
+--debug-level ep_trace       \
+--verbosity maximum

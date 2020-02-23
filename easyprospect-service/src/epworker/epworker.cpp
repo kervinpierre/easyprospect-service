@@ -3,10 +3,10 @@
 #include <boost/config.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/ssl.hpp>
-
-#include <easyprospect-web/server.h>
+#include <easyprospect-web-worker/server.h>
 #include <easyprospect-config/easyprospect-config-service.h>
 
+#include <easyprospect-config/logging.h>
 #include <easyprospect-config/logging.h>
 
 #ifdef BOOST_MSVC
@@ -21,16 +21,15 @@
 
 //------------------------------------------------------------------------------
 
-/** Create a server.
+/** Create a web worker.
 
     The configuration file is loaded,
     and all child objects are created.
 */
 
-
 //------------------------------------------------------------------------------
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     easyprospect::service::config
         ::easyprospect_config_service_shell shell;
@@ -40,16 +39,16 @@ int main(int argc, char *argv[])
     {
         builder = easyprospect::service::config
             ::easyprospect_config_service_shell
-	            ::init_args(argc, argv);
+            ::init_args(argc, argv);
     }
     catch (std::logic_error ex)
     {
-	    return 1;
+        return 1;
     }
 
     auto res = builder.to_config();
 
-    if(res.get_display_help())
+    if (res.get_display_help())
     {
         std::ostringstream disStr{};
 
@@ -78,17 +77,12 @@ int main(int argc, char *argv[])
     {
         std::string logFileName = logfile->generic_string();
 
-        // expose this somewhere
-        bool truncate_log = true;
-
-        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileName, truncate_log);
-        file_sink->set_level(spdlog::level::trace);
+        auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileName, true);
+        //file_sink->set_level()
 
         spdlog::sinks_init_list sink_list = { file_sink, console_sink };
 
         main_logger = std::make_shared<spdlog::logger>("", sink_list.begin(), sink_list.end());
-
-        main_logger->flush_on(spdlog::level::trace);
     }
     else
     {
@@ -131,20 +125,21 @@ int main(int argc, char *argv[])
 
     auto vb = res.get_verbosity();
 
-    spdlog::debug("starting epsrv");
+    spdlog::debug("starting ep-web-worker");
 
-    spdlog::debug( res.str());
+    spdlog::debug(res.str());
 
     std::stringstream sstr;
 
     sstr << "\nexe: '" << boost::filesystem::system_complete(argv[0]) << std::endl
-         << "cwd: '" << boost::filesystem::current_path() << std::endl;
+        << "cwd: '" << boost::filesystem::current_path() << std::endl;
 
     spdlog::debug(sstr.str());
 
     // Create the server
-     beast::error_code ec;
-    auto srv = easyprospect::service::web_server::make_server(res);
+    beast::error_code ec;
+    auto srv = easyprospect::service::web_worker::make_server(
+        res);
     if (!srv)
         return EXIT_FAILURE;
 

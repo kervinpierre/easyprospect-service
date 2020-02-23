@@ -79,7 +79,7 @@ easyprospect_config_v8_core_builder::to_config()
      
     easyprospect_config_v8_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_,
         display_version_, verbosity_,debug_level_, remainder_args_,out_file_,
-        log_file_,arg_file_,cnf_file_,pid_file_,source_files_);
+        log_file_,arg_file_,cnf_file_,pid_file_,pid_dir_path_,source_files_);
 
     return res;
 }

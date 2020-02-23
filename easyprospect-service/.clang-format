@@ -1,0 +1,10 @@
+﻿---
+BasedOnStyle: Microsoft
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: 'true'
+BreakBeforeBraces: Allman
+Language: Cpp
+TabWidth: '4'
+UseTab: Never
+
+...

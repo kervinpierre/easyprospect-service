@@ -13,6 +13,7 @@
 #include "utility.hpp"
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <easyprospect-web-worker/listener.hpp>
+#include <easyprospect-service-shared/easyprospect-service-shared.h>
 
 namespace easyprospect
 {
@@ -20,25 +21,6 @@ namespace easyprospect
     {
         namespace web_worker
         {
-            /** Base for polymorphic connections
-
-                Every session must be owned by one listener
-            */
-            class session
-                : public boost::enable_shared_from
-            {
-            public:
-                virtual ~session() = default;
-
-                /** Called when the server stops.
-
-                    This will be called at most once.
-                */
-                virtual
-                    void
-                    on_stop() = 0;
-            };
-
                 void
                 run_http_session(
                     server& srv,

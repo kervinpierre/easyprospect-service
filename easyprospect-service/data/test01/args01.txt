@@ -2,7 +2,8 @@
 
 # First serious test
 --webroot-dir "../../../data/test01/wwwroot" \
---listener ipv4,0.0.0.0,8080 \
+--listener name=ipv4,address=0.0.0.0,port=8080 \
+--log-file "../../../data/test01/log01.txt"       \
 --debug-level ep_trace       \
 --verbosity maximum
 

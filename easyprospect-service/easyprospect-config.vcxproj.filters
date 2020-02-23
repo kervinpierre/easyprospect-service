@@ -29,5 +29,8 @@
     <ClInclude Include="include\easyprospect-config\easyprospect-config-service.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\easyprospect-config\logging.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

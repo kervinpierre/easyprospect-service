@@ -27,6 +27,7 @@
     <ClInclude Include="include\easyprospect-config\easyprospect-config-service.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-config-v8.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h" />
+    <ClInclude Include="include\easyprospect-config\logging.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
