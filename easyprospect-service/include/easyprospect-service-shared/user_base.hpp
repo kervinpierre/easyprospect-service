@@ -9,11 +9,7 @@
 
 #pragma once
 
-#include <boost/container/flat_set.hpp>
-#include <mutex>
 #include <string>
-#include <nlohmann/json.hpp>
-#include <easyprospect-service-shared/session.hpp>
 
 namespace easyprospect
 {
@@ -25,7 +21,7 @@ namespace easyprospect
             class message;
 
             /// Represents a connected user
-            class user_base : public boost::enable_shared_from
+            class user_base //: public boost::enable_shared_from
             {
             public:
                 std::string name;

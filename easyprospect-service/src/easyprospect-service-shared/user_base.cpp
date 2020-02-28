@@ -7,7 +7,6 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include <boost/assert.hpp>
 #include "easyprospect-service-shared/user_base.hpp"
 
 namespace easyprospect

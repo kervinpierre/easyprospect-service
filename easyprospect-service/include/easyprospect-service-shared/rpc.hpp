@@ -12,12 +12,8 @@
 #include "config.hpp"
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/string.hpp>
-#include <boost/smart_ptr/shared_ptr.hpp>
-#include <boost/optional.hpp>
 #include <stdexcept>
-#include <utility>
 #include <nlohmann/json.hpp>
-#include <easyprospect-service-shared/user_base.hpp>
 
 /// Codes used in JSON-RPC error responses
 enum class rpc_code

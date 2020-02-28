@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "config.hpp"
 #include <boost/smart_ptr/enable_shared_from.hpp>
 #include <boost/smart_ptr/shared_ptr.hpp>
 #include <chrono>

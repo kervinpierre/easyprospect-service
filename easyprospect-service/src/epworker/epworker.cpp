@@ -2,11 +2,9 @@
 
 #include <boost/config.hpp>
 #include <boost/beast/core.hpp>
-#include <boost/beast/ssl.hpp>
 #include <easyprospect-web-worker/server.h>
 #include <easyprospect-config/easyprospect-config-service.h>
 
-#include <easyprospect-config/logging.h>
 #include <easyprospect-config/logging.h>
 
 #ifdef BOOST_MSVC
@@ -32,7 +30,7 @@
 int main(int argc, char* argv[])
 {
     easyprospect::service::config
-        ::easyprospect_config_service_shell shell;
+         ::easyprospect_config_service_shell shell;
     easyprospect::service::config::easyprospect_config_service_core_builder builder;
 
     try

@@ -9,8 +9,6 @@
 
 #pragma once
 
-#include "config.hpp"
-
 namespace easyprospect
 {
     namespace service

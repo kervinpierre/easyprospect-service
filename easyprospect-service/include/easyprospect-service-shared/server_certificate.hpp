@@ -13,7 +13,6 @@
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/ssl/context.hpp>
 #include <cstddef>
-#include <memory>
 
 /*  Load a signed certificate into the ssl context, and configure
     the context for use with a server.

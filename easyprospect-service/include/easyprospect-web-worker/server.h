@@ -1,5 +1,4 @@
 #pragma once
-#include <boost/asio/basic_signal_set.hpp>
 #include <spdlog/spdlog.h>
 #include "easyprospect-service-shared/server.h"
 

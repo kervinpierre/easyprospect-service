@@ -2,7 +2,6 @@
 
 #include <boost/config.hpp>
 #include <boost/beast/core.hpp>
-#include <boost/beast/ssl.hpp>
 
 #include <easyprospect-web/server.h>
 #include <easyprospect-config/easyprospect-config-service.h>

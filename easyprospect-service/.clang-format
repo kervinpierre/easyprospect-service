@@ -1,10 +1,27 @@
 ﻿---
-BasedOnStyle: Microsoft
-AlignAfterOpenBracket: Align
-AlignConsecutiveMacros: 'true'
-BreakBeforeBraces: Allman
 Language: Cpp
 TabWidth: '4'
 UseTab: Never
+BasedOnStyle: Microsoft
 
+AlignAfterOpenBracket: Align
+AlignConsecutiveMacros: true
+AlignConsecutiveAssignments: true
+AlignAfterOpenBracket: AlwaysBreak
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlines: Left
+AlignOperands: true
+AlignTrailingComments: true
+AlwaysBreakAfterReturnType: None
+AlwaysBreakTemplateDeclarations: Yes
+AllowAllParametersOfDeclarationOnNextLine: false
+BreakBeforeBraces: Allman
+BinPackArguments: false
+BinPackParameters: false
+BreakInheritanceList: BeforeColon
+BreakBeforeInheritanceComma: false
+BreakConstructorInitializers: AfterColon
+FixNamespaceComments: true
+NamespaceIndentation: Inner
+PointerAlignment: Left
 ...

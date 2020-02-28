@@ -7,9 +7,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-web", "easypro
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D9F48611-0E4E-4056-A78D-A2AA23FFA502}"
 	ProjectSection(SolutionItems) = preProject
+		.clang-format = .clang-format
 		.editorconfig = .editorconfig
 		tools\buildmsvs01.ps1 = tools\buildmsvs01.ps1
-		clang-format.txt = clang-format.txt
 		tools\pushwin01.sh = tools\pushwin01.sh
 	EndProjectSection
 EndProject

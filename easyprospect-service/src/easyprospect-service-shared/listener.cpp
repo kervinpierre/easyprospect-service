@@ -11,7 +11,6 @@
 #include "easyprospect-service-shared/utility.hpp"
 #include <spdlog/spdlog.h>
 #include "easyprospect-service-shared/session.hpp"
-#include "easyprospect-service-shared/service.hpp"
 #include "easyprospect-service-shared/server_certificate.hpp"
 #include "easyprospect-service-shared/externs.h"
 

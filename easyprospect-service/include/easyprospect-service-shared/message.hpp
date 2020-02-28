@@ -11,7 +11,6 @@
 
 #include "config.hpp"
 #include <boost/beast/core/buffer_traits.hpp>
-#include <boost/assert.hpp>
 #include <boost/core/exchange.hpp>
 #include <atomic>
 #include <memory>
