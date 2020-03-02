@@ -30,4 +30,9 @@
       <Filter>Work Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="data\test01\config01.json">
+      <Filter>Work Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

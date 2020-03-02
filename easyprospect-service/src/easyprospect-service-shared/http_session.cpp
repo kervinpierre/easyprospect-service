@@ -151,7 +151,7 @@ namespace service
             http::request<Body, http::basic_fields<Allocator>>&& req,
             Send&&                                               send)
         {
-            // TODO. KP. Block here and send to worker process.
+            // TODO. KP. Block here and send file or callback()
 
             std::stringstream sstr;
 
@@ -205,6 +205,10 @@ namespace service
             if (req.target().back() == '/')
                 curr_path.append("index.html");
 
+            // TODO: KP. Instead of opening a file, run it through a V8 parser callback then return the content.
+
+            // TODO: KP. execute injected callback function here ( which calls V8 )
+            
             // Attempt to open the file
             beast::error_code           ec;
             http::file_body::value_type body;

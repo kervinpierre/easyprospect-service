@@ -27,6 +27,7 @@
     <ClInclude Include="include\easyprospect-config\easyprospect-config-service.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-config-v8.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h" />
+    <ClInclude Include="include\easyprospect-config\easyprospect-defaults.h" />
     <ClInclude Include="include\easyprospect-config\logging.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -105,7 +106,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\nlohmann-json\$(configuration)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>

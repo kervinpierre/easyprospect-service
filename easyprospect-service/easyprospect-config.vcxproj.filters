@@ -32,5 +32,8 @@
     <ClInclude Include="include\easyprospect-config\logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\easyprospect-config\easyprospect-defaults.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

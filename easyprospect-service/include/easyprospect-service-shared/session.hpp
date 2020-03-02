@@ -70,7 +70,6 @@ namespace service
             endpoint_type                ep_;
             flat_storage                 msg_;
             std::vector<shared::message> mq_;
-            // TODO: KP. Assigned from wrapper session
             boost::shared_ptr<ws_session_t>                              wrapper_;
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
 
@@ -753,7 +752,7 @@ namespace service
                 if (ec)
                     return impl()->fail(ec, "http::async_read");
 
-                // TODO: KP. Send the HTTP request to a process here
+                // TODO: KP. PROXY the HTTP request to a process here
 
                 // See if it is a WebSocket Upgrade
                 if (websocket::is_upgrade(pr_->get()))
@@ -857,10 +856,7 @@ namespace service
                         if (ec)
                             rpc.fail(rpc_code::invalid_request, ec.message());
 
-                        // TODO: KP. Add process dispatch here
-                        // Dispatch to the proper channel
-                        // srv_.channel_list().dispatch(rpc, u, *this);
-
+                        // Dispatch via callback from worker
                         auto d    = get_dispatch_impl();
                         auto sess = get_wrapper();
                         d(rpc, *(sess->get_primary_user()), *sess);

@@ -39,7 +39,7 @@ int main(int argc, char* argv[])
             ::easyprospect_config_service_shell
             ::init_args(argc, argv);
     }
-    catch (std::logic_error ex)
+    catch (std::logic_error &ex)
     {
         return 1;
     }
