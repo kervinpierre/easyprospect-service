@@ -6,7 +6,7 @@
 #include <regex>
 #include <spdlog/spdlog.h>
 
-#include "easyprospect-defaults.h"
+#include <easyprospect-config/easyprospect-defaults.h>
 
 namespace easyprospect
 {
@@ -77,6 +77,7 @@ namespace service
             const ep_verbosity_type                         verbosity_;
             const ep_debug_level_type                       debug_level_;
             std::vector<std::regex>                         epjs_url_path_regex_;
+            std::vector<std::string>                        epjs_url_path_regex_str_;
             std::vector<ep_mime_type>                       mime_types_;
             const boost::optional<std::vector<std::string>> remainder_args_;
             const boost::optional<boost::filesystem::path>  out_file_;
@@ -104,6 +105,7 @@ namespace service
                 ep_debug_level_type                       db,
                 boost::optional<std::vector<std::string>> rem_args,
                 std::vector<std::regex>                   epjs_upr,
+                std::vector<std::string>                   epjs_upr_str,
                 std::vector<ep_mime_type>                 mtypes,
                 boost::optional<boost::filesystem::path>  of,
                 boost::optional<boost::filesystem::path>  lf,
@@ -113,7 +115,8 @@ namespace service
                 boost::optional<boost::filesystem::path>  pd) :
                 display_help_(dh),
                 display_version_(dv), verbosity_(verb), debug_level_(db), remainder_args_(rem_args),
-                epjs_url_path_regex_(epjs_upr), mime_types_(mtypes), out_file_(of), log_file_(lf), arg_file_(af),
+                epjs_url_path_regex_(epjs_upr), epjs_url_path_regex_str_(epjs_upr_str), mime_types_(mtypes), out_file_(of),
+                log_file_(lf), arg_file_(af),
                 cnf_file_(cf), pid_file_(pf), pid_dir_path_(pd){};
 
             easyprospect_config_core(
@@ -206,6 +209,11 @@ namespace service
                 return epjs_url_path_regex_;
             }
 
+            std::vector<std::string> get_epjs_url_path_regex_str() const
+            {
+                return epjs_url_path_regex_str_;
+            }
+
             std::vector<ep_mime_type> get_mime_types() const
             {
                 return mime_types_;
@@ -230,6 +238,7 @@ namespace service
             ep_verbosity_type                         verbosity_;
             ep_debug_level_type                       debug_level_;
             std::vector<std::regex>                   epjs_url_path_regex_;
+            std::vector<std::string>                   epjs_url_path_regex_str_;
             std::vector<ep_mime_type>                 mime_types_;
             boost::optional<std::vector<std::string>> remainder_args_;
             boost::optional<boost::filesystem::path>  out_file_;
@@ -253,6 +262,8 @@ namespace service
                 std::regex reg1(EPCONFIG_DEFAULT_EPJS_URL_PATH_REGEX_01);
                 std::regex reg2(EPCONFIG_DEFAULT_EPJS_URL_PATH_REGEX_02);
                 epjs_url_path_regex_ = std::vector<std::regex>{reg1, reg2};
+                epjs_url_path_regex_str_ = {EPCONFIG_DEFAULT_EPJS_URL_PATH_REGEX_01,
+                                            EPCONFIG_DEFAULT_EPJS_URL_PATH_REGEX_02};
 
                 out_file_     = boost::none;
                 log_file_     = boost::none;
@@ -330,6 +341,7 @@ namespace service
                 if (clear)
                 {
                     epjs_url_path_regex_.clear();
+                    epjs_url_path_regex_str_.clear();
                 }
 
                 for (auto s : cses)
@@ -337,6 +349,7 @@ namespace service
                     try
                     {
                         epjs_url_path_regex_.emplace_back(s);
+                        epjs_url_path_regex_str_.push_back(s);
                     }
                     catch (std::regex_error& ex)
                     {
@@ -347,11 +360,6 @@ namespace service
                         throw std::logic_error(errMsg);
                     }
                 }
-            }
-
-            void set_epjs_url_path_regex(std::vector<std::regex> cses)
-            {
-                epjs_url_path_regex_ = cses;
             }
 
             void set_mime_types(std::vector<ep_mime_type> val)

@@ -34,7 +34,8 @@ namespace easyprospect
                     boost::optional<boost::filesystem::path> pf,
                     boost::optional<boost::filesystem::path> pd,
                     boost::optional<std::vector<boost::filesystem::path>> sf) 
-                        :easyprospect_config_core( mse, dh, dv, verb, db, remArgs, of, 
+                        :
+                  easyprospect_config_core(mse, dh, dv, verb, db, remArgs, of, 
                             lf, af, cf, pf, pd), source_files_(sf)
                 { };
 

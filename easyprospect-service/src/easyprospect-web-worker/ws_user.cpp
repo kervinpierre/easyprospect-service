@@ -7,7 +7,6 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include "easyprospect-service-shared/externs.h"
 #include "easyprospect-service-shared/rpc.hpp"
 #include "easyprospect-service-shared/server.h"
 #include "easyprospect-service-shared/service.hpp"
@@ -17,6 +16,7 @@
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <boost/beast/websocket/stream.hpp>
 #include <boost/thread.hpp>
+#include <easyprospect-service-shared/externs.h>
 #include <easyprospect-service-shared/listener.h>
 #include <easyprospect-service-shared/message.hpp>
 #include <easyprospect-service-shared/uid.hpp>
@@ -646,6 +646,13 @@ namespace service
                     this->channel_list_->dispatch(r, u, s);
                 });
 
+                // process ebjs
+                set_epjs_process_req_impl([this](std::string js_path)
+                {
+                    std::string res = "";
+                    return res;
+                });
+
                 // TODO: KP. Move URL parsing to some place needed.
                 // Base
                 // UriUriW baseUri;
@@ -838,7 +845,7 @@ namespace service
 
             //--------------------------------------------------------------------------
 
-            const boost::optional<boost::filesystem::path> doc_root() const override
+            const boost::optional<boost::filesystem::path> get_doc_root() const override
             {
                 return cfg_.get_webroot_dir();
             }
@@ -846,6 +853,11 @@ namespace service
             channel_list_impl& channel_list()
             {
                 return *channel_list_;
+            }
+
+            std::vector<std::regex> get_epjs_url_path_regex() const override
+            {
+                return cfg_.get_epjs_url_path_regex();
             }
         };
 
@@ -999,9 +1011,11 @@ namespace service
             endpoint_type                  ep,
             websocket::request_type        req)
         {
-            // auto sp = boost::make_shared<shared::ssl_ws_session_impl>(srv.doc_root(), std::move(stream), ep);
-            auto sp = boost::make_shared<shared::ws_session_t>(srv.doc_root(), std::move(stream), ep);
+            // auto sp = boost::make_shared<shared::ssl_ws_session_impl>(srv.get_doc_root(), std::move(stream), ep);
+            auto sp = boost::make_shared<shared::ws_session_t>(srv.get_doc_root(), std::move(stream), ep);
             sp->set_dispatch_impl(srv.get_dispatch_impl());
+            sp->set_epjs_process_req_impl(srv.get_epjs_process_req_impl());
+
             sp->set_wrapper(sp);
             sp->run(std::move(req));
         }

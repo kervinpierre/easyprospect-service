@@ -43,6 +43,14 @@ namespace service
             }
         }
 
+        void ws_session_t::set_epjs_process_req_impl(std::function <std::string(std::string)> val)
+        {
+            if (plain_ptr_)
+            {
+                plain_ptr_->set_epjs_process_req_impl(val);
+            }
+        }
+
         void ws_session_t::set_wrapper(boost::shared_ptr<ws_session_t> w)
         {
             if (plain_ptr_)
@@ -65,8 +73,11 @@ namespace service
             http_session_base(srv, lst, ep, std::move(storage)),
             stream_(std::move(stream))
         {
-            doc_root = srv.doc_root();
+
+            doc_root_ = srv.get_doc_root();
+            epjs_exts_ = srv.get_epjs_url_path_regex();
             set_dispatch_impl(srv.get_dispatch_impl());
+            set_epjs_process_req_impl( srv.get_epjs_process_req_impl());
         }
 
         ssl_http_session_impl::ssl_http_session_impl(
@@ -79,7 +90,7 @@ namespace service
             http_session_base(srv, lst, ep, std::move(storage)),
             stream_(std::move(stream), ctx)
         {
-            doc_root = srv.doc_root();
+            doc_root_ = srv.get_doc_root();
         }
 
         void ws_session_t::send(nlohmann::json const& jv)
@@ -97,6 +108,7 @@ namespace service
                 plain_ptr_->send(m);
             }
         }
+
 
     } // namespace shared
 } // namespace service

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "easyprospect-service-shared/user_base.hpp"
-#include "session.hpp"
 #include <easyprospect-config/easyprospect-config-service.h>
+
+#include <easyprospect-service-shared/user_base.hpp>
+#include <easyprospect-service-shared/session.hpp>
 #include <easyprospect-service-shared/rpc.hpp>
 #include <easyprospect-service-shared/types.hpp>
 
@@ -40,7 +41,9 @@ namespace service
             //
             //--------------------------------------------------------------------------
 
-            virtual const boost::optional<boost::filesystem::path> doc_root() const = 0;
+            virtual const boost::optional<boost::filesystem::path> get_doc_root() const = 0;
+
+            virtual std::vector<std::regex> get_epjs_url_path_regex() const = 0;
 
             //--------------------------------------------------------------------------
 
@@ -65,6 +68,7 @@ namespace service
         class application_impl_base : public server
         {
             std::function<void(rpc_call&, user&, ws_session_t &)> dispatch_impl_;
+            std::function<std::string(std::string)>              epjs_process_req_impl_;
 
           public:
             net::io_context ioc_;
@@ -83,9 +87,18 @@ namespace service
             {
                 return dispatch_impl_;
             }
+
             void set_dispatch_impl(std::function<void(rpc_call&, user&, ws_session_t &)> val)
             {
                 dispatch_impl_ = val;
+            }
+            std::function<std::string(std::string)> get_epjs_process_req_impl() const
+            {
+                return epjs_process_req_impl_;
+            }
+            void set_epjs_process_req_impl(std::function<std::string(std::string)> val)
+            {
+                epjs_process_req_impl_ = val;
             }
         };
 

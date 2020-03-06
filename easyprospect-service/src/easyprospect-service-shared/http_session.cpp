@@ -124,8 +124,8 @@ namespace service
             //       run_ws_session_plain_func(srv, lst, std::move(str), ep, req);
 
             // 2nd
-            //auto sp = boost::make_shared<plain_ws_session_impl>(doc_root, std::move(str), ep);
-            //sp->run(std::move(req));
+            // auto sp = boost::make_shared<plain_ws_session_impl>(doc_root_, std::move(str), ep);
+            // sp->run(std::move(req));
 
             // 3rd
             std::stringstream sstr;
@@ -134,9 +134,10 @@ namespace service
 
             spdlog::debug(sstr.str());
 
-            // auto sp = boost::make_shared<shared::plain_ws_session_impl>(srv.doc_root(), std::move(stream), ep);
+            // auto sp = boost::make_shared<shared::plain_ws_session_impl>(srv.get_doc_root(), std::move(stream), ep);
             auto sp = boost::make_shared<shared::ws_session_t>(doc_root, std::move(str), ep);
             sp->set_dispatch_impl(get_dispatch_impl());
+            sp->set_epjs_process_req_impl(get_epjs_process_req_impl());
             sp->set_wrapper(sp);
             sp->run(std::move(req));
         }
@@ -148,6 +149,8 @@ namespace service
         template <class Body, class Allocator, class Send>
         void handle_request(
             boost::optional<boost::filesystem::path>             doc_root,
+            std::vector<std::regex>                              epjs_extensions,
+            std::function<std::string(std::string)>              epjs_process_req_impl_,
             http::request<Body, http::basic_fields<Allocator>>&& req,
             Send&&                                               send)
         {
@@ -205,46 +208,78 @@ namespace service
             if (req.target().back() == '/')
                 curr_path.append("index.html");
 
-            // TODO: KP. Instead of opening a file, run it through a V8 parser callback then return the content.
-
-            // TODO: KP. execute injected callback function here ( which calls V8 )
-            
-            // Attempt to open the file
-            beast::error_code           ec;
-            http::file_body::value_type body;
-            body.open(curr_path.generic_string().c_str(), beast::file_mode::scan, ec);
-
-            // Handle the case where the file doesn't exist
-            if (ec == boost::system::errc::no_such_file_or_directory)
-                return send(not_found(req.target()));
-
-            // Handle an unknown error
-            if (ec)
-                return send(server_error(ec.message()));
-
-            // Cache the size since we need it after the move
-            auto const size = body.size();
-
-            // Respond to HEAD request
-            if (req.method() == http::verb::head)
+            std::string curr_path_str = curr_path.generic_string().c_str();
+            bool        epjs_process  = false;
+            for (auto r : epjs_extensions)
             {
-                http::response<http::empty_body> res{http::status::ok, req.version()};
+                std::smatch sm;
+                if (std::regex_match(curr_path_str, sm, r))
+                {
+                    epjs_process = true;
+                    break;
+                }
+            }
+
+            beast::error_code ec;
+
+            if (epjs_process)
+            {
+                // TODO: KP. Instead of opening a file, run it through a V8 parser callback then return the content.
+
+                // TODO: KP. execute injected callback function here ( which calls V8 )
+
+                std::string output = epjs_process_req_impl_(curr_path_str);
+
+                http::response<http::string_body> res;
+                res.version(req.version());
+                res.result(http::status::ok);
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                // res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                // res.content_length(size);
+                res.keep_alive(req.keep_alive());
+                res.body() = output;
+                res.prepare_payload();
+
+                return send(std::move(res));
+            }
+            else
+            {
+                // Attempt to open the file
+                http::file_body::value_type body;
+                body.open(curr_path_str.c_str(), beast::file_mode::scan, ec);
+
+                // Handle the case where the file doesn't exist
+                if (ec == boost::system::errc::no_such_file_or_directory)
+                    return send(not_found(req.target()));
+
+                // Handle an unknown error
+                if (ec)
+                    return send(server_error(ec.message()));
+
+                // Cache the size since we need it after the move
+                auto const size = body.size();
+
+                // Respond to HEAD request
+                if (req.method() == http::verb::head)
+                {
+                    http::response<http::empty_body> res{http::status::ok, req.version()};
+                    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                    res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                    res.content_length(size);
+                    res.keep_alive(req.keep_alive());
+                    return send(std::move(res));
+                }
+
+                // Respond to GET request
+                http::response<http::file_body> res{std::piecewise_construct,
+                                                    std::make_tuple(std::move(body)),
+                                                    std::make_tuple(http::status::ok, req.version())};
                 res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
                 res.set(http::field::content_type, mime_type(curr_path.generic_string()));
                 res.content_length(size);
                 res.keep_alive(req.keep_alive());
                 return send(std::move(res));
             }
-
-            // Respond to GET request
-            http::response<http::file_body> res{std::piecewise_construct,
-                                                std::make_tuple(std::move(body)),
-                                                std::make_tuple(http::status::ok, req.version())};
-            res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-            res.set(http::field::content_type, mime_type(curr_path.generic_string()));
-            res.content_length(size);
-            res.keep_alive(req.keep_alive());
-            return send(std::move(res));
         }
 
         using ep_session_ssl_function_type = std::function<void(

@@ -7,12 +7,6 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include "easyprospect-service-shared/server.h"
-
-#include <easyprospect-config/easyprospect-config-service.h>
-#include <easyprospect-config/logging.h>
-#include <uriparser/Uri.h>
-
 #include <atomic>
 #include <boost/asio/basic_signal_set.hpp>
 #include <boost/asio/basic_waitable_timer.hpp>
@@ -24,9 +18,14 @@
 #include <thread>
 #include <vector>
 
+#include <easyprospect-service-shared/server.h>
+
 #include "easyprospect-service-shared/externs.h"
 #include "easyprospect-service-shared/service.hpp"
 #include "easyprospect-service-shared/utility.hpp"
+#include <easyprospect-config/easyprospect-config-service.h>
+#include <easyprospect-config/logging.h>
+#include <uriparser/Uri.h>
 
 namespace easyprospect
 {
@@ -265,9 +264,14 @@ namespace service
 
             //--------------------------------------------------------------------------
 
-            const boost::optional<boost::filesystem::path> doc_root() const override
+            const boost::optional<boost::filesystem::path> get_doc_root() const override
             {
                 return cfg_.get_webroot_dir();
+            }
+
+            std::vector<std::regex> get_epjs_url_path_regex() const override
+            {
+                return cfg_.get_epjs_url_path_regex();
             }
 
             // void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t&

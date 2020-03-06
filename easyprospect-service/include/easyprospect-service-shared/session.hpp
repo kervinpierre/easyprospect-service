@@ -17,6 +17,7 @@
 #include <boost/asio/yield.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <boost/beast/websocket/stream.hpp>
+//#include <easyprospect-service-shared/externs.h>
 #include <easyprospect-service-shared/listener.h>
 #include <easyprospect-service-shared/rpc.hpp>
 #include <easyprospect-service-shared/server.h>
@@ -67,11 +68,12 @@ namespace service
         class ws_session_base : public asio::coroutine, public shared::session
         {
           protected:
-            endpoint_type                ep_;
-            flat_storage                 msg_;
-            std::vector<shared::message> mq_;
+            endpoint_type                                                ep_;
+            flat_storage                                                 msg_;
+            std::vector<shared::message>                                 mq_;
             boost::shared_ptr<ws_session_t>                              wrapper_;
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
+            std::function<std::string(std::string)>                      epjs_process_req_impl_;
 
           public:
             ws_session_base(endpoint_type ep) : ep_(ep)
@@ -138,6 +140,16 @@ namespace service
             {
                 dispatch_impl_ = val;
             }
+
+            void set_epjs_process_req_impl(std::function<std::string(std::string)> val)
+            {
+                epjs_process_req_impl_ = val;
+            }
+
+            std::function<std::string(std::string)> get_epjs_process_req_impl() const
+            {
+                return epjs_process_req_impl_;
+            }
         };
 
         // class ws_session_abstract_t
@@ -155,13 +167,15 @@ namespace service
         class http_session_base : public asio::coroutine, public session
         {
           protected:
-            application_impl_base&                                       srv_;
-            listener&                                                    lst_;
-            endpoint_type                                                ep_;
-            flat_storage                                                 storage_;
-            boost::optional<boost::filesystem::path>                     doc_root;
-            std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
+            application_impl_base&                   srv_;
+            listener&                                lst_;
+            endpoint_type                            ep_;
+            flat_storage                             storage_;
+            std::vector<std::regex>                  epjs_exts_;
+            boost::optional<boost::filesystem::path> doc_root_;
 
+            std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
+            std::function<std::string(std::string)>                      epjs_process_req_impl_;
             // ep_session_ssl_function_type run_ws_session_ssl_func;
             //  ep_session_plain_function_type run_ws_session_plain_func;
 
@@ -268,6 +282,14 @@ namespace service
             void set_dispatch_impl(std::function<void(rpc_call&, shared::user&, ws_session_t&)> val)
             {
                 dispatch_impl_ = val;
+            }
+            std::function<std::string(std::string)> get_epjs_process_req_impl() const
+            {
+                return epjs_process_req_impl_;
+            }
+            void set_epjs_process_req_impl(std::function<std::string(std::string)> val)
+            {
+                epjs_process_req_impl_ = val;
             }
         };
 
@@ -394,6 +416,7 @@ namespace service
             void run(websocket::request_type req);
 
             void set_dispatch_impl(std::function<void(rpc_call&, shared::user&, ws_session_t&)> val);
+            void set_epjs_process_req_impl(std::function<std::string(std::string)> val);
 
             void set_wrapper(boost::shared_ptr<ws_session_t>);
 
@@ -717,9 +740,12 @@ namespace service
             lst_.erase(this);
         }
 
+        
         template <class Body, class Allocator, class Send>
         void handle_request(
             boost::optional<boost::filesystem::path>             doc_root,
+            std::vector<std::regex>                              epjs_exts,
+            std::function<std::string(std::string)>              epjs_process_req_impl,
             http::request<Body, http::basic_fields<Allocator>>&& req,
             Send&&                                               send);
 
@@ -768,7 +794,7 @@ namespace service
                     // EPSRV run_ws_session simply forwards to workers
                     // WORKER run_ws_session does some actual work
 
-                    return this->run_ws_session(doc_root, lst_, std::move(impl()->stream()), ep_, std::move(req));
+                    return this->run_ws_session(doc_root_, lst_, std::move(impl()->stream()), ep_, std::move(req));
 
                     // return run_ws_session(
                     //    srv_, lst_,
@@ -776,9 +802,8 @@ namespace service
                     //    ep_,
                     //    std::move(req));
                 }
-
                 // Send the response
-                yield handle_request(doc_root, pr_->release(), send_lambda{*this});
+                yield handle_request(doc_root_, epjs_exts_, epjs_process_req_impl_, pr_->release(), send_lambda{*this});
 
                 // Handle the error, if any
                 if (ec)

@@ -4,12 +4,14 @@
 
 //#include <easyprospect-service-shared/message.hpp>
 #include <boost/asio/coroutine.hpp>
+#include <boost/asio/ip/address.hpp>
+#include <boost/asio/ssl/context.hpp>
+
 #include <easyprospect-config/easyprospect-config-service.h>
 //#include <easyprospect-service-shared/session.hpp>
 #include "service.hpp"
-#include "types.hpp"
-#include <boost/asio/ip/address.hpp>
-#include <boost/asio/ssl/context.hpp>
+//#include "types.hpp"
+
 #include <easyprospect-service-shared/session.hpp>
 
 //#include <easyprospect-service-shared/types.hpp>

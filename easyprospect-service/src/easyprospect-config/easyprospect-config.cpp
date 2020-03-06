@@ -4,9 +4,6 @@
 #include <boost/convert/stream.hpp>
 #include <boost/tokenizer.hpp>
 
-//#include <boost/property_tree/ptree.hpp>
-//#include <boost/property_tree/json_parser.hpp>
-
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <regex>
@@ -236,6 +233,7 @@ std::unique_ptr<easyprospect_config_core> easyprospect_config_core_builder::to_c
         debug_level_,
         remainder_args_,
         epjs_url_path_regex_,
+        epjs_url_path_regex_str_,
         mime_types_,
         out_file_,
         log_file_,
@@ -426,6 +424,17 @@ std::string easyprospect_config_core::str()
         for (auto arg : *rargs)
         {
             sstr << "'" << arg << "', ";
+        }
+    }
+
+    sstr << std::endl << "epjs extensions\t: ";
+
+    auto epjsexts = get_epjs_url_path_regex_str();
+    if (!epjsexts.empty())
+    {
+        for (auto ext : epjsexts)
+        {
+            sstr << "'" << ext << "', ";
         }
     }
 

@@ -164,7 +164,10 @@ easyprospect_config_service_core_builder::to_config()
     easyprospect_config_service_core_builder builder;
      
     easyprospect_config_service_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_,
-        display_version_, worker_, worker_exe_use_path_, num_threads_, num_workers_, worker_args_, verbosity_,debug_level_, remainder_args_,out_file_,
+        display_version_, worker_, worker_exe_use_path_, num_threads_, num_workers_, worker_args_, verbosity_,debug_level_, remainder_args_,
+        epjs_url_path_regex_, epjs_url_path_regex_str_,
+        mime_types_,
+        out_file_,
         log_file_,arg_file_,cnf_file_,pid_file_,pid_dir_path_, webroot_dir_, worker_conf_, worker_exe_, listen_file_,
         listen_dir_path_, listeners_);
 

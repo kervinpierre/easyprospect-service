@@ -10,6 +10,7 @@
 #pragma once
 
 #include "config.hpp"
+#include <boost/optional.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/string.hpp>
 #include <stdexcept>

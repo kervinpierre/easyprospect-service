@@ -1,21 +1,21 @@
 #include <iostream>
 
+//#include <boost/beast/core.hpp>
 #include <boost/config.hpp>
-#include <boost/beast/core.hpp>
-#include <easyprospect-web-worker/server.h>
-#include <easyprospect-config/easyprospect-config-service.h>
-
 #include <easyprospect-config/logging.h>
+#include <easyprospect-config/easyprospect-config-service.h>
+#include <easyprospect-web-worker/server.h>
 
-#ifdef BOOST_MSVC
-# ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
-#  define WIN32_LEAN_AND_MEAN
-#  include <windows.h>
-#  undef WIN32_LEAN_AND_MEAN
-# else
-#  include <windows.h>
-# endif
-#endif
+
+//#ifdef BOOST_MSVC
+//#ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
+//#define WIN32_LEAN_AND_MEAN
+//#include <windows.h>
+//#undef WIN32_LEAN_AND_MEAN
+//#else
+//#include <windows.h>
+//#endif
+//#endif
 
 //------------------------------------------------------------------------------
 
@@ -29,17 +29,14 @@
 
 int main(int argc, char* argv[])
 {
-    easyprospect::service::config
-         ::easyprospect_config_service_shell shell;
+    easyprospect::service::config ::easyprospect_config_service_shell       shell;
     easyprospect::service::config::easyprospect_config_service_core_builder builder;
 
     try
     {
-        builder = easyprospect::service::config
-            ::easyprospect_config_service_shell
-            ::init_args(argc, argv);
+        builder = easyprospect::service::config ::easyprospect_config_service_shell ::init_args(argc, argv);
     }
-    catch (std::logic_error &ex)
+    catch (std::logic_error& ex)
     {
         return 1;
     }
@@ -50,8 +47,7 @@ int main(int argc, char* argv[])
     {
         std::ostringstream disStr{};
 
-        disStr << easyprospect::service::config
-            ::easyprospect_config_service_shell::get_description();
+        disStr << easyprospect::service::config ::easyprospect_config_service_shell::get_description();
         disStr << std::endl << builder.get_help_str() << std::endl;
 
         std::cout << disStr.str();
@@ -76,9 +72,9 @@ int main(int argc, char* argv[])
         std::string logFileName = logfile->generic_string();
 
         auto file_sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(logFileName, true);
-        //file_sink->set_level()
+        // file_sink->set_level()
 
-        spdlog::sinks_init_list sink_list = { file_sink, console_sink };
+        spdlog::sinks_init_list sink_list = {file_sink, console_sink};
 
         main_logger = std::make_shared<spdlog::logger>("", sink_list.begin(), sink_list.end());
     }
@@ -130,14 +126,12 @@ int main(int argc, char* argv[])
     std::stringstream sstr;
 
     sstr << "\nexe: '" << boost::filesystem::system_complete(argv[0]) << std::endl
-        << "cwd: '" << boost::filesystem::current_path() << std::endl;
+         << "cwd: '" << boost::filesystem::current_path() << std::endl;
 
     spdlog::debug(sstr.str());
 
     // Create the server
-    beast::error_code ec;
-    auto srv = easyprospect::service::web_worker::make_server(
-        res);
+    auto srv = easyprospect::service::web_worker::make_server(res);
     if (!srv)
         return EXIT_FAILURE;
 

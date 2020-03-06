@@ -1,6 +1,5 @@
 #pragma once
-#include <spdlog/spdlog.h>
-#include "easyprospect-service-shared/server.h"
+#include <easyprospect-service-shared/server.h>
 
 namespace easyprospect
 {
