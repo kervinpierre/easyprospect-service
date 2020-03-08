@@ -20,6 +20,7 @@
 #include <easyprospect-service-shared/listener.h>
 #include <easyprospect-service-shared/message.hpp>
 #include <easyprospect-service-shared/uid.hpp>
+#include <easyprospect-v8/easyprospect-v8.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <vector>
@@ -647,10 +648,49 @@ namespace service
                 });
 
                 // process ebjs
-                set_epjs_process_req_impl([this](std::string js_path)
+                set_epjs_process_req_impl([this](std::string resolved_path, std::string doc_root, std::string target)
                 {
-                    std::string res = "";
-                    return res;
+                    // TODO: KP. Do things with the path
+
+                    std::stringstream ss;
+
+                    ss << "set_epjs_process_req_impl()" << std::endl
+                       << "resolved_path\t:" << resolved_path << std::endl
+                       << "doc_root\t:" << doc_root << std::endl
+                       << "target\t:" << target << std::endl;
+
+                    spdlog::debug(ss.str());
+
+                    if (!boost::filesystem::exists(resolved_path))
+                    {
+                        spdlog::info("resolved_path '{}' does not exist", resolved_path);
+
+                        // TODO: KP. Route the path to a real file or a buffer
+                    }
+
+                    std::ifstream     t(resolved_path);
+                    std::stringstream script_buff;
+                    script_buff << t.rdbuf();
+
+                    std::shared_ptr<Platform> platform = platform::NewDefaultPlatform();
+                    std::unique_ptr<ep_v8::api::easyprospect_v8> ep =
+                        ep_v8::api::easyprospect_v8::create<ep_v8::api::easyprospect_v8>(platform);
+
+                    ep->init();
+
+                    int          r  = 0;
+                    unsigned int id = 0;
+                    if ((r = ep->create_context(id)) != Success)
+                        throw std::logic_error("Context error");
+
+                    // Exception thrown on error
+                    auto res = ep->run_javascript(id, script_buff.str());
+
+                    ep->remove_context(id);
+
+                    std::string res2 = res->ToString();
+
+                    return res2;
                 });
 
                 // TODO: KP. Move URL parsing to some place needed.

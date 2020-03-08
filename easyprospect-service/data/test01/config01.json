@@ -1,9 +1,9 @@
 {
-    "epjs_url_path_regex": [ ".*\\.epjs$", ".*\\.epj$" ],
+    "epjs_url_path_regex": [ ".*\\.epjs$", ".*\\.epj$", ".*\\.ep\\.js$" ],
 
     "mime_types": [
         {
-            "ext": [ "epjs", "epj" ],
+            "ext": [ "epjs", "epj", "ep.js" ],
             "type": "application/x-epjs"
         }
     ]

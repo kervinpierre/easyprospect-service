@@ -34,5 +34,8 @@
     <None Include="data\test01\config01.json">
       <Filter>Work Files</Filter>
     </None>
+    <None Include="data\test01\wwwroot\test001.ep.js">
+      <Filter>Work Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

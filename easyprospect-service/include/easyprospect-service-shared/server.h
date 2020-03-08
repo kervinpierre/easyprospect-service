@@ -18,6 +18,9 @@ namespace service
         class user;
         class ws_session_t;
 
+        using epjs_process_req_impl_type
+        = std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;
+
         /** An instance of the lounge server.
          */
         class server
@@ -68,7 +71,8 @@ namespace service
         class application_impl_base : public server
         {
             std::function<void(rpc_call&, user&, ws_session_t &)> dispatch_impl_;
-            std::function<std::string(std::string)>              epjs_process_req_impl_;
+            std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>
+                epjs_process_req_impl_;
 
           public:
             net::io_context ioc_;
@@ -92,11 +96,12 @@ namespace service
             {
                 dispatch_impl_ = val;
             }
-            std::function<std::string(std::string)> get_epjs_process_req_impl() const
+            epjs_process_req_impl_type
+            get_epjs_process_req_impl() const
             {
                 return epjs_process_req_impl_;
             }
-            void set_epjs_process_req_impl(std::function<std::string(std::string)> val)
+            void set_epjs_process_req_impl(epjs_process_req_impl_type val)
             {
                 epjs_process_req_impl_ = val;
             }

@@ -38,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\test01\config01.json" />
+    <None Include="data\test01\wwwroot\test001.ep.js" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

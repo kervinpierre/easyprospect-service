@@ -150,7 +150,8 @@ namespace service
         void handle_request(
             boost::optional<boost::filesystem::path>             doc_root,
             std::vector<std::regex>                              epjs_extensions,
-            std::function<std::string(std::string)>              epjs_process_req_impl_,
+            std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>
+                                                                 epjs_process_req_impl_,
             http::request<Body, http::basic_fields<Allocator>>&& req,
             Send&&                                               send)
         {
@@ -228,7 +229,7 @@ namespace service
 
                 // TODO: KP. execute injected callback function here ( which calls V8 )
 
-                std::string output = epjs_process_req_impl_(curr_path_str);
+                std::string output = epjs_process_req_impl_(curr_path_str, doc_root->generic_string(), std::string(req.target()));
 
                 http::response<http::string_body> res;
                 res.version(req.version());

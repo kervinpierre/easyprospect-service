@@ -43,7 +43,7 @@ namespace service
             }
         }
 
-        void ws_session_t::set_epjs_process_req_impl(std::function <std::string(std::string)> val)
+        void ws_session_t::set_epjs_process_req_impl(epjs_process_req_impl_type val)
         {
             if (plain_ptr_)
             {
