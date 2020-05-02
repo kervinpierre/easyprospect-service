@@ -51,6 +51,9 @@
     <ClInclude Include="include\easyprospect-service-shared\externs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\easyprospect-service-shared\easyprospect-http-request.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-service-shared.cpp">
@@ -72,6 +75,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\easyprospect-service-shared\session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-service-shared\easyprospect-http-request.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

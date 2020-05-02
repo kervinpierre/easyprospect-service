@@ -229,7 +229,18 @@ namespace service
 
                 // TODO: KP. execute injected callback function here ( which calls V8 )
 
-                std::string output = epjs_process_req_impl_(curr_path_str, doc_root->generic_string(), std::string(req.target()));
+                std::string output;
+
+                // Call the injected implementation here
+                if ( epjs_process_req_impl_ != nullptr )
+                {
+                    output = epjs_process_req_impl_(curr_path_str, doc_root->generic_string(), std::string(req.target()));
+                }
+                else
+                {
+                    // Missing implementation
+                    throw std::logic_error("Missing epjs_process_req");
+                }
 
                 http::response<http::string_body> res;
                 res.version(req.version());

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "config.hpp"
+#include <easyprospect-service-shared/config.hpp>
 #include <boost/optional.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/string.hpp>

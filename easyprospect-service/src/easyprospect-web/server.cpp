@@ -20,9 +20,9 @@
 
 #include <easyprospect-service-shared/server.h>
 
-#include "easyprospect-service-shared/externs.h"
-#include "easyprospect-service-shared/service.hpp"
-#include "easyprospect-service-shared/utility.hpp"
+#include <easyprospect-service-shared/externs.h>
+#include <easyprospect-service-shared/service.hpp>
+#include <easyprospect-service-shared/utility.hpp>
 #include <easyprospect-config/easyprospect-config-service.h>
 #include <easyprospect-config/logging.h>
 #include <uriparser/Uri.h>
@@ -120,6 +120,8 @@ namespace service
                     // while (c.running())
                     //    do_some_stuff();
 
+                    // TODO: KP. Pass arguments to the started worker
+                    
                     // c.wait(); //wait for the process to exit
                     // int result = c.exit_code();
                     // pt.emplace_back(boost::process::search_path("epwebworker"), "--conf",

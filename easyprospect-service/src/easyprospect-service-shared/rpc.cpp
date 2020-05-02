@@ -7,7 +7,7 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#include <easyprospect-service-shared/session.hpp>
+//#include <easyprospect-service-shared/session.hpp>
 #include <easyprospect-service-shared/rpc.hpp>
 #include <boost/beast/core/error.hpp>
 #include <type_traits>
@@ -47,7 +47,7 @@ namespace
             case rpc_code::expected_string_version: return
                 "Expected string version in JSON-RPC request";
             case rpc_code::unknown_version: return
-                "Uknown version in JSON-RPC request";
+                "Unknown version in JSON-RPC request";
             case rpc_code::invalid_null_id: return
                 "Invalid null id in JSON-RPC request";
             case rpc_code::expected_strnum_id: return

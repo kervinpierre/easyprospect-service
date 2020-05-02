@@ -648,6 +648,7 @@ namespace service
                 });
 
                 // process ebjs
+                // TODO: KP. Pass in full URL including parameters, and all headers, including cookies.  Parsed or unparsed.
                 set_epjs_process_req_impl([this](std::string resolved_path, std::string doc_root, std::string target)
                 {
                     // TODO: KP. Do things with the path

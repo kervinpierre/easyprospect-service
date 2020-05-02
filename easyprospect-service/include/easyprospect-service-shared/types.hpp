@@ -7,13 +7,16 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#ifndef LOUNGE_TYPES_HPP
-#define LOUNGE_TYPES_HPP
+#pragma once
 
-#include "config.hpp"
+#include <easyprospect-service-shared/config.hpp>
+
 #include <boost/beast/core/basic_stream.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
+#include <boost/beast/http/parser.hpp>
+#include <boost/beast/http/string_body.hpp>
+
 #include <boost/asio/basic_waitable_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/strand.hpp>
@@ -59,4 +62,9 @@ using flat_storage = beast::flat_buffer;
 /// The type of network endpoint
 using endpoint_type = tcp::endpoint;
 
-#endif
+
+using epjs_process_req_impl_type =
+    std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;
+
+using run_proxy_session_impl_type =
+    std::function<std::string(http::request_parser<http::string_body>&&, net::const_buffer, beast::error_code&)>;

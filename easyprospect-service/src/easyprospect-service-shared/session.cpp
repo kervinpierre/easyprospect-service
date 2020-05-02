@@ -1,7 +1,7 @@
 
-#include <easyprospect-service-shared/message.hpp>
 #include <easyprospect-service-shared/session.hpp>
 #include <spdlog/spdlog.h>
+
 using namespace easyprospect::service::shared;
 
 namespace easyprospect
@@ -91,6 +91,30 @@ namespace service
             stream_(std::move(stream), ctx)
         {
             doc_root_ = srv.get_doc_root();
+        }
+
+        void ep_make_req(http::request_parser<http::string_body>& pr)
+        {
+            std::stringstream out;
+
+            out << pr.get().base();
+            spdlog::debug(out.str());
+
+            // std::stringstream rawStr;
+            // rawStr << pr;
+
+            boost::optional<uint64_t> cl;
+
+            auto rq = pr.get();
+            
+            rq.content_length(cl);
+            auto rt = rq[http::field::content_type];
+
+            auto b = rq.body();
+
+            auto u = rq.target();
+
+            spdlog::debug(b);
         }
 
         void ws_session_t::send(nlohmann::json const& jv)

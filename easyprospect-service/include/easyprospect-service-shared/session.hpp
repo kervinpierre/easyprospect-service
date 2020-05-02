@@ -9,14 +9,20 @@
 
 #pragma once
 
-#include "config.hpp"
-#include "message.hpp"
-#include "types.hpp"
-#include "utility.hpp"
+// TODO: KP. Clean up these headers, there are too many header-included files
+
+#include <easyprospect-service-shared/config.hpp>
+#include <easyprospect-service-shared/message.hpp>
+#include <easyprospect-service-shared/utility.hpp>
+
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/yield.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <boost/beast/websocket/stream.hpp>
+
+#include <easyprospect-service-shared/types.hpp>
+
+
 //#include <easyprospect-service-shared/externs.h>
 #include <easyprospect-service-shared/listener.h>
 #include <easyprospect-service-shared/rpc.hpp>
@@ -39,6 +45,11 @@ namespace service
 
         using epjs_process_req_impl_type =
             std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;
+
+        //using run_proxy_session_impl_type = std::function<std::string(
+        //    boost::optional<http::request_parser<http::string_body>> pr,
+        //    net::const_buffer                                        buffer,
+        //    beast::error_code&                                       ec)>;
 
         class session : public boost::enable_shared_from
         {
@@ -178,7 +189,9 @@ namespace service
             boost::optional<boost::filesystem::path> doc_root_;
 
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
-            epjs_process_req_impl_type                      epjs_process_req_impl_;
+            epjs_process_req_impl_type                                   epjs_process_req_impl_;
+            run_proxy_session_impl_type                run_proxy_session_impl_;
+
             // ep_session_ssl_function_type run_ws_session_ssl_func;
             //  ep_session_plain_function_type run_ws_session_plain_func;
 
@@ -247,6 +260,7 @@ namespace service
             //
             //--------------------------------------------------------------------------
 
+            // TODO: KP. Replace with a generic lambda
             // We only require C++11, this helper is
             // the equivalent of a C++14 generic lambda.
             struct send_lambda
@@ -486,6 +500,13 @@ namespace service
             void send(shared::message m) override
             {
                 throw std::logic_error("The method or operation is not implemented.");
+            }
+
+            template <class MutableBufferSequence, class ReadHandler>
+            void async_read_some(MutableBufferSequence const& buffers, ReadHandler&& handler)
+            {
+              //  stream_.async_read_some(
+                //    std::forward<const MutableBufferSequence>(buffers), std::forward<ReadHandler>(handler));
             }
         };
 
@@ -754,6 +775,8 @@ namespace service
             http::request<Body, http::basic_fields<Allocator>>&& req,
             Send&&                                               send);
 
+        void ep_make_req(http::request_parser<http::string_body>& pr);
+
         template <class Derived>
         void http_session_base<Derived>::operator()(beast::error_code ec, std::size_t bytes_transferred, bool need_eof)
         {
@@ -770,8 +793,56 @@ namespace service
                 pr_->body_limit(64 * 1024);
                 pr_->header_limit(2048);
 
-                // Read the next HTTP request
-                yield http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
+                // 1. Read from impl()->stream()
+                // 2. Save in a local buffer and also send the the Beast request parser
+                // 3. Check the parser for an arbitrary header
+                // 4. Decide to if to stop parsing the stream
+                // 5. If parsing the stream is done send all data to a selected open socket
+                // 6. continue reading impl()->stream(), and passing data directly to that open socket
+                //bool header_found = false;
+                
+                do 
+                {
+                    //auto& strm = impl()->stream();
+                    //beast::ssl_stream<stream_type> strm = impl()->stream();
+                    
+                    // TODO: KP. Assumption. "storage_" will be intelligently filled, so that the data is appended only
+                    yield impl()->stream().async_read_some(storage_.prepare(100), bind_front(this));
+                    if (ec)
+                    {
+                        spdlog::debug(ec.message());
+                    }
+                    storage_.commit(bytes_transferred);
+
+                    spdlog::debug(storage_.size());
+
+                    ec = boost::system::error_code();
+
+                    // TODO: KP. check error code
+                   // auto pr_res = pr_->put(storage_, ec);
+                    pr_->put(storage_.cdata(), ec);
+                   if (ec)
+                   {
+                       spdlog::debug(ec.message());
+                   }
+                    
+                    spdlog::debug((char*)(storage_.data().data()));
+                    spdlog::debug(storage_.capacity());
+                    spdlog::debug(storage_.size());
+
+                   // ep_make_req(*pr_);
+
+                    // TODO: KP. Check for ec code, keep in mind header may be invalid
+
+                    // TODO: KP. Check header for arbitrary header, set "header_found" boolean variable or break
+                    ;
+
+               // } while (!(pr_->is_header_done() && header_found));
+                } while (!(pr_->is_header_done()));
+
+               // // Read the next HTTP request
+               // yield http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
+
 
                 // This means they closed the connection
                 if (ec == http::error::end_of_stream)
@@ -785,6 +856,15 @@ namespace service
 
                 // TODO: KP. PROXY the HTTP request to a process here
 
+                if (run_proxy_session_impl_ != nullptr )
+                {
+                    // Call into the epsrv implementation
+                    run_proxy_session_impl_(std::move(*pr_), storage_.cdata(), ec);
+                    return;
+                }
+
+                // From here and below is really about the worker
+                
                 // See if it is a WebSocket Upgrade
                 if (websocket::is_upgrade(pr_->get()))
                 {

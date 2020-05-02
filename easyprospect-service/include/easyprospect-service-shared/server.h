@@ -2,8 +2,8 @@
 
 #include <easyprospect-config/easyprospect-config-service.h>
 
-#include <easyprospect-service-shared/user_base.hpp>
-#include <easyprospect-service-shared/session.hpp>
+//#include <easyprospect-service-shared/user_base.hpp>
+//#include <easyprospect-service-shared/session.hpp>
 #include <easyprospect-service-shared/rpc.hpp>
 #include <easyprospect-service-shared/types.hpp>
 
@@ -17,9 +17,6 @@ namespace service
         class rpc_call;
         class user;
         class ws_session_t;
-
-        using epjs_process_req_impl_type
-        = std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;
 
         /** An instance of the lounge server.
          */

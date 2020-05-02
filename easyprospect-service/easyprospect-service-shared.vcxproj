@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\easyprospect-service-shared\config.hpp" />
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-service-shared.h" />
+    <ClInclude Include="include\easyprospect-service-shared\easyprospect-http-request.h" />
     <ClInclude Include="include\easyprospect-service-shared\externs.h" />
     <ClInclude Include="include\easyprospect-service-shared\listener.h" />
     <ClInclude Include="include\easyprospect-service-shared\message.hpp" />
@@ -36,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-service-shared.cpp" />
+    <ClCompile Include="src\easyprospect-service-shared\easyprospect-http-request.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\http_session.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\listener.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\message.cpp" />

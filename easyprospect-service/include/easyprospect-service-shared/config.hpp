@@ -7,8 +7,7 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
-#ifndef LOUNGE_CONFIG_HPP
-#define LOUNGE_CONFIG_HPP
+#pragma once
 
 // This file must be included directly or indirectly in every source file.
 
@@ -39,4 +38,3 @@ using tcp = net::ip::tcp;
 // Define this on to use the system executor
 //#define LOUNGE_USE_SYSTEM_EXECUTOR
 
-#endif
