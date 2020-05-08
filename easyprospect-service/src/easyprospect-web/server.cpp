@@ -63,6 +63,41 @@ namespace service
             {
                 timer_.expires_at(never());
 
+                //set_proxy_session_impl(
+                //    [this](
+                //        http::request_parser<http::string_body>&& p,
+                //        net::const_buffer                         b,
+                //        beast::ssl_stream<stream_type>            str,
+                //        beast::error_code&                        ec)
+                //    {
+                //        std::string res;
+
+                //        std::stringstream ss;
+                //        auto              req = p.get();
+
+                //        ss << "run_proxy_session_impl() called..." << std::endl
+                //           << (char*)(b.data()) << std::endl
+                //           << std::endl
+                //           << req << std::endl;
+
+                //        spdlog::debug(ss.str());
+
+
+                //        // 1. Open socket to one of the worker processes in the process group
+                //        // 2. Write out partial stream to worker process
+                //        // 3. Continue passing data to the worker process
+                //        
+                //        return res;
+                //    });
+
+                set_send_worker_req_impl([this](shared::easyprospect_http_request req, beast::error_code& ec) {
+                    shared::easyprospect_http_request_result res;
+
+                    spdlog::debug(req.to_string());
+
+                    return res;
+                });
+
                 // TODO: KP. Move URL parsing to some place needed.
                 // Base
                 // UriUriW baseUri;

@@ -66,5 +66,6 @@ using endpoint_type = tcp::endpoint;
 using epjs_process_req_impl_type =
     std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;
 
-using run_proxy_session_impl_type =
-    std::function<std::string(http::request_parser<http::string_body>&&, net::const_buffer, beast::error_code&)>;
+
+
+

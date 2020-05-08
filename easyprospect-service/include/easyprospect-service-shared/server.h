@@ -7,6 +7,8 @@
 #include <easyprospect-service-shared/rpc.hpp>
 #include <easyprospect-service-shared/types.hpp>
 
+#include "easyprospect-http-request.h"
+
 namespace easyprospect
 {
 namespace service
@@ -17,6 +19,8 @@ namespace service
         class rpc_call;
         class user;
         class ws_session_t;
+
+        using dispatch_impl_type = std::function<void(rpc_call&, shared::user&, ws_session_t&)>;
 
         /** An instance of the lounge server.
          */
@@ -67,9 +71,9 @@ namespace service
 
         class application_impl_base : public server
         {
-            std::function<void(rpc_call&, user&, ws_session_t &)> dispatch_impl_;
-            std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>
-                epjs_process_req_impl_;
+            dispatch_impl_type          dispatch_impl_;
+            epjs_process_req_impl_type  epjs_process_req_impl_;
+            send_worker_req_impl_type  send_worker_req_impl_;
 
           public:
             net::io_context ioc_;
@@ -84,23 +88,32 @@ namespace service
             }
 
             //   virtual void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess) = 0;
-            std::function<void(rpc_call&, user&, ws_session_t&)> get_dispatch_impl() const
+            dispatch_impl_type get_dispatch_impl() const
             {
                 return dispatch_impl_;
             }
 
-            void set_dispatch_impl(std::function<void(rpc_call&, user&, ws_session_t &)> val)
+            void set_dispatch_impl(dispatch_impl_type val)
             {
                 dispatch_impl_ = val;
             }
-            epjs_process_req_impl_type
-            get_epjs_process_req_impl() const
+
+            epjs_process_req_impl_type get_epjs_process_req_impl() const
             {
                 return epjs_process_req_impl_;
             }
             void set_epjs_process_req_impl(epjs_process_req_impl_type val)
             {
                 epjs_process_req_impl_ = val;
+            }
+
+            send_worker_req_impl_type get_send_worker_req_impl() const
+            {
+                return send_worker_req_impl_;
+            }
+            void set_send_worker_req_impl(send_worker_req_impl_type val)
+            {
+                send_worker_req_impl_ = val;
             }
         };
 

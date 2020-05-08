@@ -22,13 +22,13 @@
 
 #include <easyprospect-service-shared/types.hpp>
 
-
 //#include <easyprospect-service-shared/externs.h>
 #include <easyprospect-service-shared/listener.h>
 #include <easyprospect-service-shared/rpc.hpp>
 #include <easyprospect-service-shared/server.h>
 #include <easyprospect-service-shared/user_base.hpp>
 #include <spdlog/spdlog.h>
+
 
 namespace easyprospect
 {
@@ -43,13 +43,7 @@ namespace service
         // plain_ws_session_impl
         // ssl_ws_session_impl
 
-        using epjs_process_req_impl_type =
-            std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;
-
-        //using run_proxy_session_impl_type = std::function<std::string(
-        //    boost::optional<http::request_parser<http::string_body>> pr,
-        //    net::const_buffer                                        buffer,
-        //    beast::error_code&                                       ec)>;
+        using dispatch_impl_type = std::function<void(rpc_call&, shared::user&, ws_session_t&)>;
 
         class session : public boost::enable_shared_from
         {
@@ -82,12 +76,13 @@ namespace service
         class ws_session_base : public asio::coroutine, public shared::session
         {
           protected:
-            endpoint_type                                                ep_;
-            flat_storage                                                 msg_;
-            std::vector<shared::message>                                 mq_;
-            boost::shared_ptr<ws_session_t>                              wrapper_;
-            std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
-            epjs_process_req_impl_type                                   epjs_process_req_impl_;
+            endpoint_type                   ep_;
+            flat_storage                    msg_;
+            std::vector<shared::message>    mq_;
+            boost::shared_ptr<ws_session_t> wrapper_;
+            dispatch_impl_type              dispatch_impl_;
+            epjs_process_req_impl_type      epjs_process_req_impl_;
+            send_worker_req_impl_type       send_worker_req_impl_;
 
           public:
             ws_session_base(endpoint_type ep) : ep_(ep)
@@ -190,7 +185,7 @@ namespace service
 
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> dispatch_impl_;
             epjs_process_req_impl_type                                   epjs_process_req_impl_;
-            run_proxy_session_impl_type                run_proxy_session_impl_;
+            send_worker_req_impl_type                                   send_worker_req_impl_;
 
             // ep_session_ssl_function_type run_ws_session_ssl_func;
             //  ep_session_plain_function_type run_ws_session_plain_func;
@@ -235,6 +230,17 @@ namespace service
                 //       run_ws_session_ssl_func(srv, lst, std::move(str), ep, req);
             }
 
+            void run_proxy_session(
+                http::request_parser<http::string_body>&&,
+                net::const_buffer,
+                stream_type,
+                beast::error_code&);
+
+            void run_proxy_session(
+                http::request_parser<http::string_body>&&,
+                net::const_buffer,
+                beast::ssl_stream<stream_type>,
+                beast::error_code&);
             //--------------------------------------------------------------------------
             //
             // session
@@ -260,35 +266,35 @@ namespace service
             //
             //--------------------------------------------------------------------------
 
-            // TODO: KP. Replace with a generic lambda
-            // We only require C++11, this helper is
-            // the equivalent of a C++14 generic lambda.
-            struct send_lambda
-            {
-                http_session_base& self_;
+            //// TODO: KP. Replace with a generic lambda
+            //// We only require C++11, this helper is
+            //// the equivalent of a C++14 generic lambda.
+            //struct send_lambda
+            //{
+            //    http_session_base& self_;
 
-                template <bool isRequest, class Body, class Fields>
-                void operator()(http::message<isRequest, Body, Fields>&& msg) const
-                {
-                    std::stringstream sstr;
-                    sstr << "send_lambda() : " << msg.base() << std::endl;
+            //    template <bool isRequest, class Body, class Fields>
+            //    void operator()(http::message<isRequest, Body, Fields>&& msg) const
+            //    {
+            //        std::stringstream sstr;
+            //        sstr << "send_lambda() : " << msg.base() << std::endl;
 
-                    spdlog::debug(sstr.str());
+            //        spdlog::debug(sstr.str());
 
-                    // The lifetime of the message has to extend
-                    // for the duration of the async operation so
-                    // we use a shared_ptr to manage it.
-                    auto sp = std::make_shared<http::message<isRequest, Body, Fields>>(std::move(msg));
+            //        // The lifetime of the message has to extend
+            //        // for the duration of the async operation so
+            //        // we use a shared_ptr to manage it.
+            //        auto sp = std::make_shared<http::message<isRequest, Body, Fields>>(std::move(msg));
 
-                    // Write the response
-                    auto self = bind_front(&self_);
-                    http::async_write(
-                        self_.impl()->stream(), *sp, [self, sp](beast::error_code ec, std::size_t bytes_transferred) {
-                            self(ec, bytes_transferred, sp->need_eof());
-                        });
-                }
-            };
-
+            //        // Write the response
+            //        auto self = bind_front(&self_);
+            //        http::async_write(
+            //            self_.impl()->stream(), *sp, [self, sp](beast::error_code ec, std::size_t bytes_transferred) {
+            //                self(ec, bytes_transferred, sp->need_eof());
+            //            });
+            //    }
+            //};
+            
             void operator()(beast::error_code ec = {}, std::size_t bytes_transferred = 0, bool need_eof = false);
 
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> get_dispatch_impl() const
@@ -309,6 +315,16 @@ namespace service
             void set_epjs_process_req_impl(epjs_process_req_impl_type val)
             {
                 epjs_process_req_impl_ = val;
+            }
+
+            send_worker_req_impl_type send_worker_process_req_impl() const
+            {
+                return send_worker_req_impl_;
+            }
+
+            void set_send_worker_req_impl(send_worker_req_impl_type val)
+            {
+                send_worker_req_impl_ = val;
             }
         };
 
@@ -500,13 +516,6 @@ namespace service
             void send(shared::message m) override
             {
                 throw std::logic_error("The method or operation is not implemented.");
-            }
-
-            template <class MutableBufferSequence, class ReadHandler>
-            void async_read_some(MutableBufferSequence const& buffers, ReadHandler&& handler)
-            {
-              //  stream_.async_read_some(
-                //    std::forward<const MutableBufferSequence>(buffers), std::forward<ReadHandler>(handler));
             }
         };
 
@@ -766,142 +775,15 @@ namespace service
             lst_.erase(this);
         }
 
-        
         template <class Body, class Allocator, class Send>
         void handle_request(
             boost::optional<boost::filesystem::path>             doc_root,
             std::vector<std::regex>                              epjs_exts,
-            epjs_process_req_impl_type              epjs_process_req_impl,
+            epjs_process_req_impl_type                           epjs_process_req_impl,
             http::request<Body, http::basic_fields<Allocator>>&& req,
             Send&&                                               send);
 
         void ep_make_req(http::request_parser<http::string_body>& pr);
-
-        template <class Derived>
-        void http_session_base<Derived>::operator()(beast::error_code ec, std::size_t bytes_transferred, bool need_eof)
-        {
-            boost::ignore_unused(bytes_transferred);
-            reenter(*this)
-            {
-                // Set the expiration
-                impl()->expires_after(std::chrono::seconds(30));
-
-                // A new HTTP parser is required for each message
-                pr_.emplace();
-
-                // Set some limits to discourage attackers.
-                pr_->body_limit(64 * 1024);
-                pr_->header_limit(2048);
-
-                // 1. Read from impl()->stream()
-                // 2. Save in a local buffer and also send the the Beast request parser
-                // 3. Check the parser for an arbitrary header
-                // 4. Decide to if to stop parsing the stream
-                // 5. If parsing the stream is done send all data to a selected open socket
-                // 6. continue reading impl()->stream(), and passing data directly to that open socket
-                //bool header_found = false;
-                
-                do 
-                {
-                    //auto& strm = impl()->stream();
-                    //beast::ssl_stream<stream_type> strm = impl()->stream();
-                    
-                    // TODO: KP. Assumption. "storage_" will be intelligently filled, so that the data is appended only
-                    yield impl()->stream().async_read_some(storage_.prepare(100), bind_front(this));
-                    if (ec)
-                    {
-                        spdlog::debug(ec.message());
-                    }
-                    storage_.commit(bytes_transferred);
-
-                    spdlog::debug(storage_.size());
-
-                    ec = boost::system::error_code();
-
-                    // TODO: KP. check error code
-                   // auto pr_res = pr_->put(storage_, ec);
-                    pr_->put(storage_.cdata(), ec);
-                   if (ec)
-                   {
-                       spdlog::debug(ec.message());
-                   }
-                    
-                    spdlog::debug((char*)(storage_.data().data()));
-                    spdlog::debug(storage_.capacity());
-                    spdlog::debug(storage_.size());
-
-                   // ep_make_req(*pr_);
-
-                    // TODO: KP. Check for ec code, keep in mind header may be invalid
-
-                    // TODO: KP. Check header for arbitrary header, set "header_found" boolean variable or break
-                    ;
-
-               // } while (!(pr_->is_header_done() && header_found));
-                } while (!(pr_->is_header_done()));
-
-               // // Read the next HTTP request
-               // yield http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
-
-
-                // This means they closed the connection
-                if (ec == http::error::end_of_stream)
-                {
-                    return impl()->do_close();
-                }
-
-                // Handle the error, if any
-                if (ec)
-                    return impl()->fail(ec, "http::async_read");
-
-                // TODO: KP. PROXY the HTTP request to a process here
-
-                if (run_proxy_session_impl_ != nullptr )
-                {
-                    // Call into the epsrv implementation
-                    run_proxy_session_impl_(std::move(*pr_), storage_.cdata(), ec);
-                    return;
-                }
-
-                // From here and below is really about the worker
-                
-                // See if it is a WebSocket Upgrade
-                if (websocket::is_upgrade(pr_->get()))
-                {
-                    // Turn off the expiration timer
-                    impl()->expires_never();
-
-                    // Convert the request type
-                    websocket::request_type req(pr_->release());
-
-                    // Create a WebSocket session by transferring the socket
-
-                    // EPSRV run_ws_session simply forwards to workers
-                    // WORKER run_ws_session does some actual work
-
-                    return this->run_ws_session(doc_root_, lst_, std::move(impl()->stream()), ep_, std::move(req));
-
-                    // return run_ws_session(
-                    //    srv_, lst_,
-                    //    std::move(impl()->stream()),
-                    //    ep_,
-                    //    std::move(req));
-                }
-                // Send the response
-                yield handle_request(doc_root_, epjs_exts_, epjs_process_req_impl_, pr_->release(), send_lambda{*this});
-
-                // Handle the error, if any
-                if (ec)
-                    return impl()->fail(ec, "http::async_write");
-
-                if (need_eof)
-                {
-                    // This means we should close the connection, usually because
-                    // the response indicated the "Connection: close" semantic.
-                    return impl()->do_close();
-                }
-            }
-        }
 
         template <class Derived>
         void ws_session_base<Derived>::operator()(beast::error_code ec, std::size_t bytes_transferred)
