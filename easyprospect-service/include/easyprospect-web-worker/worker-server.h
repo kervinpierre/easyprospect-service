@@ -1,14 +1,15 @@
 #pragma once
-#include <csignal>
+
 #include <boost/container/flat_set.hpp>
 #include <boost/smart_ptr/enable_shared_from.hpp>
 #include <boost/thread/lock_guard.hpp>
 #include <boost/thread/shared_lock_guard.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <easyprospect-service-shared/server.h>
+//
+#include <easyprospect-service-shared/uid.hpp>
 
-#include "easyprospect-service-shared/uid.hpp"
-#include "easyprospect-service-shared/user_base.hpp"
+#include <easyprospect-service-shared/user_base.hpp>
 
 namespace easyprospect
 {

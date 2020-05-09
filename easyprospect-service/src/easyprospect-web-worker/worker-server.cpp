@@ -31,7 +31,7 @@ namespace service
 
         void make_system_channel(application_impl& srv)
         {
-            easyprospect::service::web_worker::insert<system_channel>(srv.channel_list(), srv);
+            web_worker::insert<system_channel>(srv.channel_list(), srv);
         }
 
     } // namespace web_worker
