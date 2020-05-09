@@ -20,11 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\easyprospect-web-worker\easyprospect-web-worker.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\worker-server-app.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\worker-server.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\ws_user.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h" />
-    <ClInclude Include="include\easyprospect-web-worker\server.h" />
+    <ClInclude Include="include\easyprospect-web-worker\worker-server-app.h" />
+    <ClInclude Include="include\easyprospect-web-worker\worker-server.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -8,6 +8,7 @@
 #include <easyprospect-service-shared/types.hpp>
 
 #include "easyprospect-http-request.h"
+#include "service.hpp"
 
 namespace easyprospect
 {
@@ -15,7 +16,6 @@ namespace service
 {
     namespace shared
     {
-        class service;
         class rpc_call;
         class user;
         class ws_session_t;

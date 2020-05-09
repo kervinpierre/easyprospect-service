@@ -61,39 +61,17 @@ namespace service
                 cfg_(std::move(cfg)), timer_(this->make_executor()), signals_(timer_.get_executor(), SIGINT, SIGTERM),
                 shutdown_time_(never()), stop_(false)
             {
+                spdlog::debug(BOOST_CURRENT_FUNCTION);
+
                 timer_.expires_at(never());
-
-                //set_proxy_session_impl(
-                //    [this](
-                //        http::request_parser<http::string_body>&& p,
-                //        net::const_buffer                         b,
-                //        beast::ssl_stream<stream_type>            str,
-                //        beast::error_code&                        ec)
-                //    {
-                //        std::string res;
-
-                //        std::stringstream ss;
-                //        auto              req = p.get();
-
-                //        ss << "run_proxy_session_impl() called..." << std::endl
-                //           << (char*)(b.data()) << std::endl
-                //           << std::endl
-                //           << req << std::endl;
-
-                //        spdlog::debug(ss.str());
-
-
-                //        // 1. Open socket to one of the worker processes in the process group
-                //        // 2. Write out partial stream to worker process
-                //        // 3. Continue passing data to the worker process
-                //        
-                //        return res;
-                //    });
 
                 set_send_worker_req_impl([this](shared::easyprospect_http_request req, beast::error_code& ec) {
                     shared::easyprospect_http_request_result res;
 
+                    spdlog::debug(BOOST_CURRENT_FUNCTION);
                     spdlog::debug(req.to_string());
+
+                    // Send to a proxy process using Beast Request
 
                     return res;
                 });
@@ -145,6 +123,10 @@ namespace service
 
                 // Create process pool here.
 
+                // TODO: KP. Start the processes, pass in the arguments, save their PIDs
+                // How can we get the child to dump to our console?
+                // How do I monitor the process group?
+                
                 // while (pt.size() < cfg_.get_num_threads())
                 while (pt.size() < 2)
                 {
@@ -155,13 +137,11 @@ namespace service
                     // while (c.running())
                     //    do_some_stuff();
 
-                    // TODO: KP. Pass arguments to the started worker
-                    
                     // c.wait(); //wait for the process to exit
                     // int result = c.exit_code();
                     // pt.emplace_back(boost::process::search_path("epwebworker"), "--conf",
                     // "../../../data/test01/args01.txt");
-                    pt.emplace_back("epworker.exe");
+                    pt.emplace_back("epworker.exe", "--conf", "../../../data/test01/argsClient01.txt");
                     boost::process::child& c = pt.back();
 
                     ptg.add(c);

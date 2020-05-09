@@ -20,6 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-service-shared\config.hpp" />
+    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-linux.h" />
+    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-win.h" />
+    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process.h" />
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-service-shared.h" />
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-http-request.h" />
     <ClInclude Include="include\easyprospect-service-shared\externs.h" />
@@ -36,6 +39,9 @@
     <ClInclude Include="include\easyprospect-service-shared\utility.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\easyprospect-service-shared\easyprospect-process-linux.cpp" />
+    <ClCompile Include="src\easyprospect-service-shared\easyprospect-process-win.cpp" />
+    <ClCompile Include="src\easyprospect-service-shared\easyprospect-process.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-service-shared.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-http-request.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\http_session.cpp" />

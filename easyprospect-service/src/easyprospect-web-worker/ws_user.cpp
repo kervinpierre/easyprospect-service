@@ -7,6 +7,9 @@
 // Official repository: https://github.com/vinniefalco/BeastLounge
 //
 
+#include <easyprospect-web-worker/worker-server.h>
+#include <easyprospect-web-worker/worker-server-app.h>
+
 #include "easyprospect-service-shared/rpc.hpp"
 #include "easyprospect-service-shared/server.h"
 #include "easyprospect-service-shared/service.hpp"
@@ -99,168 +102,7 @@ namespace service
 {
     namespace web_worker
     {
-        class channel;
-        class application_impl;
 
-        /// Represents a connected user
-        class user : public shared::user_base
-        {
-            std::mutex                           mutex_;
-            boost::container::flat_set<channel*> channels_;
-
-          public:
-            ~user();
-            void user::on_insert(channel& c);
-            void user::on_erase(channel& c);
-        };
-
-        class ws_user : public user
-        {
-        };
-
-        class channel_list;
-
-        class channel : public boost::enable_shared_from
-        {
-            using mutex             = boost::shared_mutex;
-            using lock_guard        = boost::lock_guard<mutex>;
-            using shared_lock_guard = boost::shared_lock_guard<mutex>;
-
-            channel_list& list_;
-            boost::shared_mutex mutable mutex_;
-
-            boost::container::flat_set<shared::ws_session_t*> sessions_;
-            // boost::container::flat_set<shared::ws_session_base<plain_ws_session_impl>*> sessions_plain_;
-            // boost::container::flat_set<shared::ws_session_base<ssl_ws_session_impl>*> sessions_ssl_;
-
-            uid_type    uid_;
-            std::size_t cid_;
-            std::string name_;
-
-            friend channel_list;
-
-          public:
-            /// Return the channel unique-id
-            uid_type uid() const noexcept
-            {
-                return uid_;
-            }
-
-            /// Return the channel id
-            std::size_t cid() const noexcept
-            {
-                return cid_;
-            }
-
-            /// Return the channel name
-            beast::string_view name() const noexcept
-            {
-                return name_;
-            }
-
-            /// Returns `true` if the user has joined the channel
-
-            bool is_joined(shared::user& u, shared::ws_session_t& sess) const;
-
-            /** Add a user to the channel.
-
-                @returns `false` if the user was already in the channel.
-            */
-
-            bool insert(shared::user& u, shared::ws_session_t& sess);
-
-            /** Remove the user from the channel.
-
-                @param u Weak ownership of the user to remove.
-            */
-
-            bool erase(shared::user& u, shared::ws_session_t& sess);
-
-            void send(nlohmann::json const& jv);
-            void send(shared::message m);
-
-            /// Process an RPC command for this channel
-            void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess);
-
-          protected:
-            channel(std::size_t reserved_cid, beast::string_view name);
-            channel(beast::string_view name, channel_list& list);
-            channel(std::size_t reserved_cid, beast::string_view name, channel_list& list);
-            ~channel();
-
-            // template<typename T>
-            // typename std::enable_if<std::is_same<T, plain_ws_session_impl>::value,
-            // boost::container::flat_set<shared::ws_session_base<plain_ws_session_impl>*>>::type get_sessions()
-            // {
-            //     return sessions_plain_;
-            // }
-
-            // template<typename T>
-            // typename std::enable_if<std::is_same<T, ssl_ws_session_impl>::value,
-            // boost::container::flat_set<shared::ws_session_base<ssl_ws_session_impl>*>>::type get_sessions()
-            // {
-            //     return sessions_ssl_;
-            // }
-
-            // channel::
-            //    channel(
-            //        std::size_t reserved_cid,
-            //        beast::string_view name)
-            //    : cid_(reserved_cid)
-            //    , name_(name)
-            //{
-            //    list_ = channel_list();
-            //}
-
-            void checked_user(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess);
-
-            /** Called when a user is inserted to the channel's list.
-
-                @param u A strong reference to the user.
-            */
-
-            virtual void on_insert(shared::user& u, shared::ws_session_t& sess) = 0;
-
-            /** Called when a user is erased from the channel's list.
-
-                @param u A weak reference to the user.
-            */
-
-            virtual void on_erase(shared::user& u, shared::ws_session_t& sess) = 0;
-
-            /// Called on an RPC command
-
-            virtual void on_dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess) = 0;
-
-          private:
-            void do_join(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess);
-            void do_leave(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess);
-        };
-
-        class channel_list
-        {
-          public:
-            virtual ~channel_list() = default;
-
-            virtual uid_type next_uid() noexcept = 0;
-
-            virtual std::size_t next_cid() noexcept = 0;
-
-            /// Return the channel for a cid, or nullptr
-            virtual boost::shared_ptr<channel> at(std::size_t cid) = 0;
-
-            /// Process a serialized message from a user
-            //
-            virtual void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess) = 0;
-
-            template <class T, class... Args>
-            friend void insert(channel_list& list, Args&&... args);
-
-            virtual void erase(channel const& c) = 0;
-
-          private:
-            virtual void insert(boost::shared_ptr<channel> c) = 0;
-        };
 
         // channel::channel(
         //    std::size_t reserved_cid,
@@ -299,169 +141,7 @@ namespace service
             list_.erase(*this);
         }
 
-        class room_impl : public channel
-        {
-          public:
-            room_impl(beast::string_view name, channel_list& list) : channel(2, name, list)
-            {
-            }
 
-            //--------------------------------------------------------------------------
-            //
-            // channel
-            //
-            //--------------------------------------------------------------------------
-
-            void on_insert(shared::user& u, shared::ws_session_t& sess)
-            {
-            }
-
-            void on_erase(shared::user& u, shared::ws_session_t& sess)
-            {
-            }
-
-            void on_dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& ses)
-            {
-                if (rpc.method == "say")
-                {
-                    do_say(rpc, u, ses);
-                }
-                else if (rpc.method == "slash")
-                {
-                    do_say(rpc, u, ses);
-                }
-                else
-                {
-                    rpc.fail(rpc_code::method_not_found);
-                }
-            }
-
-            //--------------------------------------------------------------------------
-            //
-            // room_impl
-            //
-            //--------------------------------------------------------------------------
-
-            void do_say(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& ses)
-            {
-                checked_user(rpc, u, ses);
-                if (!is_joined(u, ses))
-                    rpc.fail("not in channel");
-                auto const& text = shared::checked_string(rpc.params, "message");
-                {
-                    // broadcast: say
-                    nlohmann::json jv;
-                    jv["verb"]    = "say";
-                    jv["cid"]     = cid();
-                    jv["name"]    = name();
-                    jv["user"]    = u.name;
-                    jv["message"] = text;
-                    send(jv);
-                }
-
-                std::function<void(nlohmann::json)> f1 = [&ses](nlohmann::json j) { ses.send(j); };
-
-                rpc.complete(f1);
-            }
-
-            void do_slash(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& ses)
-            {
-                checked_user(rpc, u, ses);
-                rpc.fail("Unimplemented");
-            }
-        };
-
-        void make_room(channel_list& list, beast::string_view name)
-        {
-            easyprospect::service::web_worker::insert<room_impl>(list, name, list);
-        }
-
-        void make_room(channel_list& list, beast::string_view name);
-
-        class channel_list_impl : public channel_list
-        {
-            struct element
-            {
-                boost::shared_ptr<channel> c;
-                std::size_t                next = 0;
-            };
-
-            using mutex             = boost::shared_mutex;
-            using lock_guard        = boost::lock_guard<mutex>;
-            using shared_lock_guard = boost::shared_lock_guard<mutex>;
-
-            application_impl& srv_;
-            mutex mutable m_;
-            std::vector<element> v_;
-            // VFALCO look into https://github.com/greg7mdp/parallel-hashmap
-            boost::container::flat_set<channel*> users_;
-            std::atomic<uid_type>                next_uid_;
-            std::atomic<std::size_t>             next_cid_;
-
-          public:
-            channel_list_impl(application_impl& srv) : srv_(srv), next_uid_(1000), next_cid_(1000)
-            {
-                // element 0 is unused
-                v_.resize(1);
-
-                easyprospect::service::web_worker::make_room(*this, "General");
-            }
-
-            //--------------------------------------------------------------------------
-            //
-            // service
-            //
-            //--------------------------------------------------------------------------
-
-            //--------------------------------------------------------------------------
-            //
-            // channel_list
-            //
-            //--------------------------------------------------------------------------
-
-            boost::shared_ptr<channel> at(std::size_t cid)
-            {
-                shared_lock_guard lock(m_);
-                if (cid >= v_.size())
-                    return nullptr;
-                return v_[cid].c;
-            }
-
-            void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess) override;
-
-            uid_type next_uid() noexcept override
-            {
-                return ++next_uid_;
-            }
-
-            std::size_t next_cid() noexcept override
-            {
-                return ++next_cid_;
-            }
-
-            void insert(boost::shared_ptr<channel> c) override
-            {
-                auto const cid = c->cid();
-                lock_guard lock(m_);
-                v_.resize(std::max<std::size_t>(cid + 1, v_.size()));
-                BOOST_ASSERT(v_[cid].c == nullptr);
-                v_[cid].c = std::move(c);
-            }
-
-            void erase(channel const& c) override
-            {
-                auto const cid = c.cid();
-                lock_guard lock(m_);
-                BOOST_ASSERT(cid < v_.size());
-                v_[cid].c = nullptr;
-            }
-
-            //--------------------------------------------------------------------------
-            //
-            // channel_list_impl
-            //
-            //--------------------------------------------------------------------------
-        };
 
         bool channel::is_joined(shared::user& u, shared::ws_session_t& sess) const
         {
@@ -592,6 +272,32 @@ namespace service
             }
         }
 
+        void room_impl::do_say(shared::rpc_call& rpc, shared::user& u,
+                               shared::ws_session_t& ses)
+        {
+            checked_user(rpc, u, ses);
+            if (!is_joined(u, ses))
+                rpc.fail("not in channel");
+            auto const& text = shared::checked_string(rpc.params, "message");
+            {
+                // broadcast: say
+                nlohmann::json jv;
+                jv["verb"] = "say";
+                jv["cid"] = cid();
+                jv["name"] = name();
+                jv["user"] = u.name;
+                jv["message"] = text;
+                send(jv);
+            }
+
+            std::function<void(nlohmann::json)> f1 = [&ses](nlohmann::json j)
+            {
+                ses.send(j);
+            };
+
+            rpc.complete(f1);
+        }
+
         void channel_list_impl::dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess)
         {
             // Validate and extract the channel id
@@ -607,387 +313,51 @@ namespace service
             // Dispatch the request
             c->dispatch(rpc, u, sess);
         }
-        std::unique_ptr<channel_list_impl> make_channel_list(web_worker::application_impl& srv)
+
+        system_channel::system_channel(web_worker::application_impl& srv):
+            channel(1, "System", srv.channel_list()), srv_(srv)
         {
-            return boost::make_unique<channel_list_impl>(srv);
         }
 
-        void make_system_channel(application_impl& server_impl);
-
-        class application_impl : public shared::application_impl_base, public boost::enable_shared_from
+        void system_channel::do_identify(shared::rpc_call& rpc, shared::user& u,
+                                         shared::ws_session_t& ses)
         {
-            using clock_type = std::chrono::steady_clock;
-            using time_point = clock_type::time_point;
+            auto const& name = shared::checked_string(rpc.params, "name");
+            if (name.size() > 20)
+                rpc.fail("Invalid \"name\": too long");
+            if (!u.name.empty())
+                rpc.fail("Identity is already set");
+            // VFALCO NOT THREAD SAFE!
+            u.name.assign(name.data(), name.size());
+            insert(u, ses);
 
-            config::easyprospect_config_service_core                                                   cfg_;
-            std::vector<std::unique_ptr<shared::service>>                                              services_;
-            net::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
-            asio::basic_signal_set<executor_type>                                                      signals_;
-            std::condition_variable                                                                    cv_;
-            std::mutex                                                                                 mutex_;
-            time_point                                                                                 shutdown_time_;
-            bool                                                                                       running_ = false;
-            std::atomic<bool>                                                                          stop_;
-
-            std::unique_ptr<channel_list_impl> channel_list_;
-
-            static std::chrono::steady_clock::time_point never() noexcept
+            std::function<void(nlohmann::json)> f1 = [&ses](nlohmann::json j)
             {
-                return (time_point::max)();
-            }
+                ses.send(j);
+            };
 
-          public:
-            explicit application_impl(config::easyprospect_config_service_core cfg) :
-                cfg_(std::move(cfg)), timer_(this->make_executor()), signals_(timer_.get_executor(), SIGINT, SIGTERM),
-                shutdown_time_(never()), stop_(false), channel_list_(make_channel_list(*this))
-            {
-                timer_.expires_at(never());
+            rpc.complete(f1);
+        }
 
-                set_dispatch_impl([this](shared::rpc_call& r, shared::user& u, shared::ws_session_t& s) {
-                    this->channel_list_->dispatch(r, u, s);
-                });
+        void system_channel::do_shutdown(shared::rpc_call& rpc, shared::user& u,
+                                         shared::ws_session_t& ses)
+        {
+            // TODO check user perms
+            boost::ignore_unused(rpc);
+            srv_.shutdown(std::chrono::seconds(30));
+            rpc.complete([&ses](nlohmann::json j) { ses.send(j); });
+        }
 
-                // process ebjs
-                // TODO: KP. Pass in full URL including parameters, and all headers, including cookies.  Parsed or unparsed.
-                set_epjs_process_req_impl([this](std::string resolved_path, std::string doc_root, std::string target)
-                {
-                    // TODO: KP. Do things with the path
-
-                    std::stringstream ss;
-
-                    ss << "set_epjs_process_req_impl()" << std::endl
-                       << "resolved_path\t:" << resolved_path << std::endl
-                       << "doc_root\t:" << doc_root << std::endl
-                       << "target\t:" << target << std::endl;
-
-                    spdlog::debug(ss.str());
-
-                    if (!boost::filesystem::exists(resolved_path))
-                    {
-                        spdlog::info("resolved_path '{}' does not exist", resolved_path);
-
-                        // TODO: KP. Route the path to a real file or a buffer
-                    }
-
-                    std::ifstream     t(resolved_path);
-                    std::stringstream script_buff;
-                    script_buff << t.rdbuf();
-
-                    std::shared_ptr<Platform> platform = platform::NewDefaultPlatform();
-                    std::unique_ptr<ep_v8::api::easyprospect_v8> ep =
-                        ep_v8::api::easyprospect_v8::create<ep_v8::api::easyprospect_v8>(platform);
-
-                    ep->init();
-
-                    int          r  = 0;
-                    unsigned int id = 0;
-                    if ((r = ep->create_context(id)) != Success)
-                        throw std::logic_error("Context error");
-
-                    // Exception thrown on error
-                    auto res = ep->run_javascript(id, script_buff.str());
-
-                    ep->remove_context(id);
-
-                    std::string res2 = res->ToString();
-
-                    return res2;
-                });
-
-                // TODO: KP. Move URL parsing to some place needed.
-                // Base
-                // UriUriW baseUri;
-                // int res = uriParseSingleUriW(&baseUri, L"example.com", NULL);
-                // if (res != 0)
-                //{
-                //    ;
-                //}
-
-                web_worker::make_system_channel(*this);
-            }
-
-            ~application_impl()
-            {
-            }
-
-            // void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess) override
-            //{
-            //    // Validate and extract the channel id
-            //    auto const cid =
-            //        shared::checked_value(rpc.params, "cid")
-            //        .get<size_t>();
-
-            //    spdlog::debug("channel_list::dispatch() called for cid {}", cid);
-
-            //    // Lookup cid
-            //    auto c = channel_list().at(cid);
-            //    if (!c)
-            //        rpc.fail(
-            //            rpc_code::invalid_params,
-            //            "Unknown cid");
-
-            //    // Dispatch the request
-            //    c->dispatch(rpc, u, sess);
-            //}
-
-            void insert(std::unique_ptr<shared::service> sp) override
-            {
-                if (running_)
-                    throw std::logic_error("server already running");
-
-                services_.emplace_back(std::move(sp));
-            }
-
-            void run() override
-            {
-                if (running_)
-                    throw std::logic_error("server already running");
-
-                running_ = true;
-
-                // Start all agents
-                for (auto const& sp : services_)
-                    sp->on_start();
-
-                // Capture SIGINT and SIGTERM to perform a clean shutdown
-                signals_.async_wait(beast::bind_front_handler(&application_impl::on_signal, this));
-
-#ifndef LOUNGE_USE_SYSTEM_EXECUTOR
-                std::vector<std::thread> vt;
-                while (vt.size() < cfg_.get_num_threads())
-                    vt.emplace_back([this] { this->ioc_.run(); });
-#endif
-                // Block the main thread until stop() is called
-                {
-                    std::unique_lock<std::mutex> lock(mutex_);
-                    cv_.wait(lock, [this] { return stop_.load(); });
-                }
-
-                // Notify all agents to stop
-                auto agents = std::move(services_);
-                for (auto const& sp : agents)
-                    sp->on_stop();
-
-                    // services must be kept alive until after
-                    // all executor threads are joined.
-
-                    // If we get here, then the server has
-                    // stopped, so join the threads before
-                    // destroying them.
-
-#ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-                net::system_executor{}.context().join();
-#else
-                for (auto& t : vt)
-                    t.join();
-#endif
-            }
-
-            //--------------------------------------------------------------------------
-            //
-            // shutdown / stop
-            //
-            //--------------------------------------------------------------------------
-
-            bool is_shutting_down() override
-            {
-                return stop_.load();
-            }
-
-            void shutdown(std::chrono::seconds cooldown) override
-            {
-                // Get on the strand
-                if (!timer_.get_executor().running_in_this_thread())
-                    return net::post(
-                        timer_.get_executor(), beast::bind_front_handler(&application_impl::shutdown, this, cooldown));
-
-                // Only callable once
-                if (timer_.expiry() != never())
-                    return;
-
-                shutdown_time_ = clock_type::now() + cooldown;
-                on_timer();
-            }
-
-            void on_timer(beast::error_code ec = {})
-            {
-                if (ec == net::error::operation_aborted)
-                    return;
-
-                auto const remain =
-                    easyprospect::service::shared::ceil<std::chrono::seconds>(shutdown_time_ - clock_type::now());
-
-                // Countdown finished?
-                if (remain.count() <= 0)
-                {
-                    stop();
-                    return;
-                }
-
-                std::chrono::seconds amount(remain.count());
-                if (amount.count() > 10)
-                    amount = std::chrono::seconds(10);
-
-                // Notify users of impending shutdown
-                auto           c = this->channel_list_->at(1);
-                nlohmann::json jv;
-                jv["verb"]    = "say";
-                jv["cid"]     = c->cid();
-                jv["name"]    = c->name();
-                jv["message"] = "Server is shutting down in " + std::to_string(remain.count()) + " seconds";
-                c->send(jv);
-                timer_.expires_after(amount);
-                timer_.async_wait(beast::bind_front_handler(&application_impl::on_timer, this));
-            }
-
-            void on_signal(beast::error_code ec, int signum)
-            {
-                if (ec == net::error::operation_aborted)
-                    return;
-
-                spdlog::debug("application_impl::on_signal: #{}, {}\n", signum, ec.message());
-
-                if (timer_.expiry() == never())
-                {
-                    // Capture signals again
-                    signals_.async_wait(beast::bind_front_handler(&application_impl::on_signal, this));
-
-                    this->shutdown(std::chrono::seconds(30));
-                }
-                else
-                {
-                    // second time hard stop
-                    stop();
-                }
-            }
-
-            void stop() override
-            {
-                // Get on the strand
-                if (!timer_.get_executor().running_in_this_thread())
-                    return net::post(timer_.get_executor(), beast::bind_front_handler(&application_impl::stop, this));
-
-                // Only callable once
-                if (stop_)
-                    return;
-
-                // Set stop_ and unblock the main thread
-                {
-                    std::lock_guard<std::mutex> lock(mutex_);
-                    stop_ = true;
-                    cv_.notify_all();
-                }
-
-                // Cancel our outstanding I/O
-                timer_.cancel();
-                beast::error_code ec;
-                signals_.cancel(ec);
-            }
-
-            //--------------------------------------------------------------------------
-
-            const boost::optional<boost::filesystem::path> get_doc_root() const override
-            {
-                return cfg_.get_webroot_dir();
-            }
-
-            channel_list_impl& channel_list()
-            {
-                return *channel_list_;
-            }
-
-            std::vector<std::regex> get_epjs_url_path_regex() const override
-            {
-                return cfg_.get_epjs_url_path_regex();
-            }
-        };
+        void system_channel::do_stop(shared::rpc_call& rpc, shared::user& u,
+                                     shared::ws_session_t& ses)
+        {
+            // TODO check user perms
+            boost::ignore_unused(rpc);
+            srv_.stop();
+            rpc.complete([&ses](nlohmann::json j) { ses.send(j); });
+        }
 
         void make_blackjack_service(web_worker::application_impl& srv);
-
-        class system_channel : public channel
-        {
-            shared::server& srv_;
-
-          public:
-            explicit system_channel(web_worker::application_impl& srv) :
-                channel(1, "System", srv.channel_list()), srv_(srv)
-            {
-            }
-
-          protected:
-            void on_insert(shared::user& u, shared::ws_session_t& sess)
-            {
-            }
-
-            void on_erase(shared::user& u, shared::ws_session_t& sess)
-            {
-            }
-
-            void on_dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess)
-            {
-                if (rpc.method == "identify")
-                {
-                    do_identify(rpc, u, sess);
-                }
-                else if (rpc.method == "shutdown")
-                {
-                    do_shutdown(rpc, u, sess);
-                }
-                else if (rpc.method == "stop")
-                {
-                    do_stop(rpc, u, sess);
-                }
-                else
-                {
-                    rpc.fail(rpc_code::method_not_found);
-                }
-            }
-
-            void do_identify(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& ses)
-            {
-                auto const& name = shared::checked_string(rpc.params, "name");
-                if (name.size() > 20)
-                    rpc.fail("Invalid \"name\": too long");
-                if (!u.name.empty())
-                    rpc.fail("Identity is already set");
-                // VFALCO NOT THREAD SAFE!
-                u.name.assign(name.data(), name.size());
-                insert(u, ses);
-
-                std::function<void(nlohmann::json)> f1 = [&ses](nlohmann::json j) { ses.send(j); };
-
-                rpc.complete(f1);
-            }
-
-            void do_shutdown(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& ses)
-            {
-                // TODO check user perms
-                boost::ignore_unused(rpc);
-                srv_.shutdown(std::chrono::seconds(30));
-                rpc.complete([&ses](nlohmann::json j) { ses.send(j); });
-            }
-
-            void do_stop(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& ses)
-            {
-                // TODO check user perms
-                boost::ignore_unused(rpc);
-                srv_.stop();
-                rpc.complete([&ses](nlohmann::json j) { ses.send(j); });
-            }
-        };
-
-        template <class T, class... Args>
-        void insert(channel_list& list, Args&&... args)
-        {
-            list.insert(boost::make_shared<T>(std::forward<Args>(args)...));
-        }
-
-        static void make_system_channel(application_impl& srv)
-        {
-            insert<system_channel>(srv.channel_list(), srv);
-        }
-
-        std::unique_ptr<channel_list_impl> make_channel_list(web_worker::application_impl& srv);
 
         std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config)
         {
@@ -1642,40 +1012,6 @@ namespace service
             }
         };
 
-        //------------------------------------------------------------------------------
-
-        class blackjack_service : public shared::service
-        {
-            web_worker::application_impl& srv_;
-
-          public:
-            blackjack_service(web_worker::application_impl& srv) : srv_(srv)
-            {
-            }
-
-            //--------------------------------------------------------------------------
-            //
-            // service
-            //
-            //--------------------------------------------------------------------------
-
-            void on_start() override
-            {
-                insert<table>(srv_.channel_list(), srv_);
-            }
-
-            void on_stop() override
-            {
-            }
-        };
-
-        //------------------------------------------------------------------------------
-
-        static void make_blackjack_service(web_worker::application_impl& srv)
-        {
-            srv.insert(boost::make_unique<blackjack_service>(srv));
-        }
-
         void to_json(nlohmann::json& j, const seat& s)
         {
             j = nlohmann::json::object();
@@ -1756,6 +1092,14 @@ namespace service
             }
         }
 
+        void blackjack_service::on_start()
+        {
+           // insert<table>(srv_.channel_list(), srv_);
+
+            srv_.channel_list().insert(boost::make_shared<table>(srv_));
+
+        }
+
         user::~user()
         {
             // The loop is written this way because elements
@@ -1783,6 +1127,53 @@ namespace service
 
             //  std::lock_guard<std::mutex> lock(mutex_);
             BOOST_VERIFY(channels_.erase(&c) == 1);
+        }
+
+        
+        inline void application_impl::run()
+        {
+            if (running_)
+                throw std::logic_error("server already running");
+
+            running_ = true;
+
+            // Start all agents
+            for (auto const& sp : services_)
+                sp->on_start();
+
+            // Capture SIGINT and SIGTERM to perform a clean shutdown
+            signals_.async_wait(
+                beast::bind_front_handler(&application_impl::on_signal, this));
+
+#ifndef LOUNGE_USE_SYSTEM_EXECUTOR
+            std::vector<std::thread> vt;
+            while (vt.size() < cfg_.get_num_threads())
+                vt.emplace_back([this] { this->ioc_.run(); });
+#endif
+            // Block the main thread until stop() is called
+            {
+                std::unique_lock<std::mutex> lock(mutex_);
+                cv_.wait(lock, [this] { return stop_.load(); });
+            }
+
+            // Notify all agents to stop
+            auto agents = std::move(services_);
+            for (auto const& sp : agents)
+                sp->on_stop();
+
+            // services must be kept alive until after
+            // all executor threads are joined.
+
+            // If we get here, then the server has
+            // stopped, so join the threads before
+            // destroying them.
+
+#ifdef LOUNGE_USE_SYSTEM_EXECUTOR
+                net::system_executor{}.context().join();
+#else
+            for (auto& t : vt)
+                t.join();
+#endif
         }
         /*
 

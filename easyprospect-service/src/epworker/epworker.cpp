@@ -4,7 +4,8 @@
 #include <boost/config.hpp>
 #include <easyprospect-config/logging.h>
 #include <easyprospect-config/easyprospect-config-service.h>
-#include <easyprospect-web-worker/server.h>
+
+#include <easyprospect-web-worker/worker-server.h>
 
 
 //#ifdef BOOST_MSVC

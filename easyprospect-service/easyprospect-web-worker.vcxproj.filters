@@ -15,12 +15,21 @@
     <ClCompile Include="src\easyprospect-web-worker\ws_user.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\worker-server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\worker-server-app.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\easyprospect-web-worker\server.h">
+    <ClInclude Include="include\easyprospect-web-worker\worker-server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\worker-server-app.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

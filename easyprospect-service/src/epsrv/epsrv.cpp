@@ -131,6 +131,7 @@ int main(int argc, char *argv[])
     auto vb = res.get_verbosity();
 
     spdlog::debug("starting epsrv");
+    spdlog::debug(BOOST_CURRENT_FUNCTION);
 
     spdlog::debug( res.str());
 
