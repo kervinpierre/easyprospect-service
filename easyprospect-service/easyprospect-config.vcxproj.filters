@@ -18,6 +18,12 @@
     <ClCompile Include="src\easyprospect-config\easyprospect-config-service.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\easyprospect-config\easyprospect-config-wcntl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-config\ep-listener-config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h">
@@ -33,6 +39,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-config\easyprospect-defaults.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-config\easyprospect-config-wcntl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-config\ep-listener-config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

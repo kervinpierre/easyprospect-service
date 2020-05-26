@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-service-shared\config.hpp" />
+    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-base.h" />
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-linux.h" />
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-win.h" />
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-process.h" />
@@ -44,6 +45,7 @@
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-process.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-service-shared.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-http-request.cpp" />
+    <ClCompile Include="src\easyprospect-service-shared\http-session-base.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\http_session.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\listener.cpp" />
     <ClCompile Include="src\easyprospect-service-shared\message.cpp" />
@@ -132,7 +134,7 @@
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\uriparser\$(configuration)\include;$(SolutionDir)\packages\ep\openssl\$(configuration)\include;$(SolutionDir)\packages\ep\nlohmann-json\$(configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\uriparser\$(configuration)\include;$(SolutionDir)\packages\ep\openssl\$(configuration)\include;$(SolutionDir)\packages\ep\nlohmann-json\$(configuration)\include;$(SolutionDir)\packages\ep\msgpack\$(configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>

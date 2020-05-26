@@ -19,6 +19,7 @@
 #include <boost/asio/yield.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
 #include <boost/beast/websocket/stream.hpp>
+#include <boost/beast/http/file_body.hpp>
 
 #include <easyprospect-service-shared/types.hpp>
 
@@ -775,13 +776,160 @@ namespace service
             lst_.erase(this);
         }
 
+        beast::string_view mime_type(beast::string_view path);
+
+        // This function produces an HTTP response for the given
+        // request. The type of the response object depends on the
+        // contents of the request, so the interface requires the
+        // caller to pass a generic lambda for receiving the response.
         template <class Body, class Allocator, class Send>
         void handle_request(
-            boost::optional<boost::filesystem::path>             doc_root,
-            std::vector<std::regex>                              epjs_exts,
-            epjs_process_req_impl_type                           epjs_process_req_impl,
+            boost::optional<boost::filesystem::path> doc_root,
+            std::vector<std::regex>                  epjs_extensions,
+            std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>
+                                                                 epjs_process_req_impl_,
             http::request<Body, http::basic_fields<Allocator>>&& req,
-            Send&&                                               send);
+            Send&&                                               send)
+        {
+            // TODO. KP. Block here and send file or callback()
+
+            std::stringstream sstr;
+
+            sstr << "\nweb_root: " << doc_root->generic_string() << std::endl << req << std::endl;
+
+            spdlog::debug(sstr.str());
+
+            // Returns a bad request response
+            auto const bad_request = [&req](beast::string_view why) {
+                http::response<http::string_body> res{http::status::bad_request, req.version()};
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(http::field::content_type, "text/html");
+                res.keep_alive(req.keep_alive());
+                res.body() = why.to_string();
+                res.prepare_payload();
+                return res;
+            };
+
+            // Returns a not found response
+            auto const not_found = [&req](beast::string_view target) {
+                http::response<http::string_body> res{http::status::not_found, req.version()};
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(http::field::content_type, "text/html");
+                res.keep_alive(req.keep_alive());
+                res.body() = "The resource '" + target.to_string() + "' was not found.";
+                res.prepare_payload();
+                return res;
+            };
+
+            // Returns a server error response
+            auto const server_error = [&req](beast::string_view what) {
+                http::response<http::string_body> res{http::status::internal_server_error, req.version()};
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(http::field::content_type, "text/html");
+                res.keep_alive(req.keep_alive());
+                res.body() = "An error occurred: '" + what.to_string() + "'";
+                res.prepare_payload();
+                return res;
+            };
+
+            // Make sure we can handle the method
+            if (req.method() != http::verb::get && req.method() != http::verb::head)
+                return send(bad_request("Unknown HTTP-method"));
+
+            // Request path must be absolute and not contain "..".
+            if (req.target().empty() || req.target()[0] != '/' || req.target().find("..") != beast::string_view::npos)
+                return send(bad_request("Illegal request-target"));
+
+            // Build the path to the requested file
+            auto curr_path = *doc_root / std::string(req.target());
+            if (req.target().back() == '/')
+                curr_path.append("index.html");
+
+            std::string curr_path_str = curr_path.generic_string().c_str();
+            bool        epjs_process  = false;
+            for (auto r : epjs_extensions)
+            {
+                std::smatch sm;
+                if (std::regex_match(curr_path_str, sm, r))
+                {
+                    epjs_process = true;
+                    break;
+                }
+            }
+
+            beast::error_code ec;
+
+            if (epjs_process)
+            {
+                // TODO: KP. Instead of opening a file, run it through a V8 parser callback then return the content.
+
+                // TODO: KP. execute injected callback function here ( which calls V8 )
+
+                std::string output;
+
+                // Call the injected implementation here
+                if (epjs_process_req_impl_ != nullptr)
+                {
+                    output =
+                        epjs_process_req_impl_(curr_path_str, doc_root->generic_string(), std::string(req.target()));
+                }
+                else
+                {
+                    // Missing implementation
+                    throw std::logic_error("Missing epjs_process_req");
+                }
+
+                http::response<http::string_body> res;
+                res.version(req.version());
+                res.result(http::status::ok);
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                // res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                // res.content_length(size);
+                res.keep_alive(req.keep_alive());
+                res.body() = output;
+                res.prepare_payload();
+
+                return send(std::move(res));
+            }
+            else
+            {
+                // Attempt to open the file
+                http::file_body::value_type body;
+                body.open(curr_path_str.c_str(), beast::file_mode::scan, ec);
+
+                // Handle the case where the file doesn't exist
+                if (ec == boost::system::errc::no_such_file_or_directory)
+                    return send(not_found(req.target()));
+
+                // Handle an unknown error
+                if (ec)
+                    return send(server_error(ec.message()));
+
+                // Cache the size since we need it after the move
+                auto const size = body.size();
+
+                // Respond to HEAD request
+                if (req.method() == http::verb::head)
+                {
+                    http::response<http::empty_body> res{http::status::ok, req.version()};
+                    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                    res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                    res.content_length(size);
+                    res.keep_alive(req.keep_alive());
+                    return send(std::move(res));
+                }
+
+                // Respond to GET request
+                http::response<http::file_body> res{std::piecewise_construct,
+                                                    std::make_tuple(std::move(body)),
+                                                    std::make_tuple(http::status::ok, req.version())};
+                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                res.content_length(size);
+                res.keep_alive(req.keep_alive());
+                return send(std::move(res));
+            }
+        }
 
         void ep_make_req(http::request_parser<http::string_body>& pr);
 

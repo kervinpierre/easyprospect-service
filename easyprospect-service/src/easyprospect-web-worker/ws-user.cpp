@@ -9,10 +9,10 @@
 
 #include <easyprospect-web-worker/worker-server.h>
 #include <easyprospect-web-worker/worker-server-app.h>
+#include <easyprospect-web-worker/app-error.h>
 
-#include "easyprospect-service-shared/rpc.hpp"
-#include "easyprospect-service-shared/server.h"
-//#include "easyprospect-service-shared/service.hpp"
+#include <easyprospect-service-shared/rpc.hpp>
+#include <easyprospect-service-shared/server.h>
 #include <boost/asio/basic_signal_set.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/post.hpp>
@@ -23,7 +23,6 @@
 #include <easyprospect-service-shared/listener.h>
 #include <easyprospect-service-shared/message.hpp>
 #include <easyprospect-service-shared/uid.hpp>
-//#include <easyprospect-v8/easyprospect-v8.h>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <vector>
@@ -39,61 +38,6 @@ namespace service
 } // namespace service
 } // namespace easyprospect
 
-enum class error
-{
-    not_playing = 1,
-    already_playing,
-    already_leaving,
-    no_open_seat,
-    no_more_bets
-};
-
-beast::error_code make_error_code(error e);
-
-class error_codes : public beast::error_category
-{
-  public:
-    const char* name() const noexcept override
-    {
-        return "beast-lounge.blackjack";
-    }
-
-    std::string message(int ev) const override
-    {
-        switch (static_cast<error>(ev))
-        {
-        default:
-        case error::not_playing:
-            return "Not playing";
-        case error::already_playing:
-            return "Already playing";
-        case error::already_leaving:
-            return "Already playing";
-        case error::no_open_seat:
-            return "No open seat";
-        case error::no_more_bets:
-            return "No more bets";
-        }
-    }
-
-    beast::error_condition default_error_condition(int ev) const noexcept override
-    {
-        return {ev, *this};
-    }
-};
-
-namespace boost
-{
-namespace system
-{
-    template <>
-    struct is_error_code_enum<error>
-    {
-        static bool constexpr value = true;
-    };
-} // namespace system
-} // namespace boost
-
 //------------------------------------------------------------------------------
 
 namespace easyprospect
@@ -102,8 +46,6 @@ namespace service
 {
     namespace web_worker
     {
-
-
         // channel::channel(
         //    std::size_t reserved_cid,
         //    beast::string_view name)
@@ -358,82 +300,6 @@ namespace service
         }
 
         void make_blackjack_service(web_worker::application_impl& srv);
-
-        std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config)
-        {
-            beast::error_code ec;
-
-            // Read the server configuration
-            std::unique_ptr<application_impl> srv;
-            {
-                try
-                {
-                    // Create the server
-                    srv = boost::make_unique<application_impl>(curr_config);
-                }
-                catch (beast::system_error const& e)
-                {
-                    spdlog::debug("server_config: {}", e.code().message());
-
-                    return nullptr;
-                }
-            }
-
-            // Add services
-            make_blackjack_service(*srv);
-
-            // Create listeners
-            {
-                auto ls = curr_config.get_listeners();
-                for (auto& e : *ls)
-                {
-                    try
-                    {
-                        if (!run_listener(*srv, e))
-                            return nullptr;
-                    }
-                    catch (beast::system_error const& ex)
-                    {
-                        spdlog::debug("listener_config: {}", ex.code().message());
-
-                        return nullptr;
-                    }
-                }
-            }
-
-            return srv;
-        }
-
-        //------------------------------------------------------------------------------
-
-        void run_ws_session(
-            shared::application_impl_base& srv,
-            shared::listener&              lst,
-            stream_type                    stream,
-            endpoint_type                  ep,
-            websocket::request_type        req)
-        {
-        }
-
-        void run_ws_session(
-            shared::application_impl_base& srv,
-            shared::listener&              lst,
-            beast::ssl_stream<stream_type> stream,
-            endpoint_type                  ep,
-            websocket::request_type        req)
-        {
-            // auto sp = boost::make_shared<shared::ssl_ws_session_impl>(srv.get_doc_root(), std::move(stream), ep);
-            auto sp = boost::make_shared<shared::ws_session_t>(srv.get_doc_root(), std::move(stream), ep);
-            sp->set_dispatch_impl(srv.get_dispatch_impl());
-            sp->set_epjs_process_req_impl(srv.get_epjs_process_req_impl());
-
-            sp->set_wrapper(sp);
-            sp->run(std::move(req));
-        }
-
-        //------------------------------------------------------------------------------
-
-        //------------------------------------------------------------------------------
 
         class shoe
         {
@@ -1193,9 +1059,3 @@ namespace service
     } // namespace web_worker
 } // namespace service
 } // namespace easyprospect
-
-beast::error_code make_error_code(error e)
-{
-    static error_codes const cat{};
-    return {static_cast<std::underlying_type<error>::type>(e), cat};
-}

@@ -1,0 +1,6 @@
+
+# First basic test
+  --verbosity maximum      \
+  --debug-level ep_trace   \
+  --worker-exe epworker.exe   \
+  --worker-args-file "../../../data/test01/argsClient01.txt"

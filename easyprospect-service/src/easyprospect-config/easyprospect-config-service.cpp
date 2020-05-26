@@ -121,21 +121,6 @@ easyprospect_config_service_shell::init_args(int test_argc, char* test_argv[])
     return builder;
 }
 
-std::string
-easyprospect_config_service_listener_conf::str()
-{
-    std::stringstream sstr;
-
-    sstr << "name\t\t:"     << get_name()     << std::endl
-         << "port\t\t:"     << get_port()     << std::endl
-         << "min-port\t:" << get_min_port() << std::endl
-         << "max-port\t:" << get_max_port() << std::endl
-         << "address\t:"  << get_address()  << std::endl
-         << "kind\t:"     << get_kind()     << std::endl;
-
-    return sstr.str();
-}
-
 std::string easyprospect_config_service_core::str()
 {
     std::stringstream sstr;

@@ -19,12 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\easyprospect-web-worker\app-error.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\easyprospect-web-worker.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\make-server.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\worker-server-app.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\worker-server.cpp" />
-    <ClCompile Include="src\easyprospect-web-worker\ws_user.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\ws-session.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\ws-user.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\easyprospect-web-worker\app-error.h" />
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h" />
     <ClInclude Include="include\easyprospect-web-worker\worker-server-app.h" />
     <ClInclude Include="include\easyprospect-web-worker\worker-server.h" />

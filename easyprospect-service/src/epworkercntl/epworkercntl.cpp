@@ -1,41 +1,18 @@
 #include <iostream>
-
-//#include <boost/beast/core.hpp>
-#include <boost/config.hpp>
 #include <easyprospect-config/logging.h>
-#include <easyprospect-config/easyprospect-config-service.h>
 
-#include <easyprospect-web-worker/worker-server.h>
+#include <easyprospect-config/easyprospect-config-wcntl.h>
 
-
-//#ifdef BOOST_MSVC
-//#ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
-//#define WIN32_LEAN_AND_MEAN
-//#include <windows.h>
-//#undef WIN32_LEAN_AND_MEAN
-//#else
-//#include <windows.h>
-//#endif
-//#endif
-
-//------------------------------------------------------------------------------
-
-/** Create a web worker.
-
-    The configuration file is loaded,
-    and all child objects are created.
-*/
-
-//------------------------------------------------------------------------------
+#include <epworkercntl/make-server.h>
 
 int main(int argc, char* argv[])
 {
-    easyprospect::service::config ::easyprospect_config_service_shell       shell;
-    easyprospect::service::config::easyprospect_config_service_core_builder builder;
+    easyprospect::service::config ::easyprospect_config_wcntl_shell       shell;
+    easyprospect::service::config::easyprospect_config_wcntl_core_builder builder;
 
     try
     {
-        builder = easyprospect::service::config ::easyprospect_config_service_shell ::init_args(argc, argv);
+        builder = easyprospect::service::config ::easyprospect_config_wcntl_shell ::init_args(argc, argv);
     }
     catch (std::logic_error& ex)
     {
@@ -48,13 +25,11 @@ int main(int argc, char* argv[])
     {
         std::ostringstream disStr{};
 
-        disStr << easyprospect::service::config ::easyprospect_config_service_shell::get_description();
+        disStr << easyprospect::service::config ::easyprospect_config_wcntl_shell::get_description();
         disStr << std::endl << builder.get_help_str() << std::endl;
 
         std::cout << disStr.str();
     }
-
-    DebugBreak();
 
 #if BOOST_MSVC
     {
@@ -133,12 +108,13 @@ int main(int argc, char* argv[])
 
     spdlog::debug(sstr.str());
 
+    easyprospect::service::control_worker::make_server(res);
     // Create the server
-    auto srv = easyprospect::service::web_worker::make_server(res);
-    if (!srv)
-        return EXIT_FAILURE;
+    //auto srv = easyprospect::service::control_worker::make_server(res);
+    //if (!srv)
+    //    return EXIT_FAILURE;
 
-    srv->run();
+    //srv->run();
 
     return EXIT_SUCCESS;
 }

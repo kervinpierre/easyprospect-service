@@ -12,13 +12,22 @@
     <ClCompile Include="src\easyprospect-web-worker\easyprospect-web-worker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\easyprospect-web-worker\ws_user.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\easyprospect-web-worker\worker-server.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\easyprospect-web-worker\worker-server-app.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\ws-session.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\make-server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\ws-user.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\app-error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -30,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-web-worker\worker-server-app.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\app-error.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
