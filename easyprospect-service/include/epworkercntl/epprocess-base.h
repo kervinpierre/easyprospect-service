@@ -14,7 +14,7 @@ namespace service
             std::string command;
             std::string command_line;
             std::string args;
-
+            
         public:
             process_base(std::string c, std::string cl, std::string a, long p = 0)
             {
@@ -23,6 +23,11 @@ namespace service
                 args         = a;
                 pid          = p;
             }
+
+            virtual ~process_base()
+            {
+                ;
+            };
 
             long get_pid()
             {

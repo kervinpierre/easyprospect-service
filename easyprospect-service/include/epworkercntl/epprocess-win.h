@@ -81,6 +81,8 @@ namespace service
 
                 return so.str();
             }
+
+            ~process_win() override;
         };
 
         class process_control_win final : process_control_base
@@ -132,6 +134,13 @@ namespace service
             BOOL connect_to_new_client(HANDLE hPipe, LPOVERLAPPED lpo);
         };
 
+        BOOL APIENTRY MyCreatePipeEx(
+            OUT LPHANDLE             lpReadPipe,
+            OUT LPHANDLE             lpWritePipe,
+            IN LPSECURITY_ATTRIBUTES lpPipeAttributes,
+            IN DWORD                 nSize,
+            DWORD                    dwReadMode,
+            DWORD                    dwWriteMode);
     } // namespace control_worker
 } // namespace service
 } // namespace easyprospect

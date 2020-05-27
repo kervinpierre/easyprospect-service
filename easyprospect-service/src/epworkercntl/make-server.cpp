@@ -57,6 +57,8 @@ namespace service
                     spdlog::debug("Process stopped unexpectedly. {}", proc->str());
 
                     // start a new one?
+                    proc.reset();
+                    exit = true;
                 }
 
                 if (!pcntl->is_running())
