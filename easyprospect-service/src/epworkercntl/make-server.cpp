@@ -15,6 +15,8 @@ namespace service
             auto wc = curr_config.get_worker_conf();
             auto wa = curr_config.get_worker_args_file();
 
+            int proc_count = 1;
+
             if ( !cmd )
             {
                 // Missing command
@@ -36,15 +38,18 @@ namespace service
             }
 
             command_line = command + " " + command_args;
-            auto proc  = std::make_unique<process>(command, command_line, command_args);
-            auto pcntl = std::make_unique<process_control>();
 
+            auto pcntl = std::make_unique<process_control>();
             pcntl->setup();
             pcntl->start();
 
-            // TODO: KP. Start the specified number of processes
-            proc->setup();
-            proc->start();
+            auto proc_list = std::vector<std::unique_ptr<process>>();
+            for (auto i=0; i<proc_count; i++ )
+            {
+                proc_list.emplace_back(std::make_unique<process>(command, command_line, command_args));
+                proc_list[i]->setup();
+                proc_list[i]->start();
+            }
 
             bool exit = false;
 
@@ -52,13 +57,22 @@ namespace service
             {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
 
-                if (!proc->is_running())
+                for (auto i = 0; i < proc_count; i++)
                 {
-                    spdlog::debug("Process stopped unexpectedly. {}", proc->str());
+                    if(proc_list[i]==nullptr)
+                    {
+                        // Maybe deleted/terminated process?
+                        // start a new one?
+                        exit = true;
+                    }
+                    else if (!proc_list[i]->is_running())
+                    {
+                        spdlog::debug("Process stopped unexpectedly. {}", proc_list[i]->str());
 
-                    // start a new one?
-                    proc.reset();
-                    exit = true;
+                        proc_list[i].reset();
+
+                        exit = true;
+                    }
                 }
 
                 if (!pcntl->is_running())
