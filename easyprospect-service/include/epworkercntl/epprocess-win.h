@@ -85,6 +85,8 @@ namespace service
             ~process_win() override;
         };
 
+        BOOL WINAPI               ep_win_console_handler(DWORD signal);
+
         class process_control_win final : process_control_base
         {
           private:
@@ -103,6 +105,15 @@ namespace service
             process_control_win()
             {
                 pipe_name = "\\\\.\\pipe\\easyprospect_pipe_01";
+
+            }
+
+            void register_handler() override
+            {
+                if (!SetConsoleCtrlHandler(ep_win_console_handler, TRUE))
+                {
+                    spdlog::error("\nERROR: Could not set control handler");
+                }
             }
 
             bool is_running();

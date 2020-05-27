@@ -324,8 +324,8 @@ void process_win::listen_loop()
 
         case WAIT_TIMEOUT:
             // Debugging, exit after waiting for a bit
-            if(++cycles>6)
-                stop=true;
+           // if(++cycles>6)
+             //   stop=true;
             break;
 
         case WAIT_FAILED:
@@ -356,6 +356,8 @@ void process_win::stop() const
 
 process_win::~process_win()
 {
+    spdlog::debug("Destructor stopping process {}", pi.dwProcessId);
+
     TerminateProcess(pi.hProcess, 0);
 
     auto res = WaitForSingleObject(pi.hProcess, 5000);
@@ -379,6 +381,22 @@ process_win::~process_win()
     }
 
     stop();
+}
+
+using namespace easyprospect::service::control_worker;
+
+extern volatile int ep_full_exit;
+
+BOOL WINAPI easyprospect::service::control_worker::ep_win_console_handler(DWORD signal)
+{
+
+    if (signal == CTRL_C_EVENT)
+    {
+        ep_full_exit = 1;
+        spdlog::debug("Ctrl-C handled\n"); // do cleanup
+    }
+
+    return TRUE;
 }
 
 DWORD WINAPI process_control_win::run_control_thread(void* vptr)

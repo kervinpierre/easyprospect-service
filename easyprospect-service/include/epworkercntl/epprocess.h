@@ -74,6 +74,11 @@ namespace service
                 p_obj_.send(i, obj);
             }
 
+            void register_handler()
+            {
+                p_obj_.register_handler();
+            }
+
             bool is_running()
             {
                 return p_obj_.is_running();

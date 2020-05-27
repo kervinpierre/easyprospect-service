@@ -1,12 +1,15 @@
 #include <epworkercntl/epprocess.h>
 #include <epworkercntl/make-server.h>
 
+extern volatile int ep_full_exit = 0;
+
 namespace easyprospect
 {
 namespace service
 {
     namespace control_worker
     {
+
         void make_server(config::easyprospect_config_wcntl_core curr_config)
         {
             std::string command, command_line, command_args;
@@ -40,6 +43,7 @@ namespace service
             command_line = command + " " + command_args;
 
             auto pcntl = std::make_unique<process_control>();
+            pcntl->register_handler();
             pcntl->setup();
             pcntl->start();
 
@@ -51,8 +55,6 @@ namespace service
                 proc_list[i]->start();
             }
 
-            bool exit = false;
-
             do
             {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -63,7 +65,7 @@ namespace service
                     {
                         // Maybe deleted/terminated process?
                         // start a new one?
-                        exit = true;
+                        ep_full_exit = 1;
                     }
                     else if (!proc_list[i]->is_running())
                     {
@@ -71,16 +73,18 @@ namespace service
 
                         proc_list[i].reset();
 
-                        exit = true;
+                        ep_full_exit = 1;
                     }
                 }
 
                 if (!pcntl->is_running())
                 {
                     spdlog::debug("Control thread stopped.");
-                    exit = true;
+                    ep_full_exit = 1;
                 }
-            } while (!exit) ;
+            } while (!ep_full_exit) ;
+
+            spdlog::debug("Control Server stopped.");
         }
     } // namespace control_worker
 } // namespace service
