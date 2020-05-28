@@ -22,7 +22,7 @@ namespace service
 {
     namespace control_worker
     {
-        const uint32_t          buffsize = 32;
+        const uint32_t          buffsize = 2048;
 
         inline std::string geterror_to_string(bool pass_error = false, DWORD erro = 0)
         {

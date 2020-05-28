@@ -245,6 +245,7 @@ namespace easyprospect
                     return false;
                 }
 
+                spdlog::debug("open_port(): {}:{} succeeded", addr.to_string(), port);
                 return true;
             }
 

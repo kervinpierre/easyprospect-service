@@ -319,7 +319,7 @@ void process_win::listen_loop()
 
         case WAIT_OBJECT_0 + 3:
             // Process ended
-            stop = true;
+             stop = true;
             break;
 
         case WAIT_TIMEOUT:
