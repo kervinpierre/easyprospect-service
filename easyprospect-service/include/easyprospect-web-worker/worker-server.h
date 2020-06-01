@@ -11,6 +11,8 @@
 
 #include <easyprospect-service-shared/user_base.hpp>
 
+#include "easyprospect-service-shared/easyprospect-process-cntrl-client.h"
+
 namespace easyprospect
 {
 namespace service
@@ -26,6 +28,8 @@ namespace service
         std::unique_ptr<channel_list_impl> make_channel_list(web_worker::application_impl& srv);
         void                               make_room(channel_list& list, beast::string_view name);
         extern std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config);
+        extern std::unique_ptr<shared::process_cntrl_client> make_control_server(
+            config::easyprospect_config_service_core curr_config);
         extern void                            make_system_channel(application_impl& srv);
         extern void                            make_blackjack_service(web_worker::application_impl& srv);
 

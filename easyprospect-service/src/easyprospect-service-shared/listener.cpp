@@ -213,6 +213,7 @@ namespace easyprospect
                 BOOST_ASSERT(sessions_.empty());
             }
 
+            // Open the port / socket for listening
             bool listener_impl::open_port(asio::ip::address addr, int port, beast::error_code ec)
             {
                 endpoint_type ep(addr, port);

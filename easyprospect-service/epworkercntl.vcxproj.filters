@@ -56,6 +56,9 @@
     <ClCompile Include="src\epworkercntl\epprocess-win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\epworkercntl\epprocess-control-win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\test01\argsWorkCntl01.txt">

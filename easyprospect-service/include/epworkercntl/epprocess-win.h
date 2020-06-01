@@ -118,9 +118,9 @@ namespace service
 
             bool is_running();
 
-            void start();
+            void start() override;
 
-            void stop();
+            void stop() override;
 
             void setup() override;
 

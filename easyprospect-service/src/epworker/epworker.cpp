@@ -2,11 +2,10 @@
 
 //#include <boost/beast/core.hpp>
 #include <boost/config.hpp>
-#include <easyprospect-config/logging.h>
 #include <easyprospect-config/easyprospect-config-service.h>
+#include <easyprospect-config/logging.h>
 
 #include <easyprospect-web-worker/worker-server.h>
-
 
 //#ifdef BOOST_MSVC
 //#ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
@@ -133,10 +132,31 @@ int main(int argc, char* argv[])
 
     spdlog::debug(sstr.str());
 
-    // Create the server
-    auto srv = easyprospect::service::web_worker::make_server(res);
-    if (!srv)
+    // Create the control server
+    std::unique_ptr<easyprospect::service::shared::process_cntrl_client> control_srv;
+    try
+    {
+        control_srv = easyprospect::service::web_worker::make_control_server(res);
+    }
+    catch (std::logic_error &ex)
+    {
+        spdlog::error("Control server failed. {}", ex.what());
         return EXIT_FAILURE;
+    }
+
+    if (control_srv == nullptr)
+    {
+        spdlog::error("Control server failed.");
+        return EXIT_FAILURE;
+    }
+
+    // Create the worker server
+    auto srv = easyprospect::service::web_worker::make_server(res);
+    if (srv == nullptr)
+    {
+        spdlog::error("Worker Server failed.");
+        return EXIT_FAILURE;
+    }
 
     srv->run();
 

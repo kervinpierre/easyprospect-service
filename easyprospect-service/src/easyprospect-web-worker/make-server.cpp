@@ -3,6 +3,7 @@
 #include <easyprospect-service-shared/externs.h>
 #include <easyprospect-service-shared/server.h>
 #include <easyprospect-web-worker/worker-server-app.h>
+#include <easyprospect-service-shared/easyprospect-process-cntrl-client.h>
 
 namespace easyprospect
 {
@@ -55,6 +56,35 @@ namespace service
 
             return srv;
         }
+
+        std::unique_ptr<shared::process_cntrl_client> make_control_server(
+            config::easyprospect_config_service_core curr_config)
+        {
+            auto pcntl = std::make_unique<shared::process_cntrl_client>();
+            pcntl->register_handler();
+            pcntl->setup();
+            pcntl->start();
+
+            // test
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            process_message_startup st;
+            pcntl->send(st);
+
+            // do
+            //{
+            //    std::this_thread::sleep_for(std::chrono::seconds(1));
+            //    if (!pcntl->is_running())
+            //    {
+            //        spdlog::debug("Control thread stopped.");
+            //        ep_full_exit = 1;
+            //    }
+            //} while (!ep_full_exit);
+            //
+
+            return pcntl;
+        }
+
 
     } // namespace web_worker
 } // namespace service

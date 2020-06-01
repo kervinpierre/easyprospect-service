@@ -43,6 +43,8 @@ namespace service
             virtual void send(int i, process_message_base& msg) = 0;
             virtual void setup()                         = 0;
             virtual void register_handler()                         = 0;
+            virtual void stop()                                  = 0;
+            virtual void start()                                 = 0;     
         };
     } // namespace control_worker
 } // namespace service
