@@ -60,31 +60,29 @@ void process_control_win::setup()
         // read event
         hEvents[i] = CreateEvent(
             NULL,  // default security attribute
-            TRUE,  // manual-reset event
-            TRUE,  // initial state = signaled
+            FALSE,  // manual-reset event
+            FALSE,  // initial state = signaled
             NULL); // unnamed event object
 
         // write event
         hEvents[i + INSTANCES] = CreateEvent(
             NULL,  // default security attribute
-            TRUE,  // manual-reset event
-            TRUE,  // initial state = signaled
+            FALSE,  // manual-reset event
+            FALSE,  // initial state = signaled
             NULL); // unnamed event object
 
         if (hEvents[i + INSTANCES] == NULL)
         {
             spdlog::debug("CreateEvent failed with {}.\n", GetLastError());
 
-            // TODO: KP throw exception
-            return;
+            throw std::logic_error("CreateEvent failed");
         }
 
         if (hEvents[i] == NULL)
         {
             spdlog::debug("CreateEvent failed with {}.\n", GetLastError());
 
-            // TODO: KP throw exception
-            return;
+            throw std::logic_error("CreateEvent failed");
         }
 
         woverlapped[i].hEvent             = hEvents[i];
@@ -106,8 +104,7 @@ void process_control_win::setup()
         if (Pipe[i] == INVALID_HANDLE_VALUE)
         {
             spdlog::debug("CreateNamedPipe failed with {}.\n", GetLastError());
-            // TODO: KP throw exception
-            return;
+            throw std::logic_error("CreateNamedPipe failed");
         }
 
         // Call the subroutine to connect to the new client
@@ -122,8 +119,133 @@ void process_control_win::listen_loop()
     DWORD i, dwWait, cbRet, dwErr;
     BOOL  fSuccess;
 
-    while (1)
+    bool              read_pipe     = false;
+    bool              read_pending  = false;
+    bool              write_pipe    = false;
+    bool              write_pending = false;
+    std::vector<unsigned char> input_buffer(50000);
+    DWORD             read_bytes;
+    DWORD             pipe_id = -1;
+    bool              stop    = false;
+
+    do
     {
+        if (read_pipe)
+        {
+            read_pending = true;
+            read_pipe    = false;
+
+            if( pipe_id < 0 || pipe_id >= INSTANCES)
+            {
+                spdlog::error("Pipe ID is invalid {}", pipe_id);
+                throw std::logic_error("Pipe ID is invalid");
+            }
+
+            // Read
+            DWORD read_res =
+                ReadFile(Pipe[pipe_id], input_buffer.data(), input_buffer.size(), &read_bytes, &woverlapped[i]);
+
+            // The read operation is still pending.
+
+            DWORD read_err = GetLastError();
+            if (!read_res)
+            {
+                switch (read_err)
+                {
+                case ERROR_IO_PENDING:
+                    break;
+
+                default:
+                    spdlog::error("ReadFile() Error: {}", geterror_to_string(true, read_err));
+                    throw std::logic_error("ReadFile() error");
+                    break;
+                }
+            }
+        }
+
+        if (read_pending)
+        {
+            read_pending = false;
+
+            auto gor_res = GetOverlappedResult(Pipe[pipe_id], &woverlapped[i], &read_bytes, false);
+            auto gor_err = GetLastError();
+            if (!gor_res)
+            {
+                switch (gor_err)
+                {
+                case ERROR_HANDLE_EOF:
+                    spdlog::debug("EOF when reading");
+                    break;
+
+                case ERROR_IO_INCOMPLETE:
+                    read_pending = true;
+                    break;
+
+                default:
+                {
+                    spdlog::debug("GetOverlappedResult() error");
+                }
+                }
+            }
+            else
+            {
+                // Successful completion
+                std::string o(input_buffer.begin(), input_buffer.end());
+                if (read_bytes < buffsize)
+                {
+                    o.resize(read_bytes);
+                }
+
+                spdlog::debug("client read ended : '{}'", o);
+
+                if( read_bytes > 0 )
+                {
+                    msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
+
+                    msgpack::object deserialized = oh.get();
+
+                    std::stringstream os;
+
+                    os << deserialized << std::endl;
+
+                    spdlog::debug("msgpack: '{}'", os.str());
+                }
+            }
+        }
+
+        if (write_pipe)
+        {
+            if (write_queue[pipe_id].empty())
+            {
+                SleepEx(100, true);
+            }
+            else
+            {
+                // Write
+                pending_write[pipe_id] = std::move(write_queue[pipe_id].front());
+                write_queue[pipe_id].pop();
+
+                auto& b = pending_write[pipe_id];
+
+                fSuccess = WriteFile(Pipe[pipe_id], b->data(), b->size(), &cbRet, &woverlapped[i]);
+
+                // The write operation is still pending.
+
+                dwErr = GetLastError();
+                if (!fSuccess && (dwErr == ERROR_IO_PENDING))
+                {
+                    ;
+                }
+                else
+                {
+                    // An error occurred; disconnect from the client.
+                    spdlog::debug("Error writing to file. {}", geterror_to_string());
+
+                    DisconnectAndReconnect(i);
+                }
+            }
+        }
+
         // Wait for the event object to be signaled, indicating
         // completion of an overlapped read, write, or
         // connect operation.
@@ -132,110 +254,45 @@ void process_control_win::listen_loop()
             INSTANCES * 2, // number of event objects
             hEvents,       // array of event objects
             FALSE,         // does not wait for all
-            INFINITE);     // waits indefinitely
+            5000);     // waits indefinitely
 
-        // dwWait shows which pipe completed the operation.
-
-        i = dwWait - WAIT_OBJECT_0; // determines which pipe
-        if (i < 0 || i > (INSTANCES * 2 - 1))
+        switch (dwWait)
         {
-            spdlog::debug("Index out of range.\n");
-            return;
+        case WAIT_TIMEOUT:
+            break;
+
+        case WAIT_FAILED:
+        {
+            std::stringstream err;
+            err << "Wait for process failed:\n" << geterror_to_string();
+            spdlog::error(err.str());
+            stop = true;
         }
+        break;
 
-        int pipe_id = i - INSTANCES;
-
-        auto res1 = GetOverlappedResult(
-            Pipe[pipe_id],   // handle to pipe
-            &woverlapped[i], // OVERLAPPED structure
-            &cbRet,          // bytes transferred
-            FALSE);
-        if (!res1)
-        {
-            spdlog::debug("ERR: GetOverlappedResult(): {}", geterror_to_string());
-        }
-
-        if (i < INSTANCES)
-        {
-            DWORD             cbRead;
-            std::vector<char> input_buffer(50000);
-
-            // Read
-            fSuccess = ReadFile(Pipe[i], input_buffer.data(), input_buffer.size(), &cbRead, &woverlapped[i]);
-
-            // The read operation is still pending.
-
-            dwErr = GetLastError();
-            if (!fSuccess && (dwErr == ERROR_IO_PENDING))
+        default:
             {
-                ;
-            }
-            else
-            {
-                // An error occurred; disconnect from the client.
-                DisconnectAndReconnect(i);
-            }
-        }
-        else
-        {
-            bool write = false;
-            if (res1)
-            {
-                if (pending_write[pipe_id] == nullptr)
+                i = dwWait - WAIT_OBJECT_0; // determines which pipe
+                if (i < 0 || i > (INSTANCES * 2 - 1))
                 {
-                    // Nothing pending
-                    write = true;
+                    spdlog::debug("Index out of range.\n");
+                    return;
+                }
+
+                if (i < INSTANCES)
+                {
+                    read_pipe = true;
+                    pipe_id = i;
                 }
                 else
                 {
-                    if (pending_write[pipe_id]->size() == cbRet)
-                    {
-                        // The write completed
-                        pending_write[pipe_id] = nullptr;
-                        write                  = true;
-                    }
-                    else
-                    {
-                        // Not done writing
-                        ;
-                    }
+                    write_pipe = true;
+                    pipe_id = i - INSTANCES;
                 }
             }
-
-            if (write)
-            {
-                if (write_queue[pipe_id].empty())
-                {
-                    SleepEx(100, true);
-                }
-                else
-                {
-                    // Write
-                    pending_write[pipe_id] = std::move(write_queue[pipe_id].front());
-                    write_queue[pipe_id].pop();
-
-                    auto& b = pending_write[pipe_id];
-
-                    fSuccess = WriteFile(Pipe[pipe_id], b->data(), b->size(), &cbRet, &woverlapped[i]);
-
-                    // The write operation is still pending.
-
-                    dwErr = GetLastError();
-                    if (!fSuccess && (dwErr == ERROR_IO_PENDING))
-                    {
-                        ;
-                    }
-                    else
-                    {
-                        // An error occurred; disconnect from the client.
-                        spdlog::debug("Error writing to file. {}", geterror_to_string());
-
-                        DisconnectAndReconnect(i);
-                    }
-                }
-            }
+            break;
         }
-    }
+    } while (!stop);
 }
 
 void process_control_win::send(int i, control_worker::process_message_base& obj)

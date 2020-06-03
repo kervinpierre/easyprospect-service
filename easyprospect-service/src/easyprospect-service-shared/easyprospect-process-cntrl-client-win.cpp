@@ -74,7 +74,12 @@ listen_loop()
     while (1)
     {
         hPipe = CreateFileA(
-            pipe_name.c_str(), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
+            pipe_name.c_str(), 
+            GENERIC_READ | GENERIC_WRITE, 
+            0, NULL, 
+            OPEN_EXISTING, 
+            FILE_FLAG_OVERLAPPED,
+            NULL);
 
         auto gle = GetLastError();
 
@@ -84,7 +89,7 @@ listen_loop()
         switch (gle)
         {
         case ERROR_FILE_NOT_FOUND:
-            spdlog::error("Missing pipe ( Is the server running )");
+            spdlog::error("Missing pipe. ( is the server running? )");
             throw std::logic_error("Pipe not found error");
             break;
 
@@ -98,6 +103,13 @@ listen_loop()
             spdlog::error("Could not open pipe. '{}'\n", geterror_to_string(true, gle));
             throw std::logic_error("Pipe error");
             break;
+        }
+
+        DWORD dwMode_ = PIPE_READMODE_MESSAGE;
+        if (!SetNamedPipeHandleState(hPipe, &dwMode_, NULL, NULL))
+        {
+            spdlog::error("Error creating client pipe");
+            throw std::logic_error("Client pipe error");
         }
 
         if (!WaitNamedPipeA(pipe_name.c_str(), 20000))
@@ -199,7 +211,7 @@ listen_loop()
             write_pipe = false;
             write_pending = true;
 
-            auto& b = write_queue.front();
+            auto b = std::move(write_queue.front());
             write_queue.pop();
 
             auto write_res = WriteFile(hPipe, b->data(), b->size(), &write_bytes, &woverlapped[1]);
@@ -214,7 +226,7 @@ listen_loop()
                 else
                 {
                     std::stringstream err;
-                    err << "Wait for process failed:\n" << geterror_to_string();
+                    err << "WriteFile failed:\n" << geterror_to_string();
                     spdlog::error(err.str());
                 }
             }
@@ -224,7 +236,7 @@ listen_loop()
         {
             write_pending = false;
 
-            auto gor_res = GetOverlappedResult(hPipe, &woverlapped[1], &write_bytes, false);
+            auto gor_res = GetOverlappedResult(hPipe, &woverlapped[1], &write_bytes, true);
             auto gor_err = GetLastError();
             if (!gor_res)
             {

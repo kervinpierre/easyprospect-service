@@ -1,8 +1,9 @@
 #pragma once
 
-#include <msgpack.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <msgpack.hpp>
+#include <spdlog/spdlog.h>
 
 namespace easyprospect
 {
@@ -12,18 +13,18 @@ namespace service
     {
         enum class process_message_type
         {
-            NONE = 0,
-            BASE = 1,
-            START = 2,
-            PING = 3,
-            PONG = 4,
-            CMD_STOP = 5,
-            CMD_RESULT= 6
+            NONE       = 0,
+            BASE       = 1,
+            START      = 2,
+            PING       = 3,
+            PONG       = 4,
+            CMD_STOP   = 5,
+            CMD_RESULT = 6
         };
 
         struct process_message_base
         {
-            process_message_type type; 
+            process_message_type type;
             int                  pid;
             int                  port;
             uint64_t             id1;
@@ -34,17 +35,20 @@ namespace service
             process_message_base()
             {
                 type = process_message_type::BASE;
+                pid  = 0;
+                port = 0;
+                id1  = 0;
+                id2  = 0;
 
                 // https://stackoverflow.com/questions/31255486/c-how-do-i-convert-a-stdchronotime-point-to-long-and-back
-                auto now    = std::chrono::system_clock::now();
-                auto now_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-                auto epoch  = now_ms.time_since_epoch();
-                auto value  = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
-                current_time  = value.count();
+                auto now     = std::chrono::system_clock::now();
+                auto now_ms  = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+                auto epoch   = now_ms.time_since_epoch();
+                auto value   = std::chrono::duration_cast<std::chrono::milliseconds>(epoch);
+                current_time = value.count();
             }
 
-        static std::unique_ptr<msgpack::sbuffer> pack(process_message_base& o);
-
+            static std::unique_ptr<msgpack::sbuffer> pack(process_message_base& o);
         };
 
         struct process_message_startup final : process_message_base
@@ -101,8 +105,22 @@ namespace service
                 break;
 
             case process_message_type::CMD_RESULT:
+            {
                 auto& p = static_cast<process_message_cmd_result&>(o); // UB at runtime
                 msgpack::pack<msgpack::sbuffer, process_message_cmd_result>(*sbuf, p);
+            }
+            break;
+
+            case process_message_type::START:
+            {
+                auto& p = static_cast<process_message_startup&>(o); // UB at runtime
+                msgpack::pack<msgpack::sbuffer, process_message_startup>(*sbuf, p);
+            }
+            break;
+
+            default:
+                spdlog::error("Pack message type unknown: {}", o.type);
+                throw std::logic_error("Message type unknown");
                 break;
             }
 
