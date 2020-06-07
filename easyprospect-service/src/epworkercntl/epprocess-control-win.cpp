@@ -60,14 +60,14 @@ void process_control_win::setup()
         // read event
         hEvents[i] = CreateEvent(
             NULL,  // default security attribute
-            FALSE,  // manual-reset event
+            TRUE,  // manual-reset event
             FALSE,  // initial state = signaled
             NULL); // unnamed event object
 
         // write event
         hEvents[i + INSTANCES] = CreateEvent(
             NULL,  // default security attribute
-            FALSE,  // manual-reset event
+            TRUE,  // manual-reset event
             FALSE,  // initial state = signaled
             NULL); // unnamed event object
 
@@ -116,132 +116,158 @@ void process_control_win::setup()
 
 void process_control_win::listen_loop()
 {
-    DWORD i, dwWait, cbRet, dwErr;
+    DWORD ovlp_id_, dwWait, cbRet, dwErr;
     BOOL  fSuccess;
 
-    bool              read_pipe     = false;
-    bool              read_pending  = false;
-    bool              write_pipe    = false;
-    bool              write_pending = false;
     std::vector<unsigned char> input_buffer(50000);
     DWORD             read_bytes;
-    DWORD             pipe_id = -1;
     bool              stop    = false;
+    
+    bool pipe_read_ready[INSTANCES] = {false};
+    bool pipe_write_ready[INSTANCES] = {false};
+    bool read_pending[INSTANCES]     = {false};
+    bool write_pending[INSTANCES]    = {false};
+
+    // Only for debugging
+    int64_t debug_read_count = 0;
+    int64_t debug_write_count = 0;
 
     do
     {
-        if (read_pipe)
+        for( auto i=0; i<INSTANCES; i++ )
         {
-            read_pending = true;
-            read_pipe    = false;
-
-            if( pipe_id < 0 || pipe_id >= INSTANCES)
+            if(pipe_read_ready[i])
             {
-                spdlog::error("Pipe ID is invalid {}", pipe_id);
-                throw std::logic_error("Pipe ID is invalid");
-            }
+                spdlog::trace("Read pipe : {}, pipe_id {}", debug_read_count++, i);
 
-            // Read
-            DWORD read_res =
-                ReadFile(Pipe[pipe_id], input_buffer.data(), input_buffer.size(), &read_bytes, &woverlapped[i]);
+                read_pending[i] = true;
+                pipe_read_ready[i] = false;
 
-            // The read operation is still pending.
+                // Read
+                DWORD read_res = ReadFile(
+                    Pipe[i], input_buffer.data(), input_buffer.size(), &read_bytes, &woverlapped[i]);
 
-            DWORD read_err = GetLastError();
-            if (!read_res)
-            {
-                switch (read_err)
+                // The read operation is still pending.
+
+                DWORD read_err = GetLastError();
+                if (!read_res)
                 {
-                case ERROR_IO_PENDING:
-                    break;
+                    switch (read_err)
+                    {
+                    case ERROR_IO_PENDING:
+                        spdlog::trace("Read pipe IO_PENDING");
+                        break;
 
-                default:
-                    spdlog::error("ReadFile() Error: {}", geterror_to_string(true, read_err));
-                    throw std::logic_error("ReadFile() error");
-                    break;
-                }
-            }
-        }
-
-        if (read_pending)
-        {
-            read_pending = false;
-
-            auto gor_res = GetOverlappedResult(Pipe[pipe_id], &woverlapped[i], &read_bytes, false);
-            auto gor_err = GetLastError();
-            if (!gor_res)
-            {
-                switch (gor_err)
-                {
-                case ERROR_HANDLE_EOF:
-                    spdlog::debug("EOF when reading");
-                    break;
-
-                case ERROR_IO_INCOMPLETE:
-                    read_pending = true;
-                    break;
-
-                default:
-                {
-                    spdlog::debug("GetOverlappedResult() error");
-                }
-                }
-            }
-            else
-            {
-                // Successful completion
-                std::string o(input_buffer.begin(), input_buffer.end());
-                if (read_bytes < buffsize)
-                {
-                    o.resize(read_bytes);
-                }
-
-                spdlog::debug("client read ended : '{}'", o);
-
-                if( read_bytes > 0 )
-                {
-                    msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
-
-                    msgpack::object deserialized = oh.get();
-
-                    std::stringstream os;
-
-                    os << deserialized << std::endl;
-
-                    spdlog::debug("msgpack: '{}'", os.str());
-                }
-            }
-        }
-
-        if (write_pipe)
-        {
-            if (write_queue[pipe_id].empty())
-            {
-                SleepEx(100, true);
-            }
-            else
-            {
-                // Write
-                pending_write[pipe_id] = std::move(write_queue[pipe_id].front());
-                write_queue[pipe_id].pop();
-
-                auto& b = pending_write[pipe_id];
-
-                fSuccess = WriteFile(Pipe[pipe_id], b->data(), b->size(), &cbRet, &woverlapped[i]);
-
-                // The write operation is still pending.
-
-                dwErr = GetLastError();
-                if (!fSuccess && (dwErr == ERROR_IO_PENDING))
-                {
-                    ;
+                    default:
+                        spdlog::error("ReadFile() Error: {}", geterror_to_string(true, read_err));
+                        throw std::logic_error("ReadFile() error");
+                        break;
+                    }
                 }
                 else
                 {
-                    // An error occurred; disconnect from the client.
-                    spdlog::debug("Error writing to file. {}", geterror_to_string());
+                    spdlog::trace("ReadFile returned non-zero");
+                };
+            }
+        }
 
-                    DisconnectAndReconnect(i);
+        for (auto i = 0; i < INSTANCES; i++)
+        {
+            if (pipe_write_ready[i])
+            {
+                spdlog::trace("Write pipe : {}", debug_write_count++);
+
+                if (write_queue[i].empty())
+                {
+                    if (!ResetEvent(&(woverlapped[i+INSTANCES].hEvent)))
+                    {
+                        spdlog::error("ResetEvent failed. {}", geterror_to_string());
+                    }
+                    SleepEx(100, true);
+                }
+                else
+                {
+                    // Write
+                    pending_write[i] = std::move(write_queue[i].front());
+                    write_queue[i].pop();
+
+                    auto& b = pending_write[i];
+
+                    fSuccess = WriteFile(Pipe[i], b->data(), b->size(), &cbRet, &woverlapped[i+INSTANCES]);
+
+                    // The write operation is still pending.
+
+                    dwErr = GetLastError();
+                    if (!fSuccess && (dwErr == ERROR_IO_PENDING))
+                    {
+                        ;
+                    }
+                    else
+                    {
+                        // An error occurred; disconnect from the client.
+                        spdlog::debug("Error writing to file. {}", geterror_to_string());
+
+                        DisconnectAndReconnect(ovlp_id_);
+                    }
+                }
+            }
+        }
+
+        for( auto i = 0; i<INSTANCES; i++ )
+        {
+            // Read pending
+            if (read_pending[i])
+            {
+                read_pending[i] = false;
+
+                auto gor_res = GetOverlappedResult(Pipe[i], &woverlapped[i], &read_bytes, false);
+                auto gor_err = GetLastError();
+                if (!gor_res)
+                {
+                    switch (gor_err)
+                    {
+                    case ERROR_HANDLE_EOF:
+                        spdlog::debug("EOF when reading");
+                        break;
+
+                    case ERROR_IO_INCOMPLETE:
+                        //read_pending[i] = true;
+                        spdlog::debug("IO_INCOMPLETE {}", i);
+                        if(!ResetEvent(&(woverlapped[i].hEvent)))
+                        {
+                            spdlog::error("ResetEvent failed. {}", geterror_to_string());
+                        }
+                        break;
+
+                    default:
+                    {
+                        spdlog::debug("GetOverlappedResult() error");
+                    }
+                    }
+                }
+                else
+                {
+                    // Successful completion
+                    std::string o(input_buffer.begin(), input_buffer.end());
+                    if (read_bytes < buffsize)
+                    {
+                        o.resize(read_bytes);
+                    }
+
+                    spdlog::debug("client read ended : '{}'", o);
+
+                    if (read_bytes > 0)
+                    {
+                        msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
+
+                        msgpack::object deserialized = oh.get();
+
+                        std::stringstream os;
+
+                        os << deserialized << std::endl;
+
+                        spdlog::debug("msgpack: '{}'", os.str());
+                    }
                 }
             }
         }
@@ -259,6 +285,7 @@ void process_control_win::listen_loop()
         switch (dwWait)
         {
         case WAIT_TIMEOUT:
+            spdlog::trace("listen_loop(): WAIT_TIMEOUT");
             break;
 
         case WAIT_FAILED:
@@ -272,22 +299,22 @@ void process_control_win::listen_loop()
 
         default:
             {
-                i = dwWait - WAIT_OBJECT_0; // determines which pipe
-                if (i < 0 || i > (INSTANCES * 2 - 1))
+                ovlp_id_ = dwWait - WAIT_OBJECT_0; // determines which pipe
+                spdlog::trace("Event signalled: {}", ovlp_id_);
+
+                if (ovlp_id_ < 0 || ovlp_id_ > (INSTANCES * 2 - 1))
                 {
                     spdlog::debug("Index out of range.\n");
                     return;
                 }
 
-                if (i < INSTANCES)
+                if (ovlp_id_ < INSTANCES)
                 {
-                    read_pipe = true;
-                    pipe_id = i;
+                    pipe_read_ready[ovlp_id_] = true;
                 }
                 else
                 {
-                    write_pipe = true;
-                    pipe_id = i - INSTANCES;
+                    pipe_write_ready[ovlp_id_-INSTANCES] = true;
                 }
             }
             break;
