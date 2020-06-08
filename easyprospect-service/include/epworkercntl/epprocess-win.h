@@ -98,6 +98,13 @@ namespace service
             DWORD       server_thread_id;
             std::string pipe_name;
 
+            volatile bool                                 pipe_read_ready[INSTANCES]  = {false};
+            volatile bool                                 pipe_write_ready[INSTANCES] = {false};
+            volatile bool                                 read_pending[INSTANCES]     = {false};
+            volatile bool                                 write_pending[INSTANCES]    = {false};
+
+            std::mutex                                    write_mutex;
+
             std::queue<std::unique_ptr<msgpack::sbuffer>> write_queue[INSTANCES];
             std::unique_ptr<msgpack::sbuffer>             pending_write[INSTANCES];
 

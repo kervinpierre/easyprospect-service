@@ -18,13 +18,12 @@ namespace service
 #ifdef BOOST_OS_WINDOWS
             process_win p_obj_;
 #else
-            process_linux p_obj_;
+            process_linux         p_obj_;
 #endif
 
-        public:
-            process(std::string c, std::string cl="", std::string a="", long p = 0) : p_obj_(c,cl,a,p)
+          public:
+            process(std::string c, std::string cl = "", std::string a = "", long p = 0) : p_obj_(c, cl, a, p)
             {
-                
             }
 
             void setup();
@@ -61,7 +60,7 @@ namespace service
           public:
             void setup()
             {
-                p_obj_.setup();     
+                p_obj_.setup();
             }
 
             void start()
@@ -84,6 +83,6 @@ namespace service
                 return p_obj_.is_running();
             }
         };
-    }
+    } // namespace control_worker
 } // namespace service
 } // namespace easyprospect

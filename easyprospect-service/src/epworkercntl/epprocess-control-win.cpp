@@ -61,14 +61,14 @@ void process_control_win::setup()
         hEvents[i] = CreateEvent(
             NULL,  // default security attribute
             TRUE,  // manual-reset event
-            FALSE,  // initial state = signaled
+            TRUE, // initial state = signaled
             NULL); // unnamed event object
 
         // write event
         hEvents[i + INSTANCES] = CreateEvent(
             NULL,  // default security attribute
             TRUE,  // manual-reset event
-            FALSE,  // initial state = signaled
+            TRUE, // initial state = signaled
             NULL); // unnamed event object
 
         if (hEvents[i + INSTANCES] == NULL)
@@ -110,7 +110,6 @@ void process_control_win::setup()
         // Call the subroutine to connect to the new client
 
         connect_to_new_client(Pipe[i], &woverlapped[i]);
-        connect_to_new_client(Pipe[i], &woverlapped[i + INSTANCES]);
     }
 }
 
@@ -120,32 +119,29 @@ void process_control_win::listen_loop()
     BOOL  fSuccess;
 
     std::vector<unsigned char> input_buffer(50000);
-    DWORD             read_bytes;
-    bool              stop    = false;
-    
-    bool pipe_read_ready[INSTANCES] = {false};
-    bool pipe_write_ready[INSTANCES] = {false};
-    bool read_pending[INSTANCES]     = {false};
-    bool write_pending[INSTANCES]    = {false};
+    DWORD                      read_bytes;
+    bool                       stop = false;
 
     // Only for debugging
-    int64_t debug_read_count = 0;
+    int64_t debug_read_count  = 0;
     int64_t debug_write_count = 0;
 
     do
     {
-        for( auto i=0; i<INSTANCES; i++ )
+        for (auto i = 0; i < INSTANCES; i++)
         {
-            if(pipe_read_ready[i])
+            if (pipe_read_ready[i])
             {
                 spdlog::trace("Read pipe : {}, pipe_id {}", debug_read_count++, i);
 
-                read_pending[i] = true;
+                read_pending[i]    = true;
                 pipe_read_ready[i] = false;
 
                 // Read
-                DWORD read_res = ReadFile(
-                    Pipe[i], input_buffer.data(), input_buffer.size(), &read_bytes, &woverlapped[i]);
+                DWORD read_res =
+                    ReadFile(Pipe[i], input_buffer.data(), input_buffer.size(), &read_bytes, &woverlapped[i]);
+
+                // TODO: KP. needs to handle the case when ReadFile completes immediately
 
                 // The read operation is still pending.
 
@@ -173,19 +169,28 @@ void process_control_win::listen_loop()
 
         for (auto i = 0; i < INSTANCES; i++)
         {
+            {
+                std::lock_guard<std::mutex> lock(write_mutex);
+
+                if (write_queue[i].empty())
+                {
+                    if (!ResetEvent(woverlapped[i + INSTANCES].hEvent))
+                    {
+                        spdlog::error("ResetEvent failed. {}", geterror_to_string());
+                    }
+                    pipe_write_ready[i] = false;
+                }
+                else
+                {
+                    pipe_write_ready[i] = true;     
+                }
+            }
+
             if (pipe_write_ready[i])
             {
                 spdlog::trace("Write pipe : {}", debug_write_count++);
 
-                if (write_queue[i].empty())
-                {
-                    if (!ResetEvent(&(woverlapped[i+INSTANCES].hEvent)))
-                    {
-                        spdlog::error("ResetEvent failed. {}", geterror_to_string());
-                    }
-                    SleepEx(100, true);
-                }
-                else
+                if (!write_queue[i].empty())
                 {
                     // Write
                     pending_write[i] = std::move(write_queue[i].front());
@@ -193,80 +198,31 @@ void process_control_win::listen_loop()
 
                     auto& b = pending_write[i];
 
-                    fSuccess = WriteFile(Pipe[i], b->data(), b->size(), &cbRet, &woverlapped[i+INSTANCES]);
+                    fSuccess = WriteFile(Pipe[i], b->data(), b->size(), &cbRet, &woverlapped[i + INSTANCES]);
 
                     // The write operation is still pending.
 
                     dwErr = GetLastError();
-                    if (!fSuccess && (dwErr == ERROR_IO_PENDING))
+
+                    if (fSuccess)
                     {
-                        ;
+                        write_pending[i] = false;
+                        spdlog::debug("\nWrite to client completed.");
                     }
                     else
                     {
-                        // An error occurred; disconnect from the client.
-                        spdlog::debug("Error writing to file. {}", geterror_to_string());
-
-                        DisconnectAndReconnect(ovlp_id_);
-                    }
-                }
-            }
-        }
-
-        for( auto i = 0; i<INSTANCES; i++ )
-        {
-            // Read pending
-            if (read_pending[i])
-            {
-                read_pending[i] = false;
-
-                auto gor_res = GetOverlappedResult(Pipe[i], &woverlapped[i], &read_bytes, false);
-                auto gor_err = GetLastError();
-                if (!gor_res)
-                {
-                    switch (gor_err)
-                    {
-                    case ERROR_HANDLE_EOF:
-                        spdlog::debug("EOF when reading");
-                        break;
-
-                    case ERROR_IO_INCOMPLETE:
-                        //read_pending[i] = true;
-                        spdlog::debug("IO_INCOMPLETE {}", i);
-                        if(!ResetEvent(&(woverlapped[i].hEvent)))
+                        if (dwErr == ERROR_IO_PENDING)
                         {
-                            spdlog::error("ResetEvent failed. {}", geterror_to_string());
+                            // need to set write pending
+                            write_pending[i] = true;
                         }
-                        break;
+                        else
+                        {
+                            // An error occurred; disconnect from the client.
+                            spdlog::error("\nError writing to file. {}", geterror_to_string());
 
-                    default:
-                    {
-                        spdlog::debug("GetOverlappedResult() error");
-                    }
-                    }
-                }
-                else
-                {
-                    // Successful completion
-                    std::string o(input_buffer.begin(), input_buffer.end());
-                    if (read_bytes < buffsize)
-                    {
-                        o.resize(read_bytes);
-                    }
-
-                    spdlog::debug("client read ended : '{}'", o);
-
-                    if (read_bytes > 0)
-                    {
-                        msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
-
-                        msgpack::object deserialized = oh.get();
-
-                        std::stringstream os;
-
-                        os << deserialized << std::endl;
-
-                        spdlog::debug("msgpack: '{}'", os.str());
+                            DisconnectAndReconnect(i);
+                        }
                     }
                 }
             }
@@ -280,7 +236,7 @@ void process_control_win::listen_loop()
             INSTANCES * 2, // number of event objects
             hEvents,       // array of event objects
             FALSE,         // does not wait for all
-            5000);     // waits indefinitely
+            5000);         // waits indefinitely
 
         switch (dwWait)
         {
@@ -298,26 +254,97 @@ void process_control_win::listen_loop()
         break;
 
         default:
-            {
-                ovlp_id_ = dwWait - WAIT_OBJECT_0; // determines which pipe
-                spdlog::trace("Event signalled: {}", ovlp_id_);
+        {
+            ovlp_id_ = dwWait - WAIT_OBJECT_0; // determines which pipe
+            spdlog::trace("Event signalled: {}", ovlp_id_);
 
-                if (ovlp_id_ < 0 || ovlp_id_ > (INSTANCES * 2 - 1))
+            if (ovlp_id_ < 0 || ovlp_id_ > (INSTANCES * 2 - 1))
+            {
+                spdlog::debug("Index out of range.\n");
+                return;
+            }
+
+            if (ovlp_id_ < INSTANCES)
+            {
+                bool pipe_reinit = false;
+
+                if (read_pending[ovlp_id_])
                 {
-                    spdlog::debug("Index out of range.\n");
-                    return;
+                    auto gor_res = GetOverlappedResult(Pipe[ovlp_id_], &woverlapped[ovlp_id_], &read_bytes, false);
+
+                    if (gor_res)
+                    {
+                        read_pending[ovlp_id_] = false;
+                        // Successful completion
+                        std::string o(input_buffer.begin(), input_buffer.end());
+                        if (read_bytes < buffsize)
+                        {
+                            o.resize(read_bytes);
+                        }
+
+                        spdlog::debug("client read ended : '{}'", o);
+
+                        if (read_bytes > 0)
+                        {
+                            msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
+
+                            msgpack::object deserialized = oh.get();
+
+                            std::stringstream os;
+
+                            os << deserialized << std::endl;
+
+                            spdlog::debug("msgpack: '{}'", os.str());
+                        }
+                    }
+                    else
+                    {
+                        spdlog::error("\nERROR in Read from client for {}", ovlp_id_);
+                        DisconnectAndReconnect(ovlp_id_);
+                        pipe_reinit                = true;
+                        pipe_read_ready[ovlp_id_]  = false;
+                        pipe_write_ready[ovlp_id_] = false;
+                    }
                 }
 
-                if (ovlp_id_ < INSTANCES)
+                if (!pipe_reinit)
                 {
                     pipe_read_ready[ovlp_id_] = true;
-                }
-                else
-                {
-                    pipe_write_ready[ovlp_id_-INSTANCES] = true;
+                    // This is to set the initial state to be write ready after a connect
+                  //  if (!write_pending[ovlp_id_])
+                  //      pipe_write_ready[ovlp_id_] = true;
                 }
             }
-            break;
+            else
+            {
+                auto pipeid      = ovlp_id_ - INSTANCES;
+                bool pipe_reinit = false;
+
+                if (write_pending[pipeid])
+                {
+                    DWORD byteswritten = 0;
+                    auto  gor_res = GetOverlappedResult(Pipe[pipeid], &woverlapped[ovlp_id_], &byteswritten, false);
+
+                    if (gor_res)
+                    {
+                        write_pending[pipeid] = false;
+                        spdlog::debug("\nWrite to client completed. Bytes written = {}", byteswritten);
+                    }
+                    else
+                    {
+                        spdlog::debug("\nERROR in Write to client for {}", ovlp_id_);
+                        DisconnectAndReconnect(ovlp_id_);
+                        pipe_reinit                = true;
+                        pipe_read_ready[ovlp_id_]  = false;
+                        pipe_write_ready[ovlp_id_] = false;
+                    }
+                }
+
+               // if (!pipe_reinit)
+               //     pipe_write_ready[pipeid] = true;
+            }
+        }
+        break;
         }
     } while (!stop);
 }
@@ -328,7 +355,13 @@ void process_control_win::send(int i, control_worker::process_message_base& obj)
 
     auto buff = process_message_base::pack(obj);
 
+    std::lock_guard<std::mutex> lock(write_mutex);
+    pipe_write_ready[i] = true;
     write_queue[i].push(std::move(buff));
+    if (!SetEvent(woverlapped[i + INSTANCES].hEvent))
+    {
+        spdlog::error("SetEvent failed. {}", geterror_to_string());
+    }
 }
 
 void process_control_win::DisconnectAndReconnect(DWORD i)
@@ -343,7 +376,6 @@ void process_control_win::DisconnectAndReconnect(DWORD i)
     // Call a subroutine to connect to the new client.
 
     connect_to_new_client(Pipe[i], &woverlapped[i]);
-    connect_to_new_client(Pipe[i], &woverlapped[i + INSTANCES]);
 }
 
 BOOL process_control_win::connect_to_new_client(HANDLE hPipe, LPOVERLAPPED lpo)
