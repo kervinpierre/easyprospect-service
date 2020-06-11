@@ -37,7 +37,7 @@ namespace service
                 p_obj_.register_handler();
             }
 
-            void send(control_worker::process_message_base& obj)
+            void send(control::process_message_base& obj)
             {
                 p_obj_.send(obj);
             }

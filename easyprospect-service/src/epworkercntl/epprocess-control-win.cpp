@@ -275,27 +275,34 @@ void process_control_win::listen_loop()
                     if (gor_res)
                     {
                         read_pending[ovlp_id_] = false;
-                        // Successful completion
-                        std::string o(input_buffer.begin(), input_buffer.end());
-                        if (read_bytes < buffsize)
-                        {
-                            o.resize(read_bytes);
-                        }
-
-                        spdlog::debug("client read ended : '{}'", o);
 
                         if (read_bytes > 0)
                         {
-                            msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
-
-                            msgpack::object deserialized = oh.get();
-
-                            std::stringstream os;
-
-                            os << deserialized << std::endl;
-
-                            spdlog::debug("msgpack: '{}'", os.str());
+                            auto res = control::process_message_base::process_input(input_buffer, read_bytes);
                         }
+
+                        // Successful completion
+                        //std::string o(input_buffer.begin(), input_buffer.end());
+                        //if (read_bytes < buffsize)
+                        //{
+                        //    o.resize(read_bytes);
+                        //}
+
+                        //spdlog::debug("client read ended : '{}'", o);
+
+                        //if (read_bytes > 0)
+                        //{
+                        //    msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
+
+                        //    msgpack::object deserialized = oh.get();
+
+                        //    std::stringstream os;
+
+                        //    os << deserialized << std::endl;
+
+                        //    spdlog::debug("msgpack: '{}'", os.str());
+                        //}
+                        
                     }
                     else
                     {
@@ -349,11 +356,11 @@ void process_control_win::listen_loop()
     } while (!stop);
 }
 
-void process_control_win::send(int i, control_worker::process_message_base& obj)
+void process_control_win::send(int i, control::process_message_base& obj)
 {
     BOOL fSuccess = FALSE;
 
-    auto buff = process_message_base::pack(obj);
+    auto buff = control::process_message_base::pack(obj);
 
     std::lock_guard<std::mutex> lock(write_mutex);
     pipe_write_ready[i] = true;

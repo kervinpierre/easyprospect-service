@@ -309,7 +309,7 @@ setup()
 }
 
 void easyprospect::service::shared::process_cntrl_client_win::
-send(control_worker::process_message_base& obj)
+send(control::process_message_base& obj)
 {
     if( !is_running() )
     {
@@ -318,7 +318,7 @@ send(control_worker::process_message_base& obj)
 
     BOOL fSuccess = FALSE;
 
-    auto buff = control_worker::process_message_base::pack(obj);
+    auto buff = control::process_message_base::pack(obj);
 
     // FIXME: How should we extend the life of this object?
 

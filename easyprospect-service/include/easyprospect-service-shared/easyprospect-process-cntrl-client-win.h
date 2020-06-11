@@ -7,7 +7,7 @@
 #include <easyprospect-service-shared/easyprospect-process-cntrl-client-base.h>
 #include <windows.h>
 
-#include <epworkercntl/epprocess-message.h>
+#include <easyprospect-service-control/epprocess-message.h>
 #include <spdlog/spdlog.h>
 
 #include "epworkercntl/epprocess-win.h"
@@ -48,7 +48,7 @@ namespace service
             void stop() override;
             void listen_loop() override;
             void setup() override;
-            void send(control_worker::process_message_base& obj) override;
+            void send(control::process_message_base& obj) override;
             void register_handler() override;
             bool is_running() override;
         };

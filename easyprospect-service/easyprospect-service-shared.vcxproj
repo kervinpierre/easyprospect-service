@@ -57,6 +57,9 @@
     <ProjectReference Include="easyprospect-config.vcxproj">
       <Project>{3ef75984-9598-49d6-b4dc-ab71734e9cbc}</Project>
     </ProjectReference>
+    <ProjectReference Include="easyprospect-service-control.vcxproj">
+      <Project>{fedab78b-c134-49a6-b839-0c622d91e8e2}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

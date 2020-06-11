@@ -1,5 +1,5 @@
 #pragma once
-#include <epworkercntl/epprocess-message.h>
+#include <easyprospect-service-control/epprocess-message.h>
 
 namespace easyprospect
 {
@@ -40,7 +40,7 @@ namespace service
           public:
             virtual ~process_control_base()                      = default;
             virtual void listen_loop()                       = 0;
-            virtual void send(int i, process_message_base& msg) = 0;
+            virtual void send(int i, control::process_message_base& msg) = 0;
             virtual void setup()                         = 0;
             virtual void register_handler()                         = 0;
             virtual void stop()                                  = 0;

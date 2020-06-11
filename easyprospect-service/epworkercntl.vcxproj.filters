@@ -36,9 +36,6 @@
     <ClInclude Include="include\epworkercntl\control-worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\epworkercntl\epprocess-message.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\epworkercntl\epworkercntl.cpp">
@@ -48,9 +45,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\epworkercntl\worker-control-app.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\epworkercntl\epprocess-message.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\epworkercntl\epprocess-win.cpp">

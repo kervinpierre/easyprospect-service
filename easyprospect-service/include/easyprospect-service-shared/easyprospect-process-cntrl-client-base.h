@@ -15,7 +15,7 @@ namespace service
                 ;
             }
             virtual void listen_loop()                                   = 0;
-            virtual void send(control_worker::process_message_base& obj) = 0;
+            virtual void send(control::process_message_base& obj) = 0;
             virtual void setup()                                         = 0;
             virtual void stop()                                         = 0;
             virtual void start()                                         = 0;

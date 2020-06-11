@@ -68,7 +68,7 @@ namespace service
                 p_obj_.start();
             }
 
-            void send(int i, control_worker::process_message_base& obj)
+            void send(int i, control::process_message_base& obj)
             {
                 p_obj_.send(i, obj);
             }

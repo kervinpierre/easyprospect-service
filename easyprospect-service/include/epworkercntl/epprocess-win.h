@@ -135,7 +135,7 @@ namespace service
 
             static DWORD WINAPI run_control_thread(void* vptr);
 
-            void send(int i, control_worker::process_message_base& obj) override;
+            void send(int i, control::process_message_base& obj) override;
 
             // DisconnectAndReconnect(DWORD)
             // This function is called when an error occurs or when the client
