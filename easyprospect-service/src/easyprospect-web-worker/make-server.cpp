@@ -65,12 +65,6 @@ namespace service
             pcntl->setup();
             pcntl->start();
 
-            // test
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-
-            control::process_message_startup st;
-            pcntl->send(st);
-
             // do
             //{
             //    std::this_thread::sleep_for(std::chrono::seconds(1));

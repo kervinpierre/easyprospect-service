@@ -8,6 +8,7 @@
 #include <easyprospect-service-shared/types.hpp>
 
 #include "easyprospect-http-request.h"
+#include "easyprospect-process-cntrl-client.h"
 #include "service.hpp"
 
 namespace easyprospect
@@ -26,6 +27,7 @@ namespace service
          */
         class server
         {
+
           public:
             virtual ~server() = default;
 

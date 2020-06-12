@@ -27,6 +27,7 @@ namespace service
             time_point                                                                                 shutdown_time_;
             bool                                                                                       running_ = false;
             std::atomic<bool>                                                                          stop_;
+            std::unique_ptr<shared::process_cntrl_client>                                                      control_client_;
 
             std::unique_ptr<channel_list_impl> channel_list_;
 

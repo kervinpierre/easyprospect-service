@@ -82,6 +82,28 @@ namespace service
                     return res2;
                 });
 
+            // Create the control server
+            try
+            {
+                control_client_ = easyprospect::service::web_worker::make_control_server(cfg);
+            }
+            catch (std::logic_error& ex)
+            {
+                spdlog::error("Control server failed. {}", ex.what());
+                throw std::logic_error("control server failed.");
+            }
+
+            if (control_client_ == nullptr)
+            {
+                spdlog::error("Control server failed.");
+                throw std::logic_error("control server failed.");
+            }
+
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+
+            control::process_message_startup st;
+            control_client_->send(st);
+
             // TODO: KP. Move URL parsing to some place needed.
             // Base
             // UriUriW baseUri;

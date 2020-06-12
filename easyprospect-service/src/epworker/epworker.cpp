@@ -132,24 +132,6 @@ int main(int argc, char* argv[])
 
     spdlog::debug(sstr.str());
 
-    // Create the control server
-    std::unique_ptr<easyprospect::service::shared::process_cntrl_client> control_srv;
-    try
-    {
-        control_srv = easyprospect::service::web_worker::make_control_server(res);
-    }
-    catch (std::logic_error &ex)
-    {
-        spdlog::error("Control server failed. {}", ex.what());
-        return EXIT_FAILURE;
-    }
-
-    if (control_srv == nullptr)
-    {
-        spdlog::error("Control server failed.");
-        return EXIT_FAILURE;
-    }
-
     // Create the worker server
     auto srv = easyprospect::service::web_worker::make_server(res);
     if (srv == nullptr)
