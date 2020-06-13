@@ -48,7 +48,7 @@ namespace service
             static std::unique_ptr<process_message_base> process_input(
                 std::vector<unsigned char>& in, size_t bytes);
 
-            static std::unique_ptr<msgpack::sbuffer> pack(process_message_base& o);
+            static std::unique_ptr<msgpack::sbuffer> pack(const process_message_base& o);
 
         private:
             void config(process_message_type ty, int pi, int po, uint64_t i1, uint64_t i2, long long ct)
@@ -116,7 +116,7 @@ namespace service
             }
         };
 
-        inline std::unique_ptr<msgpack::sbuffer> process_message_base::pack(process_message_base& o)
+        inline std::unique_ptr<msgpack::sbuffer> process_message_base::pack(const process_message_base& o)
         // TODO: KP. There must be a better way to write this function
         {
             auto sbuf = std::make_unique<msgpack::sbuffer>();
@@ -130,14 +130,14 @@ namespace service
 
             case process_message_type::CMD_RESULT:
             {
-                auto& p = static_cast<process_message_cmd_result&>(o); // UB at runtime
+                auto& p = static_cast<const process_message_cmd_result&>(o); // UB at runtime
                 msgpack::pack<msgpack::sbuffer, process_message_cmd_result>(*sbuf, p);
             }
             break;
 
             case process_message_type::START:
             {
-                auto& p = static_cast<process_message_startup&>(o); // UB at runtime
+                auto& p = static_cast<const process_message_startup&>(o); // UB at runtime
                 msgpack::pack<msgpack::sbuffer, process_message_startup>(*sbuf, p);
             }
             break;

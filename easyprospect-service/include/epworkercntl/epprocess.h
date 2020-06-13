@@ -68,7 +68,7 @@ namespace service
                 p_obj_.start();
             }
 
-            void send(int i, control::process_message_base& obj)
+            void send(int i, const control::process_message_base& obj)
             {
                 p_obj_.send(i, obj);
             }
@@ -81,6 +81,11 @@ namespace service
             bool is_running()
             {
                 return p_obj_.is_running();
+            }
+
+            auto next_message(int i)
+            {
+                return p_obj_.next_message(i);     
             }
         };
     } // namespace control_worker

@@ -36,6 +36,9 @@
     <ClInclude Include="include\epworkercntl\control-worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\epworkercntl\epprocess-action.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\epworkercntl\epworkercntl.cpp">

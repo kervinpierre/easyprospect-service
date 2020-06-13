@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="includes\epworkercntl\worker-contol-app.h" />
     <ClInclude Include="include\epworkercntl\control-worker.h" />
+    <ClInclude Include="include\epworkercntl\epprocess-action.h" />
     <ClInclude Include="include\epworkercntl\epprocess-base.h" />
     <ClInclude Include="include\epworkercntl\epworkercntl.h" />
     <ClInclude Include="include\epworkercntl\epprocess-linux.h" />

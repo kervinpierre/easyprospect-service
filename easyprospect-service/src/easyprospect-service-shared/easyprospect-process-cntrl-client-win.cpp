@@ -185,24 +185,28 @@ listen_loop()
             else
             {
                 // Successful completion
-                std::string o(input_buffer.begin(), input_buffer.end());
-                if (read_bytes < buffsize)
-                {
-                    o.resize(read_bytes);
-                }
 
-                spdlog::debug("client read ended : '{}'", o);
+                auto res = control::process_message_base::process_input(input_buffer, read_bytes);
 
-                msgpack::object_handle oh
-                = msgpack::unpack(o.data(), o.size());
 
-                msgpack::object deserialized = oh.get();
+                //std::string o(input_buffer.begin(), input_buffer.end());
+                //if (read_bytes < buffsize)
+                //{
+                //    o.resize(read_bytes);
+                //}
 
-                std::stringstream os;
+                //spdlog::debug("client read ended : '{}'", o);
 
-                os << deserialized << std::endl;
+                //msgpack::object_handle oh
+                //= msgpack::unpack(o.data(), o.size());
 
-                spdlog::debug("msgpack: '{}'", os.str());
+                //msgpack::object deserialized = oh.get();
+
+                //std::stringstream os;
+
+                //os << deserialized << std::endl;
+
+                //spdlog::debug("msgpack: '{}'", os.str());
             }
         }
 

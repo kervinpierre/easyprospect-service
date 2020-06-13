@@ -17,7 +17,7 @@ std::unique_ptr<process_message_base>
         o.resize(bytes);
     }
 
-    spdlog::debug("client read ended : '{}'", o);
+    spdlog::debug("process_message_base::process_input() : '{}'", o);
 
     msgpack::object_handle oh = msgpack::unpack(o.data(), o.size());
 

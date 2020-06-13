@@ -104,9 +104,11 @@ namespace service
             volatile bool                                 write_pending[INSTANCES]    = {false};
 
             std::mutex                                    write_mutex;
+            std::mutex                                    read_mutex;
 
             std::queue<std::unique_ptr<msgpack::sbuffer>> write_queue[INSTANCES];
-            std::unique_ptr<msgpack::sbuffer>             pending_write[INSTANCES];
+            std::queue<std::unique_ptr<control::process_message_base>> read_queue[INSTANCES];
+           // std::unique_ptr<msgpack::sbuffer>             pending_write[INSTANCES];
 
           public:
             process_control_win()
@@ -132,10 +134,11 @@ namespace service
             void setup() override;
 
             void listen_loop() override;
+            std::unique_ptr<easyprospect::service::control::process_message_base> next_message(int i);
 
             static DWORD WINAPI run_control_thread(void* vptr);
 
-            void send(int i, control::process_message_base& obj) override;
+            void send(int i, const control::process_message_base& obj) override;
 
             // DisconnectAndReconnect(DWORD)
             // This function is called when an error occurs or when the client

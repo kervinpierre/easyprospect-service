@@ -193,10 +193,11 @@ void process_control_win::listen_loop()
                 if (!write_queue[i].empty())
                 {
                     // Write
-                    pending_write[i] = std::move(write_queue[i].front());
+                   // pending_write[i] = std::move(write_queue[i].front());
+                    auto b = std::move(write_queue[i].front());
                     write_queue[i].pop();
 
-                    auto& b = pending_write[i];
+                   // auto& b = pending_write[i];
 
                     fSuccess = WriteFile(Pipe[i], b->data(), b->size(), &cbRet, &woverlapped[i + INSTANCES]);
 
@@ -278,7 +279,10 @@ void process_control_win::listen_loop()
 
                         if (read_bytes > 0)
                         {
+                            std::lock_guard<std::mutex> lock(read_mutex);
+
                             auto res = control::process_message_base::process_input(input_buffer, read_bytes);
+                            read_queue->push(std::move(res));
                         }
 
                         // Successful completion
@@ -356,7 +360,21 @@ void process_control_win::listen_loop()
     } while (!stop);
 }
 
-void process_control_win::send(int i, control::process_message_base& obj)
+std::unique_ptr<easyprospect::service::control::process_message_base>
+process_control_win::next_message(int i)
+{
+    std::lock_guard<std::mutex> lock(read_mutex);
+
+    if ( read_queue->empty() )
+        return nullptr;
+
+    auto n = std::move(read_queue[i].front());
+    read_queue[i].pop();
+
+    return n;
+}
+
+void process_control_win::send(int i, const control::process_message_base& obj)
 {
     BOOL fSuccess = FALSE;
 
