@@ -34,13 +34,23 @@ std::unique_ptr<process_message_base>
         auto k = m.key.as<std::string>();
         spdlog::debug("key: '{}'", k);
 
-        if (k != "type")
+        process_message_type curr_type = process_message_type::NONE;
+
+        if (k == "type")
+        {
+            curr_type = m.val.as<process_message_type>();
+        }
+        else if (k == "process_message_base")
+        {
+            auto b    = m.val.as<process_message_base>();
+            curr_type = b.type;
+        }
+        else
         {
             continue;
         }
 
-        auto v = m.val.as<process_message_type>();
-        switch(v)
+        switch(curr_type)
         {
         case process_message_type::NONE: break;
         case process_message_type::BASE: break;
@@ -52,10 +62,19 @@ std::unique_ptr<process_message_base>
                 return st;
             }
             break;
+
         case process_message_type::PING: break;
         case process_message_type::PONG: break;
         case process_message_type::CMD_STOP: break;
-        case process_message_type::CMD_RESULT: break;
+        case process_message_type::CMD_RESULT:
+            {
+                auto rs = std::make_unique<process_message_cmd_result>();
+                deserialized.convert<process_message_cmd_result>(*rs);
+
+                return rs;
+            }
+            break;
+
         default: ;
         }
     }

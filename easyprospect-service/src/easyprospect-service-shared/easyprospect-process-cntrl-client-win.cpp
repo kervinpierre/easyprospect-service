@@ -42,8 +42,7 @@ listen_loop()
 {
     DWORD dwWait;
     bool stop = false;
-    bool read_pipe = true;
-    bool write_pipe = true;
+
     bool read_pending = false;
     bool write_pending = false;
     std::vector<unsigned char> input_buffer(50000);
@@ -57,15 +56,15 @@ listen_loop()
 
     wevent[0] = CreateEvent(
         NULL,  // default security attribute
-        FALSE, // manual-reset event
-        FALSE, // initial state = signaled
+        TRUE, // manual-reset event
+        TRUE, // initial state = signaled
         NULL); // unnamed event object
 
     // write event
     wevent[1] = CreateEvent(
         NULL,  // default security attribute
-        FALSE, // manual-reset event
-        FALSE, // initial state = signaled
+        TRUE, // manual-reset event
+        TRUE, // initial state = signaled
         NULL); // unnamed event object
 
     woverlapped[0].hEvent = wevent[0];
@@ -115,7 +114,8 @@ listen_loop()
         if (!WaitNamedPipeA(pipe_name.c_str(), 20000))
         {
             spdlog::error("Could not open pipe: 20 second wait timed out.");
-            return;
+            throw std::logic_error("Client pipe open timeout");
+
         }
     }
 
@@ -124,7 +124,7 @@ listen_loop()
     if (!fSuccess)
     {
         spdlog::error("SetNamedPipeHandleState failed. GLE={}\n", GetLastError());
-        return;
+        throw std::logic_error("SetNamedPipeHandleState failed");
     }
 
     InterlockedExchange(&initialized, 1);
@@ -143,7 +143,11 @@ listen_loop()
             // The read operation is still pending.
 
             DWORD read_err = GetLastError();
-            if (!read_res)
+            if (read_res)
+            {
+                spdlog::trace("ReadFile returned non-zero");
+            }
+            else
             {
                 switch (read_err)
                 {
@@ -158,132 +162,61 @@ listen_loop()
             }
         }
 
-        if (read_pending)
+        if ( write_pipe )
         {
-            read_pending = false;
-
-            auto gor_res = GetOverlappedResult(hPipe, &woverlapped[0], &read_bytes, false);
-            auto gor_err = GetLastError();
-            if (!gor_res)
             {
-                switch (gor_err)
+                std::lock_guard<std::mutex> lock(write_mutex);
+
+                if (write_queue.empty())
                 {
-                case ERROR_HANDLE_EOF:
-                    spdlog::debug("EOF when reading");
-                    break;
-
-                case ERROR_IO_INCOMPLETE:
-                    read_pending = true;
-                    break;
-
-                default:
-                {
-                    spdlog::debug("GetOverlappedResult() error");
-                }
-                }
-            }
-            else
-            {
-                // Successful completion
-
-                auto res = control::process_message_base::process_input(input_buffer, read_bytes);
-
-
-                //std::string o(input_buffer.begin(), input_buffer.end());
-                //if (read_bytes < buffsize)
-                //{
-                //    o.resize(read_bytes);
-                //}
-
-                //spdlog::debug("client read ended : '{}'", o);
-
-                //msgpack::object_handle oh
-                //= msgpack::unpack(o.data(), o.size());
-
-                //msgpack::object deserialized = oh.get();
-
-                //std::stringstream os;
-
-                //os << deserialized << std::endl;
-
-                //spdlog::debug("msgpack: '{}'", os.str());
-            }
-        }
-
-        if (write_pipe && !write_queue.empty())
-        {
-            write_pipe = false;
-            write_pending = true;
-
-            auto b = std::move(write_queue.front());
-            write_queue.pop();
-
-            auto write_res = WriteFile(hPipe, b->data(), b->size(), &write_bytes, &woverlapped[1]);
-            if (!write_res)
-            {
-                spdlog::error("WriteFile to pipe failed. GLE={}\n", GetLastError());
-                auto write_err = GetLastError();
-                if (write_err == ERROR_IO_PENDING)
-                {
-                    write_pending = true;
+                    if (!ResetEvent(wevent[1]))
+                    {
+                        spdlog::error("ResetEvent failed. {}", geterror_to_string());
+                    }
+                    write_pipe = false;
+                    write_pending = false;
                 }
                 else
                 {
-                    std::stringstream err;
-                    err << "WriteFile failed:\n" << geterror_to_string();
-                    spdlog::error(err.str());
-                }
-            }
-        }
-
-        if (write_pending)
-        {
-            write_pending = false;
-
-            auto gor_res = GetOverlappedResult(hPipe, &woverlapped[1], &write_bytes, true);
-            auto gor_err = GetLastError();
-            if (!gor_res)
-            {
-                switch (gor_err)
-                {
-                case ERROR_HANDLE_EOF:
-                    spdlog::debug("EOF when writing");
-                    break;
-
-                case ERROR_IO_INCOMPLETE:
+                    write_pipe = true;
                     write_pending = true;
-                    break;
-
-                default:
-                {
-                    spdlog::debug("GetOverlappedResult() error");
-                }
                 }
             }
-            else
+
+            if (write_pipe)
             {
-                // Successful completion
-                spdlog::debug("write completed");
+                auto b = std::move(write_queue.front());
+                write_queue.pop();
+
+                auto write_res = WriteFile(hPipe, b->data(), b->size(), &write_bytes, &woverlapped[1]);
+                DWORD write_err     = GetLastError();
+
+                if (write_res)
+                {
+                    write_pending = false;
+                    spdlog::debug("\nWrite to server completed.");
+                }
+                else
+                {
+                    if (write_err == ERROR_IO_PENDING)
+                    {
+                        write_pending = true;
+                    }
+                    else
+                    {
+                        spdlog::error("WriteFile to pipe failed. GLE={}\n", GetLastError());     
+
+                        std::stringstream err;
+                        err << "WriteFile failed:\n" << geterror_to_string();
+                        spdlog::error(err.str());
+                    }
+                }
             }
         }
 
         dwWait = WaitForMultipleObjects(2, &wevent[0], FALSE, 5000);
-        int i = dwWait - WAIT_OBJECT_0;
         switch (dwWait)
         {
-        case WAIT_OBJECT_0 + 0:
-            {
-                read_pipe = true;
-            }
-            break;
-
-        case WAIT_OBJECT_0 + 1:
-            // Write
-            {
-                write_pipe = true;
-            }
-            break;
-
         case WAIT_TIMEOUT:
             // Debugging, exit after waiting for a bit
             // if(++cycles>6)
@@ -291,15 +224,118 @@ listen_loop()
             break;
 
         case WAIT_FAILED:
-            {
-                std::stringstream err;
-                err << "Wait for process failed:\n" << geterror_to_string();
-                spdlog::error(err.str());
-                stop = true;
-            }
-            break;
+        {
+            std::stringstream err;
+            err << "Wait for client IO failed:\n" << geterror_to_string();
+            spdlog::error(err.str());
+            stop = true;
+        }
+        break;
 
         default:
+            {
+                DWORD ovlp_id_ = dwWait - WAIT_OBJECT_0; // determines which pipe
+                spdlog::trace("Event signalled: {}", ovlp_id_);
+
+                if (ovlp_id_== 0)
+                {
+                    read_pipe = true;
+
+                    if (read_pending)
+                    {
+                        read_pending = false;
+
+                        auto gor_res = GetOverlappedResult(hPipe, &woverlapped[0], &read_bytes, false);
+                        auto gor_err = GetLastError();
+                        if (gor_res)
+                        {
+                            // Successful completion
+
+                            if (read_bytes > 0)
+                            {
+                                auto res = control::process_message_base::process_input(input_buffer, read_bytes);
+                                read_queue.push(std::move(res));
+                            }
+
+                            // std::string o(input_buffer.begin(), input_buffer.end());
+                            // if (read_bytes < buffsize)
+                            //{
+                            //    o.resize(read_bytes);
+                            //}
+
+                            // spdlog::debug("client read ended : '{}'", o);
+
+                            // msgpack::object_handle oh
+                            //= msgpack::unpack(o.data(), o.size());
+
+                            // msgpack::object deserialized = oh.get();
+
+                            // std::stringstream os;
+
+                            // os << deserialized << std::endl;
+
+                            // spdlog::debug("msgpack: '{}'", os.str());
+                        }
+                        else
+                        {
+                            switch (gor_err)
+                            {
+                            case ERROR_HANDLE_EOF:
+                                spdlog::debug("EOF when reading");
+                                break;
+
+                            case ERROR_IO_INCOMPLETE:
+                                read_pending = true;
+                                break;
+
+                            default:
+                                {
+                                    spdlog::debug("GetOverlappedResult() error");
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (ovlp_id_== 1)
+                {
+                    write_pipe = true;
+
+                    if (write_pending)
+                    {
+                        write_pending = false;
+
+                        auto gor_res = GetOverlappedResult(hPipe, &woverlapped[1], &write_bytes, true);
+                        auto gor_err = GetLastError();
+                        if (gor_res)
+                        {
+                            // Successful completion
+                            spdlog::debug("write completed");
+                        }
+                        else
+                        {
+                            switch (gor_err)
+                            {
+                            case ERROR_HANDLE_EOF:
+                                spdlog::debug("EOF when writing");
+                                break;
+
+                            case ERROR_IO_INCOMPLETE:
+                                write_pending = true;
+                                break;
+
+                            default:
+                                {
+                                    spdlog::debug("GetOverlappedResult() error");
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    spdlog::warn("Invalid overlap : {}", ovlp_id_);
+                }
+            }
             break;
         }
     }
@@ -320,13 +356,15 @@ send(control::process_message_base& obj)
         throw std::logic_error("Control thread not running.");
     }
 
-    BOOL fSuccess = FALSE;
-
+    std::lock_guard<std::mutex> lock(write_mutex);
     auto buff = control::process_message_base::pack(obj);
 
-    // FIXME: How should we extend the life of this object?
-
+    write_pipe = true;
     write_queue.push(std::move(buff));
+    if (!SetEvent(wevent[1]))
+    {
+        spdlog::error("SetEvent failed. {}", geterror_to_string());
+    }
 }
 
 void easyprospect::service::shared::process_cntrl_client_win::

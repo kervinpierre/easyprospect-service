@@ -115,7 +115,7 @@ void process_control_win::setup()
 
 void process_control_win::listen_loop()
 {
-    DWORD ovlp_id_, dwWait, cbRet, dwErr;
+    DWORD dwWait, cbRet;
     BOOL  fSuccess;
 
     std::vector<unsigned char> input_buffer(50000);
@@ -146,7 +146,11 @@ void process_control_win::listen_loop()
                 // The read operation is still pending.
 
                 DWORD read_err = GetLastError();
-                if (!read_res)
+                if (read_res)
+                {
+                    spdlog::trace("ReadFile returned non-zero");
+                }
+                else
                 {
                     switch (read_err)
                     {
@@ -159,10 +163,6 @@ void process_control_win::listen_loop()
                         throw std::logic_error("ReadFile() error");
                         break;
                     }
-                }
-                else
-                {
-                    spdlog::trace("ReadFile returned non-zero");
                 };
             }
         }
@@ -203,7 +203,7 @@ void process_control_win::listen_loop()
 
                     // The write operation is still pending.
 
-                    dwErr = GetLastError();
+                    DWORD dwErr = GetLastError();
 
                     if (fSuccess)
                     {
@@ -248,7 +248,7 @@ void process_control_win::listen_loop()
         case WAIT_FAILED:
         {
             std::stringstream err;
-            err << "Wait for process failed:\n" << geterror_to_string();
+            err << "Wait for server IO failed:\n" << geterror_to_string();
             spdlog::error(err.str());
             stop = true;
         }
@@ -256,7 +256,7 @@ void process_control_win::listen_loop()
 
         default:
         {
-            ovlp_id_ = dwWait - WAIT_OBJECT_0; // determines which pipe
+            DWORD ovlp_id_ = dwWait - WAIT_OBJECT_0; // determines which pipe
             spdlog::trace("Event signalled: {}", ovlp_id_);
 
             if (ovlp_id_ < 0 || ovlp_id_ > (INSTANCES * 2 - 1))
@@ -282,7 +282,7 @@ void process_control_win::listen_loop()
                             std::lock_guard<std::mutex> lock(read_mutex);
 
                             auto res = control::process_message_base::process_input(input_buffer, read_bytes);
-                            read_queue->push(std::move(res));
+                            read_queue[ovlp_id_].push(std::move(res));
                         }
 
                         // Successful completion

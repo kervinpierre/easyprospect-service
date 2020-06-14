@@ -24,14 +24,21 @@ namespace service
         {
           private:
             std::string                                   pipe_name;
+
+            volatile bool                                 read_pipe  = true;
+            volatile bool                                 write_pipe = true;
+
             OVERLAPPED                                    woverlapped[2];
             HANDLE                                        wevent[2];
             HANDLE                                        hPipe;
             HANDLE                                        process_control_thread_handle_;
-            std::queue<std::unique_ptr<msgpack::sbuffer>> write_queue;
             DWORD                                         process_control_thread_id_;
             DWORD                                          initialized = 0;
-          public:
+            std::mutex write_mutex;
+            std::mutex read_mutex;
+            std::queue<std::unique_ptr<msgpack::sbuffer>>  write_queue;
+            std::queue<std::unique_ptr<control::process_message_base>> read_queue;
+        public:
             process_cntrl_client_win()
             {
                 pipe_name = R"(\\.\pipe\easyprospect_pipe_01)";
