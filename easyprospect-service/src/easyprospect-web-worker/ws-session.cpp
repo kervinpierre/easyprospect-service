@@ -5,17 +5,17 @@ void run_ws_session(
     easyprospect::service::shared::application_impl_base& srv,
     easyprospect::service::shared::listener&              lst,
     stream_type                    stream,
-    endpoint_type                  ep,
-    websocket::request_type        req)
+    boost::asio::ip::tcp::endpoint                  ep,
+    boost::beast::websocket::request_type        req)
 {
 }
 
 void run_ws_session(
     easyprospect::service::shared::application_impl_base& srv,
     easyprospect::service::shared::listener&              lst,
-    beast::ssl_stream<stream_type> stream,
-    endpoint_type                  ep,
-    websocket::request_type        req)
+    boost::beast::ssl_stream<stream_type> stream,
+    boost::asio::ip::tcp::endpoint                  ep,
+    boost::beast::websocket::request_type        req)
 {
     // auto sp = boost::make_shared<shared::ssl_ws_session_impl>(srv.get_doc_root(), std::move(stream), ep);
     auto sp = boost::make_shared<easyprospect::service::shared::ws_session_t>(srv.get_doc_root(), std::move(stream), ep);

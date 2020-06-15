@@ -40,7 +40,7 @@ namespace service
             return doc_root_;
         }
 
-        void ws_session_t::run(websocket::request_type req)
+        void ws_session_t::run(boost::beast::websocket::request_type req)
         {
             if (plain_ptr_)
             {
@@ -81,8 +81,8 @@ namespace service
             application_impl_base& srv,
             listener&              lst,
             stream_type            stream,
-            endpoint_type          ep,
-            flat_storage           storage) :
+            boost::asio::ip::tcp::endpoint          ep,
+            boost::beast::flat_buffer           storage) :
             http_session_base(srv, lst, ep, std::move(storage)),
             stream_(std::move(stream))
         {
@@ -97,17 +97,17 @@ namespace service
         ssl_http_session_impl::ssl_http_session_impl(
             application_impl_base& srv,
             listener&              lst,
-            asio::ssl::context&    ctx,
+            boost::asio::ssl::context&    ctx,
             stream_type            stream,
-            endpoint_type          ep,
-            flat_storage           storage) :
+            boost::asio::ip::tcp::endpoint          ep,
+            boost::beast::flat_buffer           storage) :
             http_session_base(srv, lst, ep, std::move(storage)),
             stream_(std::move(stream), ctx)
         {
             doc_root_ = srv.get_doc_root();
         }
 
-        void ep_make_req(http::request_parser<http::string_body>& pr)
+        void ep_make_req(boost::beast::http::request_parser<boost::beast::http::string_body>& pr)
         {
             std::stringstream out;
 
@@ -122,7 +122,7 @@ namespace service
             auto rq = pr.get();
             
             rq.content_length(cl);
-            auto rt = rq[http::field::content_type];
+            auto rt = rq[boost::beast::http::field::content_type];
 
             auto b = rq.body();
 
@@ -151,13 +151,13 @@ namespace service
 
         
         // Return a reasonable mime type based on the extension of a file.
-        beast::string_view mime_type(beast::string_view path)
+        boost::beast::string_view mime_type(boost::beast::string_view path)
         {
-            using beast::iequals;
+            using boost::beast::iequals;
             auto const ext = [&path] {
                 auto const pos = path.rfind(".");
-                if (pos == beast::string_view::npos)
-                    return beast::string_view{};
+                if (pos == boost::beast::string_view::npos)
+                    return boost::beast::string_view{};
                 return path.substr(pos);
             }();
             if (iequals(ext, ".htm"))

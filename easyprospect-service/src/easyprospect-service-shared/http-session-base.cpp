@@ -8,7 +8,7 @@ namespace service
     namespace shared
     {
         template <class Derived>
-        void http_session_base<Derived>::operator()(beast::error_code ec, std::size_t bytes_transferred, bool need_eof)
+        void http_session_base<Derived>::operator()(boost::beast::error_code ec, std::size_t bytes_transferred, bool need_eof)
         {
             boost::ignore_unused(bytes_transferred);
             reenter(*this)
@@ -33,7 +33,7 @@ namespace service
                 // do
                 //{
                 //    // auto& strm = impl()->stream();
-                //    // beast::ssl_stream<stream_type> strm = impl()->stream();
+                //    // boost::beast::ssl_stream<stream_type> strm = impl()->stream();
                 //
                 //    yield impl()->stream().async_read_some(storage_.prepare(100), bind_front(this));
                 //    if (ec)
@@ -64,17 +64,17 @@ namespace service
                 //} while (!(pr_->is_header_done())); // or is_done()
 
                 // // Read the next HTTP request
-                yield http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
+                yield boost::beast::http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
 
                 // This means they closed the connection
-                if (ec == http::error::end_of_stream)
+                if (ec == boost::beast::http::error::end_of_stream)
                 {
                     return impl()->do_close();
                 }
 
                 // Handle the error, if any
                 if (ec)
-                    return impl()->fail(ec, "http::async_read");
+                    return impl()->fail(ec, "boost::beast::http::async_read");
 
                 // TODO: KP. PROXY the HTTP request to a process here
                 if (send_worker_req_impl_)
@@ -116,13 +116,13 @@ namespace service
                 // From here and below is really about the worker
 
                 // See if it is a WebSocket Upgrade
-                if (websocket::is_upgrade(pr_->get()))
+                if (boost::beast::websocket::is_upgrade(pr_->get()))
                 {
                     // Turn off the expiration timer
                     impl()->expires_never();
 
                     // Convert the request type
-                    websocket::request_type req(pr_->release());
+                    boost::beast::websocket::request_type req(pr_->release());
 
                     // Create a WebSocket session by transferring the socket
 
@@ -149,21 +149,21 @@ namespace service
                     // The lifetime of the message has to extend
                     // for the duration of the async operation so
                     // we use a shared_ptr to manage it.
-                    // auto sp = std::make_shared<http::message<isRequest, Body, Fields>>(std::move(msg));
+                    // auto sp = std::make_shared<boost::beast::http::message<isRequest, Body, Fields>>(std::move(msg));
                     auto sp =
                         std::make_shared<std::remove_reference_t<decltype(msg)>>(std::forward<decltype(msg)>(msg));
 
                     // Write the response
                     auto self = bind_front(this);
-                    http::async_write(
-                        this->impl()->stream(), *sp, [self, sp](beast::error_code ec, std::size_t bytes_transferred) {
+                    boost::beast::http::async_write(
+                        this->impl()->stream(), *sp, [self, sp](boost::beast::error_code ec, std::size_t bytes_transferred) {
                             self(ec, bytes_transferred, sp->need_eof());
                         });
                 });
 
                 // Handle the error, if any
                 if (ec)
-                    return impl()->fail(ec, "http::async_write");
+                    return impl()->fail(ec, "boost::beast::http::async_write");
 
                 if (need_eof)
                 {
@@ -179,8 +179,8 @@ namespace service
             boost::optional<boost::filesystem::path> doc_root,
             listener&                                lst,
             stream_type                              str,
-            endpoint_type                            ep,
-            websocket::request_type                  req)
+            boost::asio::ip::tcp::endpoint                            ep,
+            boost::beast::websocket::request_type                  req)
         {
             //    shared::run_ws_session(srv, lst, std::move(str), ep, req);
 
@@ -206,12 +206,12 @@ namespace service
         }
 
         template void http_session_base<ssl_http_session_impl>::operator()(
-            beast::error_code ec,
+            boost::beast::error_code ec,
             std::size_t       bytes_transferred,
             bool              need_eof);
 
         template void http_session_base<plain_http_session_impl>::operator()(
-            beast::error_code ec,
+            boost::beast::error_code ec,
             std::size_t       bytes_transferred,
             bool              need_eof);
     } // namespace shared

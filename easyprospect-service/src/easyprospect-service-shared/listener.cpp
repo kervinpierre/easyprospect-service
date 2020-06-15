@@ -30,18 +30,18 @@ namespace easyprospect
             {
                 application_impl_base& srv_;
                 listener& lst_;
-                asio::ssl::context& ctx_;
+                boost::asio::ssl::context& ctx_;
                 stream_type stream_;
-                endpoint_type ep_;
-                flat_storage storage_;
+                boost::asio::ip::tcp::endpoint ep_;
+                boost::beast::flat_buffer storage_;
 
             public:
                 detector(
                     application_impl_base& srv,
                     listener& lst,
-                    asio::ssl::context& ctx,
+                    boost::asio::ssl::context& ctx,
                     socket_type sock,
-                    endpoint_type ep)
+                    boost::asio::ip::tcp::endpoint ep)
                     : srv_(srv)
                     , lst_(lst)
                     , ctx_(ctx)
@@ -60,7 +60,7 @@ namespace easyprospect
                     run()
                 {
                     // Use post to get on to our strand.
-                    net::post(
+                    boost::asio::post(
                         stream_.get_executor(),
                         bind_front(this));
                 }
@@ -68,9 +68,9 @@ namespace easyprospect
                 void
                     on_stop() override
                 {
-                    net::post(
+                    boost::asio::post(
                         stream_.get_executor(),
-                        beast::bind_front_handler(
+                        boost::beast::bind_front_handler(
                             &detector::do_stop,
                             this));
                 }
@@ -86,7 +86,7 @@ namespace easyprospect
 #include <boost/asio/yield.hpp>
                 void
                     operator()(
-                        beast::error_code ec = {},
+                        boost::beast::error_code ec = {},
                         bool is_tls = false)
                 {
                     reenter(*this)
@@ -96,7 +96,7 @@ namespace easyprospect
                             std::chrono::seconds(30));
 
                         // See if a TLS handshake is requested
-                        yield beast::async_detect_ssl(
+                        yield boost::beast::async_detect_ssl(
                             stream_,
                             storage_,
                             bind_front(this));
@@ -128,9 +128,9 @@ namespace easyprospect
 #include <boost/asio/unyield.hpp>
 
                 void
-                    fail(beast::error_code ec, char const* what)
+                    fail(boost::beast::error_code ec, char const* what)
                 {
-                    if (ec == net::error::operation_aborted)
+                    if (ec == boost::asio::error::operation_aborted)
                         spdlog::trace("{} \t {}", what, ec.message());
                         // LOG_TRC(log_, what, '\t', ec.message());
                     else
@@ -152,9 +152,9 @@ namespace easyprospect
             };
 
 
-            inline void listener_impl::fail(beast::error_code ec, char const* what)
+            inline void listener_impl::fail(boost::beast::error_code ec, char const* what)
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     spdlog::debug("{} \t {}", what, ec.message());
                 //LOG_TRC(log_, what, '\t', ec.message());
                 else
@@ -186,9 +186,9 @@ namespace easyprospect
             void listener_impl::on_stop()
             {
                 // Call do_stop from within the strand
-                net::post(
+                boost::asio::post(
                     acceptor_.get_executor(),
-                    beast::bind_front_handler(
+                    boost::beast::bind_front_handler(
                         &listener_impl::do_stop,
                         this));
             }
@@ -196,7 +196,7 @@ namespace easyprospect
             listener_impl::listener_impl(application_impl_base& srv,
                                          easyprospect::service::config::easyprospect_config_service_listener_conf cfg):
                 srv_(srv)
-                , ctx_(asio::ssl::context::tlsv12)
+                , ctx_(boost::asio::ssl::context::tlsv12)
                 , acceptor_(srv_.make_executor())
             {
                 cfg_ = config::easyprospect_config_service_listener_conf(
@@ -214,9 +214,9 @@ namespace easyprospect
             }
 
             // Open the port / socket for listening
-            bool listener_impl::open_port(asio::ip::address addr, int port, beast::error_code ec)
+            bool listener_impl::open_port(boost::asio::ip::address addr, int port, boost::beast::error_code ec)
             {
-                endpoint_type ep(addr, port);
+                boost::asio::ip::tcp::endpoint ep(addr, port);
 
                 // Open the acceptor
                 acceptor_.open(ep.protocol(), ec);
@@ -229,7 +229,7 @@ namespace easyprospect
 
                 // Allow address reuse
                 acceptor_.set_option(
-                    net::socket_base::reuse_address(true));
+                    boost::asio::socket_base::reuse_address(true));
                 if (ec)
                 {
                     spdlog::debug("acceptor_.set_option: {}", ec.message());
@@ -252,12 +252,12 @@ namespace easyprospect
 
             bool listener_impl::open()
             {
-                beast::error_code ec;
+                boost::beast::error_code ec;
 
                 spdlog::debug("creating address '{}'", cfg_.get_address());
                 spdlog::debug("creating port '{}' or random from '{}' to '{}'", cfg_.get_port(), cfg_.get_min_port(),
                               cfg_.get_max_port());
-                auto addr = net::ip::make_address(cfg_.get_address());
+                auto addr = boost::asio::ip::make_address(cfg_.get_address());
 
                 int port;
                 std::stringstream portStream(cfg_.get_port());
@@ -305,7 +305,7 @@ namespace easyprospect
 
                 // Start listening for connections
                 acceptor_.listen(
-                    net::socket_base::max_listen_connections, ec);
+                    boost::asio::socket_base::max_listen_connections, ec);
                 if (ec)
                 {
                     spdlog::debug("acceptor_.listen: {}", ec.message());
@@ -321,7 +321,7 @@ namespace easyprospect
                 spdlog::debug("listener::do_stop");
 
                 // Close the acceptor
-                beast::error_code ec;
+                boost::beast::error_code ec;
                 acceptor_.close(ec);
 
                 // Stop all the sessions
@@ -343,7 +343,7 @@ namespace easyprospect
 
             void
                 listener_impl::operator()(
-                    beast::error_code ec,
+                    boost::beast::error_code ec,
                     socket_type sock)
             {
                 reenter(*this)

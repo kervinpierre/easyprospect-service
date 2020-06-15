@@ -26,7 +26,7 @@ namespace service
 
         
         std::unique_ptr<channel_list_impl> make_channel_list(web_worker::application_impl& srv);
-        void                               make_room(channel_list& list, beast::string_view name);
+        void                               make_room(channel_list& list, boost::beast::string_view name);
         extern std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config);
         extern std::unique_ptr<shared::process_cntrl_client> make_control_server(
             config::easyprospect_config_service_core curr_config);
@@ -84,7 +84,7 @@ namespace service
             }
 
             /// Return the channel name
-            beast::string_view name() const noexcept
+            boost::beast::string_view name() const noexcept
             {
                 return name_;
             }
@@ -114,9 +114,9 @@ namespace service
             void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess);
 
           protected:
-            channel(std::size_t reserved_cid, beast::string_view name);
-            channel(beast::string_view name, channel_list& list);
-            channel(std::size_t reserved_cid, beast::string_view name, channel_list& list);
+            channel(std::size_t reserved_cid, boost::beast::string_view name);
+            channel(boost::beast::string_view name, channel_list& list);
+            channel(std::size_t reserved_cid, boost::beast::string_view name, channel_list& list);
             ~channel();
 
             // template<typename T>
@@ -136,7 +136,7 @@ namespace service
             // channel::
             //    channel(
             //        std::size_t reserved_cid,
-            //        beast::string_view name)
+            //        boost::beast::string_view name)
             //    : cid_(reserved_cid)
             //    , name_(name)
             //{
@@ -196,7 +196,7 @@ namespace service
         class room_impl : public channel
         {
           public:
-            room_impl(beast::string_view name, channel_list& list) : channel(2, name, list)
+            room_impl(boost::beast::string_view name, channel_list& list) : channel(2, name, list)
             {
             }
 

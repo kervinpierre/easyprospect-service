@@ -33,7 +33,7 @@ namespace easyprospect
             {
                 struct impl
                 {
-                    net::const_buffer cb;
+                    boost::asio::const_buffer cb;
                     std::atomic<std::size_t> count;
 
                     explicit
@@ -51,7 +51,7 @@ namespace easyprospect
 
             public:
                 using value_type =
-                    net::const_buffer;
+                    boost::asio::const_buffer;
 
                 using iterator =
                     value_type const*;
@@ -84,7 +84,7 @@ namespace easyprospect
                     class ConstBufferSequence
 #ifndef BOOST_BEAST_DOXYGEN
                     , class = typename std::enable_if<
-                    net::is_const_buffer_sequence<
+                    boost::asio::is_const_buffer_sequence<
                     ConstBufferSequence>::value>::type
 #endif
                 >
@@ -95,12 +95,12 @@ namespace easyprospect
                         {
                             allocator a;
                             auto const n =
-                                beast::buffer_bytes(buffers);
+                                boost::beast::buffer_bytes(buffers);
                             auto const p = ::new(a.allocate(
                                 (2 * sizeof(impl) + n - 1) /
                                 sizeof(impl))) impl(n);
-                            net::buffer_copy(
-                                net::mutable_buffer(
+                            boost::asio::buffer_copy(
+                                boost::asio::mutable_buffer(
                                     p + 1, n),
                                 buffers);
                             return p;

@@ -255,6 +255,9 @@ listen_loop()
                             {
                                 auto res = control::process_message_base::process_input(input_buffer, read_bytes);
                                 read_queue.push(std::move(res));
+
+                                // TODO: KP. Callback for boost::asio::post to ASIO here
+                               // static_assert(false, "dispatch to ASIO maybe via callback");
                             }
 
                             // std::string o(input_buffer.begin(), input_buffer.end());

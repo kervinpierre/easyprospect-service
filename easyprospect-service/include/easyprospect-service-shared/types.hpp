@@ -30,38 +30,36 @@
 
 /// The type of executor agents and sessions will use
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-using executor_type = net::strand<
-    net::system_executor>;
+using executor_type = boost::asio::strand<
+    boost::asio::system_executor>;
 #else
-using executor_type = net::strand<
-    net::io_context::executor_type>;
+using executor_type = boost::asio::strand<
+    boost::asio::io_context::executor_type>;
 #endif
 
 /// The type of socket for agents to use
 using socket_type =
-    net::basic_stream_socket<tcp, executor_type>;
+    boost::asio::basic_stream_socket<boost::asio::ip::tcp, executor_type>;
 
 /// The type of plain stream for sessions to use
 #if 1
 using stream_type =
-    beast::basic_stream<tcp, executor_type>;
+    boost::beast::basic_stream<boost::asio::ip::tcp, executor_type>;
 #else
 using stream_type = socket_type;
 #endif
 
 /// The type of timers
 using timer_type =
-    net::basic_waitable_timer<
+    boost::asio::basic_waitable_timer<
         std::chrono::steady_clock,
-        net::wait_traits<std::chrono::steady_clock>,
+        boost::asio::wait_traits<std::chrono::steady_clock>,
         executor_type>;
 
 /// The type of flat storage to use
-using flat_storage = beast::flat_buffer;
+//using flat_storage = boost::beast::flat_buffer;
 
-/// The type of network endpoint
-using endpoint_type = tcp::endpoint;
-
+/// The endpoint-type = tcp::endpoint;
 
 using epjs_process_req_impl_type =
     std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>;

@@ -71,7 +71,7 @@ namespace boost
     } // system
 } // boost
 
-beast::error_code
+boost::beast::error_code
 make_error_code(rpc_code e);
 
 namespace easyprospect
@@ -100,12 +100,12 @@ namespace easyprospect
                 rpc_error(
                     rpc_code ev)
                     : rpc_error(ev,
-                        beast::error_code(ev).message())
+                        boost::beast::error_code(ev).message())
                 {
                 }
 
                 rpc_error(
-                    beast::string_view msg)
+                    boost::beast::string_view msg)
                     : rpc_error(
                         rpc_code::invalid_params,
                         msg)
@@ -114,14 +114,14 @@ namespace easyprospect
 
                 rpc_error(
                     rpc_code ev,
-                    beast::string_view msg)
+                    boost::beast::string_view msg)
                     : code_(static_cast<int>(ev))
                     , msg_(msg)
                 {
                 }
 
                 rpc_error(
-                    beast::error_code const& ec)
+                    boost::beast::error_code const& ec)
                     : code_(static_cast<int>(ec.value()))
                     , msg_(ec.message())
                 {
@@ -183,7 +183,7 @@ namespace easyprospect
                 void
                     extract(
                         nlohmann::basic_json<>&& jv,
-                        beast::error_code& ec);
+                        boost::beast::error_code& ec);
 
                 /** Complete the RPC request with a success.
 
@@ -222,7 +222,7 @@ namespace easyprospect
                 nlohmann::json&
                 checked_value(
                     nlohmann::json& jv,
-                    beast::string_view key);
+                    boost::beast::string_view key);
 
             extern
                 std::string
@@ -232,7 +232,7 @@ namespace easyprospect
                 std::string
                 checked_string(
                     nlohmann::json& jv,
-                    beast::string_view key);
+                    boost::beast::string_view key);
             //------------------------------------------------------------------------------
 
         }

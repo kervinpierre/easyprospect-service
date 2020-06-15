@@ -20,8 +20,8 @@ namespace service
 
             easyprospect::service::config::easyprospect_config_service_core                            cfg_;
             std::vector<std::unique_ptr<easyprospect::service::shared::service>>                       services_;
-            net::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
-            asio::basic_signal_set<executor_type>                                                      signals_;
+            boost::asio::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
+            boost::asio::basic_signal_set<executor_type>                                                      signals_;
             std::condition_variable                                                                    cv_;
             std::mutex                                                                                 mutex_;
             time_point                                                                                 shutdown_time_;
@@ -84,8 +84,8 @@ namespace service
             {
                 // Get on the strand
                 if (!timer_.get_executor().running_in_this_thread())
-                    return net::post(
-                        timer_.get_executor(), beast::bind_front_handler(&application_impl::shutdown, this, cooldown));
+                    return boost::asio::post(
+                        timer_.get_executor(), boost::beast::bind_front_handler(&application_impl::shutdown, this, cooldown));
 
                 // Only callable once
                 if (timer_.expiry() != never())
@@ -95,9 +95,9 @@ namespace service
                 on_timer();
             }
 
-            void on_timer(beast::error_code ec = {})
+            void on_timer(boost::beast::error_code ec = {})
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     return;
 
                 auto const remain =
@@ -123,12 +123,12 @@ namespace service
                 jv["message"] = "Server is shutting down in " + std::to_string(remain.count()) + " seconds";
                 c->send(jv);
                 timer_.expires_after(amount);
-                timer_.async_wait(beast::bind_front_handler(&application_impl::on_timer, this));
+                timer_.async_wait(boost::beast::bind_front_handler(&application_impl::on_timer, this));
             }
 
-            void on_signal(beast::error_code ec, int signum)
+            void on_signal(boost::beast::error_code ec, int signum)
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     return;
 
                 spdlog::debug("application_impl::on_signal: #{}, {}\n", signum, ec.message());
@@ -136,7 +136,7 @@ namespace service
                 if (timer_.expiry() == never())
                 {
                     // Capture signals again
-                    signals_.async_wait(beast::bind_front_handler(&application_impl::on_signal, this));
+                    signals_.async_wait(boost::beast::bind_front_handler(&application_impl::on_signal, this));
 
                     this->shutdown(std::chrono::seconds(30));
                 }
@@ -151,7 +151,7 @@ namespace service
             {
                 // Get on the strand
                 if (!timer_.get_executor().running_in_this_thread())
-                    return net::post(timer_.get_executor(), beast::bind_front_handler(&application_impl::stop, this));
+                    return boost::asio::post(timer_.get_executor(), boost::beast::bind_front_handler(&application_impl::stop, this));
 
                 // Only callable once
                 if (stop_)
@@ -166,7 +166,7 @@ namespace service
 
                 // Cancel our outstanding I/O
                 timer_.cancel();
-                beast::error_code ec;
+                boost::beast::error_code ec;
                 signals_.cancel(ec);
             }
 

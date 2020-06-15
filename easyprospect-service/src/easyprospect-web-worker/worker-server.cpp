@@ -19,7 +19,7 @@ namespace service
             return boost::make_unique<channel_list_impl>(srv);
         }
 
-        void make_room(channel_list& list, beast::string_view name)
+        void make_room(channel_list& list, boost::beast::string_view name)
         {
             easyprospect::service::web_worker::insert<room_impl>(list, name, list);
         }

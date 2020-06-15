@@ -78,14 +78,14 @@ namespace service
             send_worker_req_impl_type  send_worker_req_impl_;
 
           public:
-            net::io_context ioc_;
+            boost::asio::io_context ioc_;
 
             executor_type make_executor() override
             {
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-                return net::make_strand(net::system_executor{});
+                return boost::asio::make_strand(boost::asio::system_executor{});
 #else
-                return net::make_strand(ioc_.get_executor());
+                return boost::asio::make_strand(ioc_.get_executor());
 #endif
             }
 

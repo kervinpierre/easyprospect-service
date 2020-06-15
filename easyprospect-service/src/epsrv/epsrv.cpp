@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
     spdlog::debug(sstr.str());
 
     // Create the server
-     beast::error_code ec;
+     boost::beast::error_code ec;
     auto srv = easyprospect::service::web_server::make_server(res);
     if (!srv)
         return EXIT_FAILURE;

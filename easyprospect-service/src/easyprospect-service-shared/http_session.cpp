@@ -34,8 +34,8 @@ namespace service
         // The returned path is normalized for the platform.
         // std::string
         // path_cat(
-        //    beast::string_view base,
-        //    beast::string_view path)
+        //    boost::beast::string_view base,
+        //    boost::beast::string_view path)
         //{
         //    if(base.empty())
         //        return path.to_string();
@@ -60,12 +60,12 @@ namespace service
         using ep_session_ssl_function_type = std::function<void(
             application_impl_base&,
             shared::listener&,
-            beast::ssl_stream<stream_type>,
-            endpoint_type,
-            websocket::request_type)>;
+            boost::beast::ssl_stream<stream_type>,
+            boost::asio::ip::tcp::endpoint,
+            boost::beast::websocket::request_type)>;
 
         using ep_session_plain_function_type = std::function<
-            void(application_impl_base&, shared::listener&, stream_type, endpoint_type, websocket::request_type)>;
+            void(application_impl_base&, shared::listener&, stream_type, boost::asio::ip::tcp::endpoint, boost::beast::websocket::request_type)>;
 
         //------------------------------------------------------------------------------
 
@@ -75,8 +75,8 @@ namespace service
             application_impl_base& srv,
             listener&              lst,
             stream_type            stream,
-            endpoint_type          ep,
-            flat_storage           storage)
+            boost::asio::ip::tcp::endpoint          ep,
+            boost::beast::flat_buffer           storage)
         {
             auto sp = boost::make_shared<plain_http_session_impl>(srv, lst, std::move(stream), ep, std::move(storage));
             sp->run();
@@ -85,10 +85,10 @@ namespace service
         void run_https_session(
             application_impl_base& srv,
             listener&              lst,
-            asio::ssl::context&    ctx,
+            boost::asio::ssl::context&    ctx,
             stream_type            stream,
-            endpoint_type          ep,
-            flat_storage           storage)
+            boost::asio::ip::tcp::endpoint          ep,
+            boost::beast::flat_buffer           storage)
         {
             auto sp =
                 boost::make_shared<ssl_http_session_impl>(srv, lst, ctx, std::move(stream), ep, std::move(storage));

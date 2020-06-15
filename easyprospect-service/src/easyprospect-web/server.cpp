@@ -43,8 +43,8 @@ namespace service
 
             easyprospect::service::config::easyprospect_config_service_core                            cfg_;
             std::vector<std::unique_ptr<shared::service>>                                              services_;
-            net::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
-            asio::basic_signal_set<executor_type>                                                      signals_;
+            boost::asio::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
+            boost::asio::basic_signal_set<executor_type>                                                      signals_;
             std::condition_variable                                                                    cv_;
             std::mutex                                                                                 mutex_;
             time_point                                                                                 shutdown_time_;
@@ -65,7 +65,7 @@ namespace service
 
                 timer_.expires_at(never());
 
-                set_send_worker_req_impl([this](shared::easyprospect_http_request req, beast::error_code& ec) {
+                set_send_worker_req_impl([this](shared::easyprospect_http_request req, boost::beast::error_code& ec) {
                     shared::easyprospect_http_request_result res;
 
                     spdlog::debug(BOOST_CURRENT_FUNCTION);
@@ -110,7 +110,7 @@ namespace service
                     sp->on_start();
 
                 // Capture SIGINT and SIGTERM to perform a clean shutdown
-                signals_.async_wait(beast::bind_front_handler(&server_impl::on_signal, this));
+                signals_.async_wait(boost::beast::bind_front_handler(&server_impl::on_signal, this));
 
 #ifndef LOUNGE_USE_SYSTEM_EXECUTOR
                 std::vector<std::thread> vt;
@@ -166,7 +166,7 @@ namespace service
                     // destroying them.
 
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-                net::system_executor{}.context().join();
+                boost::asio::system_executor{}.context().join();
 #else
                 for (auto& t : vt)
                     t.join();
@@ -188,8 +188,8 @@ namespace service
             {
                 // Get on the strand
                 if (!timer_.get_executor().running_in_this_thread())
-                    return net::post(
-                        timer_.get_executor(), beast::bind_front_handler(&server_impl::shutdown, this, cooldown));
+                    return boost::asio::post(
+                        timer_.get_executor(), boost::beast::bind_front_handler(&server_impl::shutdown, this, cooldown));
 
                 // Only callable once
                 if (timer_.expiry() != never())
@@ -199,9 +199,9 @@ namespace service
                 on_timer();
             }
 
-            void on_timer(beast::error_code ec = {})
+            void on_timer(boost::beast::error_code ec = {})
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     return;
 
                 auto const remain =
@@ -232,12 +232,12 @@ namespace service
                 // c->send(jv);
 
                 timer_.expires_after(amount);
-                timer_.async_wait(beast::bind_front_handler(&server_impl::on_timer, this));
+                timer_.async_wait(boost::beast::bind_front_handler(&server_impl::on_timer, this));
             }
 
-            void on_signal(beast::error_code ec, int signum)
+            void on_signal(boost::beast::error_code ec, int signum)
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     return;
 
                 spdlog::debug("application_impl::on_signal: #{}, {}\n", signum, ec.message());
@@ -245,7 +245,7 @@ namespace service
                 if (timer_.expiry() == never())
                 {
                     // Capture signals again
-                    signals_.async_wait(beast::bind_front_handler(&server_impl::on_signal, this));
+                    signals_.async_wait(boost::beast::bind_front_handler(&server_impl::on_signal, this));
 
                     this->shutdown(std::chrono::seconds(30));
                 }
@@ -260,7 +260,7 @@ namespace service
             {
                 // Get on the strand
                 if (!timer_.get_executor().running_in_this_thread())
-                    return net::post(timer_.get_executor(), beast::bind_front_handler(&server_impl::stop, this));
+                    return boost::asio::post(timer_.get_executor(), boost::beast::bind_front_handler(&server_impl::stop, this));
 
                 // Only callable once
                 if (stop_)
@@ -275,7 +275,7 @@ namespace service
 
                 // Cancel our outstanding I/O
                 timer_.cancel();
-                beast::error_code ec;
+                boost::beast::error_code ec;
                 signals_.cancel(ec);
             }
 
@@ -306,7 +306,7 @@ namespace service
 
         std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config)
         {
-            beast::error_code ec;
+            boost::beast::error_code ec;
 
             // Read the server configuration
             std::unique_ptr<server_impl> srv;
@@ -316,7 +316,7 @@ namespace service
                     // Create the server
                     srv = boost::make_unique<server_impl>(curr_config);
                 }
-                catch (beast::system_error const& e)
+                catch (boost::beast::system_error const& e)
                 {
                     spdlog::debug("server_config: {}", e.code().message());
 
@@ -334,7 +334,7 @@ namespace service
                         if (!run_listener(*srv, e))
                             return nullptr;
                     }
-                    catch (beast::system_error const& ex)
+                    catch (boost::beast::system_error const& ex)
                     {
                         spdlog::debug("listener_config: {}", ex.code().message());
 

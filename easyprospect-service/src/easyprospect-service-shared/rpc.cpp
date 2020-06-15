@@ -17,7 +17,7 @@
 //------------------------------------------------------------------------------
 namespace
 {
-    class rpc_error_codes : public beast::error_category
+    class rpc_error_codes : public boost::beast::error_category
     {
     public:
         const char*
@@ -70,7 +70,7 @@ namespace
             return "Unknown RPC error #" + std::to_string(ev);
         }
 
-        beast::error_condition
+        boost::beast::error_condition
             default_error_condition(int ev) const noexcept override
         {
             return { ev, *this };
@@ -78,7 +78,7 @@ namespace
     };
 }
 
-beast::error_code
+boost::beast::error_code
 make_error_code(rpc_code e)
 {
     static rpc_error_codes const cat{};
@@ -122,7 +122,7 @@ namespace easyprospect
                 rpc_call::
                 extract(
                     nlohmann::basic_json<>&& jv,
-                    beast::error_code& ec)
+                    boost::beast::error_code& ec)
             {
                 // must be object
                 if (!jv.is_object())
@@ -262,7 +262,7 @@ namespace easyprospect
             nlohmann::json&
                 checked_value(
                     nlohmann::json& jv,
-                    beast::string_view key)
+                    boost::beast::string_view key)
             {
                 auto& obj =
                     checked_object(jv);
@@ -286,7 +286,7 @@ namespace easyprospect
             std::string
                 checked_string(
                     nlohmann::json& jv,
-                    beast::string_view key)
+                    boost::beast::string_view key)
             {
                 return checked_string(
                     checked_value(jv, key));

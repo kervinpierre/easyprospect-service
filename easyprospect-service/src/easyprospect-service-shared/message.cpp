@@ -25,7 +25,7 @@ namespace easyprospect
                 auto jv_buf = jv.dump();
                 std::strcpy(buf, jv_buf.c_str());
 
-                return message(net::const_buffer(buf, jv_buf.length()));
+                return message(boost::asio::const_buffer(buf, jv_buf.length()));
             }
 
         }

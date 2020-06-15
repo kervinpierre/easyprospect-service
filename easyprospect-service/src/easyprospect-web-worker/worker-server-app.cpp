@@ -136,7 +136,7 @@ namespace service
                 sp->on_start();
 
             // Capture SIGINT and SIGTERM to perform a clean shutdown
-            signals_.async_wait(beast::bind_front_handler(&application_impl::on_signal, this));
+            signals_.async_wait(boost::beast::bind_front_handler(&application_impl::on_signal, this));
 
 #ifndef LOUNGE_USE_SYSTEM_EXECUTOR
             std::vector<std::thread> vt;
@@ -162,7 +162,7 @@ namespace service
                 // destroying them.
 
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-            net::system_executor{}.context().join();
+            boost::asio::system_executor{}.context().join();
 #else
             for (auto& t : vt)
                 t.join();

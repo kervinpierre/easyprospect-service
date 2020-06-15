@@ -27,13 +27,13 @@ namespace ssl {}
 
 } // boost
 
-namespace net   = boost::asio;
-namespace asio  = boost::asio;
-namespace beast = boost::beast;
-namespace http  = boost::beast::http;
-namespace websocket = boost::beast::websocket;
-
-using tcp = net::ip::tcp;
+//namespace net   = boost::asio;
+//namespace asio  = boost::asio;
+//namespace beast = boost::beast;
+//namespace http  = boost::beast::http;
+//namespace websocket = boost::beast::websocket;
+//
+//using tcp = boost::asio::ip::tcp;
 
 // Define this on to use the system executor
 //#define LOUNGE_USE_SYSTEM_EXECUTOR

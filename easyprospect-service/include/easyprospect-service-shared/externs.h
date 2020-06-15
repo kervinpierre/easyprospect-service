@@ -17,16 +17,16 @@ namespace service
             application_impl_base& srv,
             listener&              lst,
             stream_type                                           stream,
-            endpoint_type                                         ep,
-            flat_storage                                          storage);
+            boost::asio::ip::tcp::endpoint                                         ep,
+            boost::beast::flat_buffer                                          storage);
 
         void run_https_session(
             application_impl_base& srv,
             listener&              lst,
-            asio::ssl::context&                                   ctx,
+            boost::asio::ssl::context&                                   ctx,
             stream_type                                           stream,
-            endpoint_type                                         ep,
-            flat_storage                                          storage);
+            boost::asio::ip::tcp::endpoint                                         ep,
+            boost::beast::flat_buffer                                          storage);
 
         bool run_listener(application_impl_base& srv, config::easyprospect_config_service_listener_conf cfg);
 
@@ -35,16 +35,16 @@ namespace service
         //    application_impl_base& srv,
         //    shared::listener& lst,
         //    stream_type stream,
-        //    endpoint_type ep,
-        //    websocket::request_type req);
+        //    boost::asio::ip::tcp::endpoint ep,
+        //    boost::beast::websocket::request_type req);
 
         // extern void run_ws_session(
         //    application_impl_base& srv,
         //    shared::listener& lst,
-        //    beast::ssl_stream<
+        //    boost::beast::ssl_stream<
         //    stream_type> stream,
-        //    endpoint_type ep,
-        //    websocket::request_type req);
+        //    boost::asio::ip::tcp::endpoint ep,
+        //    boost::beast::websocket::request_type req);
     } // namespace shared
 } // namespace service
 } // namespace easyprospect

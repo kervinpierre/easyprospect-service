@@ -12,7 +12,7 @@ namespace service
     {
         class easyprospect_http_request;
         class easyprospect_http_request_result;
-        using send_worker_req_impl_type = std::function<easyprospect_http_request_result(easyprospect_http_request, beast::error_code &ec)>;
+        using send_worker_req_impl_type = std::function<easyprospect_http_request_result(easyprospect_http_request, boost::beast::error_code &ec)>;
 
         class easyprospect_http_request final
         {
@@ -190,7 +190,7 @@ namespace service
                 url_ = u;
             }
 
-            easyprospect_http_request_builder(http::parser<true, http::string_body>& req_p)
+            easyprospect_http_request_builder(boost::beast::http::parser<true, boost::beast::http::string_body>& req_p)
             {
                 auto& req = req_p.get();
 
@@ -201,7 +201,7 @@ namespace service
 
                 set_body(req.body());
                 set_content_length(req_p.content_length());
-                set_content_type( req[http::field::content_type].to_string());
+                set_content_type( req[boost::beast::http::field::content_type].to_string());
                 set_url(req.target().to_string());
 
                 std::vector<std::pair<std::string, std::string>> h;

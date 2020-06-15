@@ -40,7 +40,7 @@ namespace service
             std::string name;
 
             // endpoint to bind to
-            net::ip::address address;
+            boost::asio::ip::address address;
 
             // port number
             unsigned short port_num;
@@ -75,22 +75,22 @@ namespace service
             // which uses the wrong socket type here:
             // https://github.com/boostorg/asio/blob/c7bbd30491c377ebe12f6e33a0992a3280d71fa4/include/boost/asio/detail/reactive_socket_accept_op.hpp#L198
 
-            struct tcp_ex : net::ip::tcp
+            struct tcp_ex : boost::asio::ip::tcp
             {
                 tcp_ex(tcp const& t) : tcp(t)
                 {
                 }
 
-                using socket = net::basic_stream_socket<tcp, executor_type>;
+                using socket = boost::asio::basic_stream_socket<tcp, executor_type>;
             };
 
             shared::application_impl_base&                    srv_;
             std::mutex                                        mutex_;
             config::easyprospect_config_service_listener_conf cfg_;
-            asio::ssl::context                                ctx_;
-            net::basic_socket_acceptor<tcp_ex, executor_type> acceptor_;
+            boost::asio::ssl::context                                ctx_;
+            boost::asio::basic_socket_acceptor<tcp_ex, executor_type> acceptor_;
             boost::container::flat_set<session*>              sessions_;
-            endpoint_type                                     ep_;
+            boost::asio::ip::tcp::endpoint                                     ep_;
 
             int current_port_;
 
@@ -99,16 +99,16 @@ namespace service
 
             ~listener_impl();
 
-            bool open_port(asio::ip::address addr, int port, beast::error_code ec);
+            bool open_port(boost::asio::ip::address addr, int port, boost::beast::error_code ec);
 
             bool open();
 
             void do_stop();
 
-            void listener_impl::operator()(beast::error_code ec, socket_type sock);
+            void listener_impl::operator()(boost::beast::error_code ec, socket_type sock);
 
             // Report a failure
-            void fail(beast::error_code ec, char const* what);
+            void fail(boost::beast::error_code ec, char const* what);
 
             //--------------------------------------------------------------------------
             //

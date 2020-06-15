@@ -14,7 +14,7 @@ namespace service
         std::unique_ptr<shared::server> make_server(
             config::easyprospect_config_service_core curr_config)
         {
-            beast::error_code ec;
+            boost::beast::error_code ec;
 
             // Read the server configuration
             std::unique_ptr<application_impl> srv;
@@ -24,7 +24,7 @@ namespace service
                     // Create the server
                     srv = boost::make_unique<easyprospect::service::web_worker::application_impl>(curr_config);
                 }
-                catch (beast::system_error const& e)
+                catch (boost::beast::system_error const& e)
                 {
                     spdlog::debug("server_config: {}", e.code().message());
 
@@ -45,7 +45,7 @@ namespace service
                         if (!run_listener(*srv, e))
                             return nullptr;
                     }
-                    catch (beast::system_error const& ex)
+                    catch (boost::beast::system_error const& ex)
                     {
                         spdlog::debug("listener_config: {}", ex.code().message());
 

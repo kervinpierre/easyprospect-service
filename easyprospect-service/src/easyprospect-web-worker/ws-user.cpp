@@ -48,17 +48,17 @@ namespace service
     {
         // channel::channel(
         //    std::size_t reserved_cid,
-        //    beast::string_view name)
+        //    boost::beast::string_view name)
         //{
         //
         //}
 
-        channel::channel(beast::string_view name, channel_list& list) :
+        channel::channel(boost::beast::string_view name, channel_list& list) :
             list_(list), uid_(list.next_uid()), cid_(list.next_cid()), name_(name)
         {
         }
 
-        channel::channel(std::size_t reserved_cid, beast::string_view name, channel_list& list) :
+        channel::channel(std::size_t reserved_cid, boost::beast::string_view name, channel_list& list) :
             list_(list), uid_(list.next_uid()), cid_(reserved_cid), name_(name)
         {
         }
@@ -66,7 +66,7 @@ namespace service
         // channel::
         //    channel(
         //        std::size_t reserved_cid,
-        //        beast::string_view name)
+        //        boost::beast::string_view name)
         //    : cid_(reserved_cid)
         //    , name_(name)
         //{
@@ -340,7 +340,7 @@ namespace service
         struct hand
         {
             // cards[0]==0 for hole card
-            beast::static_string<22> cards;
+            boost::beast::static_string<22> cards;
             int                      wager      = 0;
             bool                     busted     = false;
             bool                     twenty_one = false;
@@ -491,7 +491,7 @@ namespace service
 
             // Join the game as a player.
             // Returns seat assignment on success
-            int64_t join(shared::user& u, beast::error_code& ec)
+            int64_t join(shared::user& u, boost::beast::error_code& ec)
             {
                 if (find(u) != 0)
                 {
@@ -515,7 +515,7 @@ namespace service
             // Leave the game as a player.
             //  1 = now leaving, was playing
             //  2 = now open, was waiting
-            int leave(shared::user& u, beast::error_code& ec)
+            int leave(shared::user& u, boost::beast::error_code& ec)
             {
                 auto const i = find(u);
                 if (!i)
@@ -554,7 +554,7 @@ namespace service
                 return 1;
             }
 
-            void bet(shared::user& u, beast::error_code& ec)
+            void bet(shared::user& u, boost::beast::error_code& ec)
             {
                 auto const i = find(u);
                 if (!i)
@@ -578,7 +578,7 @@ namespace service
                 cb_.on_game_bet();
             }
 
-            void start(beast::error_code& ec)
+            void start(boost::beast::error_code& ec)
             {
                 deal_one();
                 ec = {};
@@ -645,7 +645,7 @@ namespace service
             template <class... Args>
             void post(Args&&... args)
             {
-                net::post(timer_.get_executor(), beast::bind_front_handler(std::forward<Args>(args)...));
+                boost::asio::post(timer_.get_executor(), boost::beast::bind_front_handler(std::forward<Args>(args)...));
             }
 
             //--------------------------------------------------------------------------
@@ -706,7 +706,7 @@ namespace service
             //
             //--------------------------------------------------------------------------
 
-            void update(beast::string_view action)
+            void update(boost::beast::string_view action)
             {
                 nlohmann::json jv;
 
@@ -718,9 +718,9 @@ namespace service
                 send(jv);
             }
 
-            void on_timer(beast::error_code ec)
+            void on_timer(boost::beast::error_code ec)
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     return;
 
                 if (ec)
@@ -735,7 +735,7 @@ namespace service
                 // g_.tick();
 
                 timer_.expires_after(std::chrono::seconds(1));
-                timer_.async_wait(beast::bind_front_handler(&table::on_timer, this));
+                timer_.async_wait(boost::beast::bind_front_handler(&table::on_timer, this));
             }
 
             //--------------------------------------------------------------------------
@@ -765,7 +765,7 @@ namespace service
                 try
                 {
                     // TODO Optional seat choice
-                    beast::error_code ec;
+                    boost::beast::error_code ec;
                     g_.join(u, ec);
                     if (ec)
                         rpc.fail(ec.message());
@@ -784,7 +784,7 @@ namespace service
 
                 try
                 {
-                    beast::error_code ec;
+                    boost::beast::error_code ec;
                     g_.leave(u, ec);
                     if (ec)
                         rpc.fail(ec.message());
@@ -803,7 +803,7 @@ namespace service
 
                 try
                 {
-                    beast::error_code ec;
+                    boost::beast::error_code ec;
                     g_.bet(u, ec);
                     if (ec)
                         rpc.fail(ec.message());
@@ -821,7 +821,7 @@ namespace service
 
                 try
                 {
-                    beast::error_code ec;
+                    boost::beast::error_code ec;
                     g_.start(ec);
                     if (ec)
                         rpc.fail(ec.message());
@@ -1009,7 +1009,7 @@ namespace service
 
             // Capture SIGINT and SIGTERM to perform a clean shutdown
             signals_.async_wait(
-                beast::bind_front_handler(&application_impl::on_signal, this));
+                boost::beast::bind_front_handler(&application_impl::on_signal, this));
 
 #ifndef LOUNGE_USE_SYSTEM_EXECUTOR
             std::vector<std::thread> vt;
@@ -1035,7 +1035,7 @@ namespace service
             // destroying them.
 
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-                net::system_executor{}.context().join();
+                boost::asio::system_executor{}.context().join();
 #else
             for (auto& t : vt)
                 t.join();

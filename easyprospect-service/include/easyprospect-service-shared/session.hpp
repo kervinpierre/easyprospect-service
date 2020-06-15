@@ -15,6 +15,7 @@
 #include <easyprospect-service-shared/message.hpp>
 #include <easyprospect-service-shared/utility.hpp>
 
+#include <boost/asio/post.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/yield.hpp>
 #include <boost/beast/ssl/ssl_stream.hpp>
@@ -74,11 +75,11 @@ namespace service
         };
 
         template <class Derived>
-        class ws_session_base : public asio::coroutine, public shared::session
+        class ws_session_base : public boost::asio::coroutine, public shared::session
         {
           protected:
-            endpoint_type                   ep_;
-            flat_storage                    msg_;
+            boost::asio::ip::tcp::endpoint                   ep_;
+            boost::beast::flat_buffer                    msg_;
             std::vector<shared::message>    mq_;
             boost::shared_ptr<ws_session_t> wrapper_;
             dispatch_impl_type              dispatch_impl_;
@@ -86,7 +87,7 @@ namespace service
             send_worker_req_impl_type       send_worker_req_impl_;
 
           public:
-            ws_session_base(endpoint_type ep) : ep_(ep)
+            ws_session_base(boost::asio::ip::tcp::endpoint ep) : ep_(ep)
             {
             }
 
@@ -109,12 +110,12 @@ namespace service
             //
             //--------------------------------------------------------------------------
 
-            void run(websocket::request_type req);
+            void run(boost::beast::websocket::request_type req);
 
-            void operator()(beast::error_code ec = {}, std::size_t bytes_transferred = 0);
+            void operator()(boost::beast::error_code ec = {}, std::size_t bytes_transferred = 0);
 
             // Report a failure
-            void fail(beast::error_code ec, char const* what);
+            void fail(boost::beast::error_code ec, char const* what);
 
             //--------------------------------------------------------------------------
             //
@@ -140,7 +141,7 @@ namespace service
 
             void do_write();
 
-            void on_write(std::size_t idx, beast::error_code ec, std::size_t);
+            void on_write(std::size_t idx, boost::beast::error_code ec, std::size_t);
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> get_dispatch_impl() const
             {
                 return dispatch_impl_;
@@ -174,13 +175,13 @@ namespace service
         //};
 
         template <class Derived>
-        class http_session_base : public asio::coroutine, public session
+        class http_session_base : public boost::asio::coroutine, public session
         {
           protected:
             application_impl_base&                   srv_;
             listener&                                lst_;
-            endpoint_type                            ep_;
-            flat_storage                             storage_;
+            boost::asio::ip::tcp::endpoint                            ep_;
+            boost::beast::flat_buffer                             storage_;
             std::vector<std::regex>                  epjs_exts_;
             boost::optional<boost::filesystem::path> doc_root_;
 
@@ -191,10 +192,10 @@ namespace service
             // ep_session_ssl_function_type run_ws_session_ssl_func;
             //  ep_session_plain_function_type run_ws_session_plain_func;
 
-            boost::optional<http::request_parser<http::string_body>> pr_;
+            boost::optional<boost::beast::http::request_parser<boost::beast::http::string_body>> pr_;
 
           public:
-            http_session_base(application_impl_base& srv, listener& lst, endpoint_type ep, flat_storage storage);
+            http_session_base(application_impl_base& srv, listener& lst, boost::asio::ip::tcp::endpoint ep, boost::beast::flat_buffer storage);
 
             ~http_session_base();
 
@@ -216,15 +217,15 @@ namespace service
                 boost::optional<boost::filesystem::path> doc_root,
                 listener&                                lst,
                 stream_type                              str,
-                endpoint_type                            ep,
-                websocket::request_type                  req);
+                boost::asio::ip::tcp::endpoint                            ep,
+                boost::beast::websocket::request_type                  req);
 
             void run_ws_session(
                 boost::optional<boost::filesystem::path> doc_root,
                 listener&                                lst,
-                beast::ssl_stream<stream_type>           str,
-                endpoint_type                            ep,
-                websocket::request_type                  req)
+                boost::beast::ssl_stream<stream_type>           str,
+                boost::asio::ip::tcp::endpoint           ep,
+                boost::beast::websocket::request_type                  req)
             {
                 // shared::run_ws_session(srv, lst, std::move(str), ep, req);
 
@@ -232,16 +233,16 @@ namespace service
             }
 
             void run_proxy_session(
-                http::request_parser<http::string_body>&&,
-                net::const_buffer,
+                boost::beast::http::request_parser<boost::beast::http::string_body>&&,
+                boost::asio::const_buffer,
                 stream_type,
-                beast::error_code&);
+                boost::beast::error_code&);
 
             void run_proxy_session(
-                http::request_parser<http::string_body>&&,
-                net::const_buffer,
-                beast::ssl_stream<stream_type>,
-                beast::error_code&);
+                boost::beast::http::request_parser<boost::beast::http::string_body>&&,
+                boost::asio::const_buffer,
+                boost::beast::ssl_stream<stream_type>,
+                boost::beast::error_code&);
             //--------------------------------------------------------------------------
             //
             // session
@@ -250,15 +251,15 @@ namespace service
 
             void on_stop() override
             {
-                net::post(
+                boost::asio::post(
                     impl()->stream().get_executor(),
-                    beast::bind_front_handler(&http_session_base::do_stop, boost::shared_from(this)));
+                    boost::beast::bind_front_handler(&http_session_base::do_stop, boost::shared_from(this)));
             }
 
             void do_stop()
             {
-                beast::error_code ec;
-                beast::close_socket(beast::get_lowest_layer(impl()->stream()));
+                boost::beast::error_code ec;
+                boost::beast::close_socket(boost::beast::get_lowest_layer(impl()->stream()));
             }
 
             //--------------------------------------------------------------------------
@@ -275,7 +276,7 @@ namespace service
             //    http_session_base& self_;
 
             //    template <bool isRequest, class Body, class Fields>
-            //    void operator()(http::message<isRequest, Body, Fields>&& msg) const
+            //    void operator()(boost::beast::http::message<isRequest, Body, Fields>&& msg) const
             //    {
             //        std::stringstream sstr;
             //        sstr << "send_lambda() : " << msg.base() << std::endl;
@@ -285,18 +286,18 @@ namespace service
             //        // The lifetime of the message has to extend
             //        // for the duration of the async operation so
             //        // we use a shared_ptr to manage it.
-            //        auto sp = std::make_shared<http::message<isRequest, Body, Fields>>(std::move(msg));
+            //        auto sp = std::make_shared<boost::beast::http::message<isRequest, Body, Fields>>(std::move(msg));
 
             //        // Write the response
             //        auto self = bind_front(&self_);
-            //        http::async_write(
-            //            self_.impl()->stream(), *sp, [self, sp](beast::error_code ec, std::size_t bytes_transferred) {
+            //        boost::beast::http::async_write(
+            //            self_.impl()->stream(), *sp, [self, sp](boost::beast::error_code ec, std::size_t bytes_transferred) {
             //                self(ec, bytes_transferred, sp->need_eof());
             //            });
             //    }
             //};
             
-            void operator()(beast::error_code ec = {}, std::size_t bytes_transferred = 0, bool need_eof = false);
+            void operator()(boost::beast::error_code ec = {}, std::size_t bytes_transferred = 0, bool need_eof = false);
 
             std::function<void(rpc_call&, shared::user&, ws_session_t&)> get_dispatch_impl() const
             {
@@ -340,28 +341,28 @@ namespace service
 
         class plain_ws_session_impl : public shared::ws_session_base<plain_ws_session_impl>
         {
-            websocket::stream<stream_type> ws_;
+            boost::beast::websocket::stream<stream_type> ws_;
 
           public:
             plain_ws_session_impl(
                 boost::optional<boost::filesystem::path> doc_root,
                 stream_type                              stream,
-                endpoint_type                            ep) :
+                boost::asio::ip::tcp::endpoint                            ep) :
                 ws_session_base(ep),
                 ws_(std::move(stream))
             {
                 doc_root_ = doc_root;
             }
 
-            websocket::stream<stream_type>& ws()
+            boost::beast::websocket::stream<stream_type>& ws()
             {
                 return ws_;
             }
 
             // Report a failure
-            void fail(beast::error_code ec, char const* what)
+            void fail(boost::beast::error_code ec, char const* what)
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     spdlog::trace("{} \t {}", what, ec.message());
                 // LOG_TRC(log_, what, '\t', ec.message());
                 else
@@ -372,26 +373,26 @@ namespace service
 
         class ssl_ws_session_impl : public ws_session_base<ssl_ws_session_impl>
         {
-            websocket::stream<beast::ssl_stream<stream_type>> ws_;
+            boost::beast::websocket::stream<boost::beast::ssl_stream<stream_type>> ws_;
 
           public:
             ssl_ws_session_impl(
                 boost::optional<boost::filesystem::path> doc_root,
-                beast::ssl_stream<stream_type>           stream,
-                endpoint_type                            ep) :
+                boost::beast::ssl_stream<stream_type>           stream,
+                boost::asio::ip::tcp::endpoint                            ep) :
                 ws_session_base(ep),
                 ws_(std::move(stream))
             {
                 doc_root_ = doc_root;
             }
 
-            websocket::stream<beast::ssl_stream<stream_type>>& ws()
+            boost::beast::websocket::stream<boost::beast::ssl_stream<stream_type>>& ws()
             {
                 return ws_;
             }
 
             // Report a failure
-            void fail(beast::error_code ec, char const* what)
+            void fail(boost::beast::error_code ec, char const* what)
             {
                 // ssl::error::ws_truncated, also known as an SSL "short read",
                 // indicates the peer closed the connection without performing the
@@ -406,14 +407,14 @@ namespace service
                 // https://security.stackexchange.com/questions/91435/how-to-handle-a-malicious-ssl-tls-shutdown
                 //
                 // When a short read would cut off the end of an HTTP message,
-                // Beast returns the error beast::http::error::partial_message.
+                // Beast returns the error boost::beast::http::error::partial_message.
                 // Therefore, if we see a short read here, it has occurred
                 // after the message has been completed, so it is safe to ignore it.
 
-                if (ec == asio::ssl::error::stream_truncated)
+                if (ec == boost::asio::ssl::error::stream_truncated)
                     return;
 
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     spdlog::trace("{} \t {}", what, ec.message());
                 // LOG_TRC( log_, what, '\t', ec.message() );
                 else
@@ -431,7 +432,7 @@ namespace service
             boost::shared_ptr<shared::user>          primary_user_;
 
           public:
-            ws_session_t(boost::optional<boost::filesystem::path> doc_root, stream_type stream, endpoint_type ep)
+            ws_session_t(boost::optional<boost::filesystem::path> doc_root, stream_type stream, boost::asio::ip::tcp::endpoint ep)
             {
                 plain_ptr_    = boost::make_shared<shared::plain_ws_session_impl>(doc_root, std::move(stream), ep);
                 primary_user_ = boost::make_shared<shared::user>();
@@ -439,8 +440,8 @@ namespace service
 
             ws_session_t(
                 boost::optional<boost::filesystem::path> doc_root,
-                beast::ssl_stream<stream_type>           stream,
-                endpoint_type                            ep)
+                boost::beast::ssl_stream<stream_type>           stream,
+                boost::asio::ip::tcp::endpoint                            ep)
             {
                 ssl_ptr_      = boost::make_shared<shared::ssl_ws_session_impl>(doc_root, std::move(stream), ep);
                 primary_user_ = boost::make_shared<shared::user>();
@@ -449,7 +450,7 @@ namespace service
             void send(nlohmann::json const& jv);
             void send(shared::message m);
 
-            void run(websocket::request_type req);
+            void run(boost::beast::websocket::request_type req);
 
             void set_dispatch_impl(std::function<void(rpc_call&, shared::user&, ws_session_t&)> val);
             void set_epjs_process_req_impl(epjs_process_req_impl_type val);
@@ -468,8 +469,8 @@ namespace service
                 application_impl_base& srv,
                 listener&              lst,
                 stream_type            stream,
-                endpoint_type          ep,
-                flat_storage           storage);
+                boost::asio::ip::tcp::endpoint          ep,
+                boost::beast::flat_buffer           storage);
 
             stream_type& stream()
             {
@@ -489,19 +490,19 @@ namespace service
             void run()
             {
                 // Use post to get on to our strand.
-                net::post(stream_.get_executor(), bind_front(this));
+                boost::asio::post(stream_.get_executor(), bind_front(this));
             }
 
             void do_close()
             {
-                beast::error_code ec;
-                stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+                boost::beast::error_code ec;
+                stream_.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_send, ec);
             }
 
             // Report a failure
-            void fail(beast::error_code ec, char const* what)
+            void fail(boost::beast::error_code ec, char const* what)
             {
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     // LOG_TRC(log_, what, '\t', ec.message());
                     spdlog::debug("{} \t {}", what, ec.message());
                 else
@@ -524,18 +525,18 @@ namespace service
 
         class ssl_http_session_impl : public http_session_base<ssl_http_session_impl>
         {
-            beast::ssl_stream<stream_type> stream_;
+            boost::beast::ssl_stream<stream_type> stream_;
 
           public:
             ssl_http_session_impl(
                 application_impl_base& srv,
                 listener&              lst,
-                asio::ssl::context&    ctx,
+                boost::asio::ssl::context&    ctx,
                 stream_type            stream,
-                endpoint_type          ep,
-                flat_storage           storage);
+                boost::asio::ip::tcp::endpoint          ep,
+                boost::beast::flat_buffer           storage);
 
-            beast::ssl_stream<stream_type>& stream()
+            boost::beast::ssl_stream<stream_type>& stream()
             {
                 return stream_;
             }
@@ -553,9 +554,9 @@ namespace service
             void run()
             {
                 // Use post to get on to our strand.
-                net::post(
+                boost::asio::post(
                     stream_.get_executor(),
-                    beast::bind_front_handler(&ssl_http_session_impl::do_run, boost::shared_from(this)));
+                    boost::beast::bind_front_handler(&ssl_http_session_impl::do_run, boost::shared_from(this)));
             }
 
             void do_run()
@@ -565,12 +566,12 @@ namespace service
 
                 // Perform the TLS handshake in the server role
                 stream_.async_handshake(
-                    asio::ssl::stream_base::server,
+                    boost::asio::ssl::stream_base::server,
                     storage_.data(),
-                    beast::bind_front_handler(&ssl_http_session_impl::on_handshake, boost::shared_from(this)));
+                    boost::beast::bind_front_handler(&ssl_http_session_impl::on_handshake, boost::shared_from(this)));
             }
 
-            void on_handshake(beast::error_code ec, std::size_t bytes_transferred)
+            void on_handshake(boost::beast::error_code ec, std::size_t bytes_transferred)
             {
                 // Adjust the buffer for what the handshake used
                 storage_.consume(bytes_transferred);
@@ -590,17 +591,17 @@ namespace service
 
                 // Perform the TLS closing handshake
                 stream_.async_shutdown(
-                    beast::bind_front_handler(&ssl_http_session_impl::on_shutdown, boost::shared_from(this)));
+                    boost::beast::bind_front_handler(&ssl_http_session_impl::on_shutdown, boost::shared_from(this)));
             }
 
-            void on_shutdown(beast::error_code ec)
+            void on_shutdown(boost::beast::error_code ec)
             {
                 if (ec)
                     return fail(ec, "async_shutdown");
             }
 
             // Report a failure
-            void fail(beast::error_code ec, char const* what)
+            void fail(boost::beast::error_code ec, char const* what)
             {
                 // ssl::error::stream_truncated, also known as an SSL "short read",
                 // indicates the peer closed the connection without performing the
@@ -615,14 +616,14 @@ namespace service
                 // https://security.stackexchange.com/questions/91435/how-to-handle-a-malicious-ssl-tls-shutdown
                 //
                 // When a short read would cut off the end of an HTTP message,
-                // Beast returns the error beast::http::error::partial_message.
+                // Beast returns the error boost::beast::http::error::partial_message.
                 // Therefore, if we see a short read here, it has occurred
                 // after the message has been completed, so it is safe to ignore it.
 
-                if (ec == asio::ssl::error::stream_truncated)
+                if (ec == boost::asio::ssl::error::stream_truncated)
                     return;
 
-                if (ec == net::error::operation_aborted)
+                if (ec == boost::asio::error::operation_aborted)
                     // LOG_TRC(log_, what, '\t', ec.message());
                     spdlog::debug("{} \t {}", what, ec.message());
                 else
@@ -647,7 +648,7 @@ namespace service
         };
 
         template <class Derived>
-        void ws_session_base<Derived>::run(websocket::request_type req)
+        void ws_session_base<Derived>::run(boost::beast::websocket::request_type req)
         {
             std::stringstream ss;
             ss << "ws_user::run(): " << req << std::endl;
@@ -655,7 +656,7 @@ namespace service
             spdlog::trace(ss.str());
 
             // Apply settings to stream
-            impl()->ws().set_option(websocket::stream_base::timeout::suggested(beast::role_type::server));
+            impl()->ws().set_option(boost::beast::websocket::stream_base::timeout::suggested(boost::beast::role_type::server));
 
             // Limit the maximum incoming message size
             impl()->ws().read_message_max(64 * 1024);
@@ -667,9 +668,9 @@ namespace service
         }
 
         template <class Derived>
-        void ws_session_base<Derived>::fail(beast::error_code ec, char const* what)
+        void ws_session_base<Derived>::fail(boost::beast::error_code ec, char const* what)
         {
-            if (ec == net::error::operation_aborted)
+            if (ec == boost::asio::error::operation_aborted)
                 spdlog::debug("{} \t {}", what, ec.message());
             // LOG_TRC(log_, what, '\t', ec.message());
             else
@@ -680,16 +681,16 @@ namespace service
         template <class Derived>
         void ws_session_base<Derived>::on_stop()
         {
-            net::post(
+            boost::asio::post(
                 impl()->ws().get_executor(),
-                beast::bind_front_handler(&ws_session_base::do_stop, boost::shared_from(this)));
+                boost::beast::bind_front_handler(&ws_session_base::do_stop, boost::shared_from(this)));
         }
 
         template <class Derived>
         void ws_session_base<Derived>::do_stop()
         {
-            beast::error_code ec;
-            beast::close_socket(beast::get_lowest_layer(impl()->ws()));
+            boost::beast::error_code ec;
+            boost::beast::close_socket(boost::beast::get_lowest_layer(impl()->ws()));
         }
 
         template <class Derived>
@@ -710,15 +711,15 @@ namespace service
         template <class Derived>
         void ws_session_base<Derived>::send(message m)
         {
-            net::dispatch(
+            boost::asio::dispatch(
                 impl()->ws().get_executor(),
-                beast::bind_front_handler(&ws_session_base::do_send, boost::shared_from(this), std::move(m)));
+                boost::beast::bind_front_handler(&ws_session_base::do_send, boost::shared_from(this), std::move(m)));
         }
 
         template <class Derived>
         void ws_session_base<Derived>::do_send(message m)
         {
-            if (!beast::get_lowest_layer(impl()->ws()).socket().is_open())
+            if (!boost::beast::get_lowest_layer(impl()->ws()).socket().is_open())
                 return;
             mq_.emplace_back(std::move(m));
             if (mq_.size() == 1)
@@ -739,11 +740,11 @@ namespace service
 
             impl()->ws().async_write(
                 mq_.back(),
-                beast::bind_front_handler(&ws_session_base::on_write, boost::shared_from(this), mq_.size() - 1));
+                boost::beast::bind_front_handler(&ws_session_base::on_write, boost::shared_from(this), mq_.size() - 1));
         }
 
         template <class Derived>
-        void ws_session_base<Derived>::on_write(std::size_t idx, beast::error_code ec, std::size_t)
+        void ws_session_base<Derived>::on_write(std::size_t idx, boost::beast::error_code ec, std::size_t)
         {
             BOOST_ASSERT(!mq_.empty());
             if (ec)
@@ -760,8 +761,8 @@ namespace service
         http_session_base<Derived>::http_session_base(
             application_impl_base& srv,
             listener&              lst,
-            endpoint_type          ep,
-            flat_storage           storage) :
+            boost::asio::ip::tcp::endpoint          ep,
+            boost::beast::flat_buffer           storage) :
             srv_(srv),
             lst_(lst), ep_(ep), storage_(std::move(storage))
         {
@@ -776,7 +777,7 @@ namespace service
             lst_.erase(this);
         }
 
-        beast::string_view mime_type(beast::string_view path);
+        boost::beast::string_view mime_type(boost::beast::string_view path);
 
         // This function produces an HTTP response for the given
         // request. The type of the response object depends on the
@@ -788,7 +789,7 @@ namespace service
             std::vector<std::regex>                  epjs_extensions,
             std::function<std::string(std::string resolved_path, std::string doc_root, std::string target)>
                                                                  epjs_process_req_impl_,
-            http::request<Body, http::basic_fields<Allocator>>&& req,
+            boost::beast::http::request<Body, boost::beast::http::basic_fields<Allocator>>&& req,
             Send&&                                               send)
         {
             // TODO. KP. Block here and send file or callback()
@@ -800,10 +801,10 @@ namespace service
             spdlog::debug(sstr.str());
 
             // Returns a bad request response
-            auto const bad_request = [&req](beast::string_view why) {
-                http::response<http::string_body> res{http::status::bad_request, req.version()};
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(http::field::content_type, "text/html");
+            auto const bad_request = [&req](boost::beast::string_view why) {
+                boost::beast::http::response<boost::beast::http::string_body> res{boost::beast::http::status::bad_request, req.version()};
+                res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(boost::beast::http::field::content_type, "text/html");
                 res.keep_alive(req.keep_alive());
                 res.body() = why.to_string();
                 res.prepare_payload();
@@ -811,10 +812,10 @@ namespace service
             };
 
             // Returns a not found response
-            auto const not_found = [&req](beast::string_view target) {
-                http::response<http::string_body> res{http::status::not_found, req.version()};
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(http::field::content_type, "text/html");
+            auto const not_found = [&req](boost::beast::string_view target) {
+                boost::beast::http::response<boost::beast::http::string_body> res{boost::beast::http::status::not_found, req.version()};
+                res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(boost::beast::http::field::content_type, "text/html");
                 res.keep_alive(req.keep_alive());
                 res.body() = "The resource '" + target.to_string() + "' was not found.";
                 res.prepare_payload();
@@ -822,10 +823,10 @@ namespace service
             };
 
             // Returns a server error response
-            auto const server_error = [&req](beast::string_view what) {
-                http::response<http::string_body> res{http::status::internal_server_error, req.version()};
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(http::field::content_type, "text/html");
+            auto const server_error = [&req](boost::beast::string_view what) {
+                boost::beast::http::response<boost::beast::http::string_body> res{boost::beast::http::status::internal_server_error, req.version()};
+                res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(boost::beast::http::field::content_type, "text/html");
                 res.keep_alive(req.keep_alive());
                 res.body() = "An error occurred: '" + what.to_string() + "'";
                 res.prepare_payload();
@@ -833,11 +834,11 @@ namespace service
             };
 
             // Make sure we can handle the method
-            if (req.method() != http::verb::get && req.method() != http::verb::head)
+            if (req.method() != boost::beast::http::verb::get && req.method() != boost::beast::http::verb::head)
                 return send(bad_request("Unknown HTTP-method"));
 
             // Request path must be absolute and not contain "..".
-            if (req.target().empty() || req.target()[0] != '/' || req.target().find("..") != beast::string_view::npos)
+            if (req.target().empty() || req.target()[0] != '/' || req.target().find("..") != boost::beast::string_view::npos)
                 return send(bad_request("Illegal request-target"));
 
             // Build the path to the requested file
@@ -857,7 +858,7 @@ namespace service
                 }
             }
 
-            beast::error_code ec;
+            boost::beast::error_code ec;
 
             if (epjs_process)
             {
@@ -879,11 +880,11 @@ namespace service
                     throw std::logic_error("Missing epjs_process_req");
                 }
 
-                http::response<http::string_body> res;
+                boost::beast::http::response<boost::beast::http::string_body> res;
                 res.version(req.version());
-                res.result(http::status::ok);
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                // res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                res.result(boost::beast::http::status::ok);
+                res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                // res.set(boost::beast::http::field::content_type, mime_type(curr_path.generic_string()));
                 // res.content_length(size);
                 res.keep_alive(req.keep_alive());
                 res.body() = output;
@@ -894,8 +895,8 @@ namespace service
             else
             {
                 // Attempt to open the file
-                http::file_body::value_type body;
-                body.open(curr_path_str.c_str(), beast::file_mode::scan, ec);
+                boost::beast::http::file_body::value_type body;
+                body.open(curr_path_str.c_str(), boost::beast::file_mode::scan, ec);
 
                 // Handle the case where the file doesn't exist
                 if (ec == boost::system::errc::no_such_file_or_directory)
@@ -909,32 +910,32 @@ namespace service
                 auto const size = body.size();
 
                 // Respond to HEAD request
-                if (req.method() == http::verb::head)
+                if (req.method() == boost::beast::http::verb::head)
                 {
-                    http::response<http::empty_body> res{http::status::ok, req.version()};
-                    res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                    res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                    boost::beast::http::response<boost::beast::http::empty_body> res{boost::beast::http::status::ok, req.version()};
+                    res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                    res.set(boost::beast::http::field::content_type, mime_type(curr_path.generic_string()));
                     res.content_length(size);
                     res.keep_alive(req.keep_alive());
                     return send(std::move(res));
                 }
 
                 // Respond to GET request
-                http::response<http::file_body> res{std::piecewise_construct,
+                boost::beast::http::response<boost::beast::http::file_body> res{std::piecewise_construct,
                                                     std::make_tuple(std::move(body)),
-                                                    std::make_tuple(http::status::ok, req.version())};
-                res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-                res.set(http::field::content_type, mime_type(curr_path.generic_string()));
+                                                    std::make_tuple(boost::beast::http::status::ok, req.version())};
+                res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                res.set(boost::beast::http::field::content_type, mime_type(curr_path.generic_string()));
                 res.content_length(size);
                 res.keep_alive(req.keep_alive());
                 return send(std::move(res));
             }
         }
 
-        void ep_make_req(http::request_parser<http::string_body>& pr);
+        void ep_make_req(boost::beast::http::request_parser<boost::beast::http::string_body>& pr);
 
         template <class Derived>
-        void ws_session_base<Derived>::operator()(beast::error_code ec, std::size_t bytes_transferred)
+        void ws_session_base<Derived>::operator()(boost::beast::error_code ec, std::size_t bytes_transferred)
         {
 #include <boost/asio/yield.hpp>
             boost::ignore_unused(bytes_transferred);
