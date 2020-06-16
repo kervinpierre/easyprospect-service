@@ -5,7 +5,7 @@ namespace easyprospect
 {
 namespace service
 {
-    namespace shared
+    namespace web_worker
     {
         class process_cntrl_client_base
         {

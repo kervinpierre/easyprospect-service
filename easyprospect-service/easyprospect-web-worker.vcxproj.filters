@@ -30,6 +30,15 @@
     <ClCompile Include="src\easyprospect-web-worker\app-error.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client-linux.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client-win.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h">
@@ -42,6 +51,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-web-worker\app-error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client-base.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client-linux.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client-win.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-message-actions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

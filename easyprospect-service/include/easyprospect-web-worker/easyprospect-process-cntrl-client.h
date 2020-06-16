@@ -2,7 +2,7 @@
 #include <boost/predef.h>
 
 #ifdef BOOST_OS_WINDOWS
-  #include <easyprospect-service-shared/easyprospect-process-cntrl-client-win.h>
+  #include <easyprospect-web-worker/easyprospect-process-cntrl-client-win.h>
 #else
   #include <easyprospect-service-shared/easyprospect-process-cntrl-client-linux.h>
 #endif
@@ -11,7 +11,7 @@ namespace easyprospect
 {
 namespace service
 {
-    namespace shared
+    namespace web_worker
     {
         class process_cntrl_client final
         {

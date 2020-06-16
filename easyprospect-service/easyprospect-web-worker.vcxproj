@@ -20,6 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\easyprospect-web-worker\app-error.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client-linux.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client-win.cpp" />
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\easyprospect-web-worker.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\make-server.cpp" />
     <ClCompile Include="src\easyprospect-web-worker\worker-server-app.cpp" />
@@ -29,6 +32,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-web-worker\app-error.h" />
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client-base.h" />
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client-linux.h" />
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client-win.h" />
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-cntrl-client.h" />
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-message-actions.h" />
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h" />
     <ClInclude Include="include\easyprospect-web-worker\worker-server-app.h" />
     <ClInclude Include="include\easyprospect-web-worker\worker-server.h" />

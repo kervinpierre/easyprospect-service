@@ -54,18 +54,6 @@
     <ClInclude Include="include\easyprospect-service-shared\easyprospect-http-request.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-cntrl-client.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-cntrl-client-base.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-cntrl-client-linux.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\easyprospect-service-shared\easyprospect-process-cntrl-client-win.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\easyprospect-service-shared\easyprospect-service-shared.cpp">
@@ -93,15 +81,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\easyprospect-service-shared\http-session-base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-service-shared\easyprospect-process-cntrl-client.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-service-shared\easyprospect-process-cntrl-client-linux.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\easyprospect-service-shared\easyprospect-process-cntrl-client-win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

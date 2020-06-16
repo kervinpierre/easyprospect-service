@@ -1,7 +1,10 @@
 
-#include <easyprospect-service-shared/easyprospect-process-cntrl-client-win.h>
+#include <easyprospect-web-worker/easyprospect-process-cntrl-client-win.h>
+#include <boost/asio/post.hpp>
 
-DWORD easyprospect::service::shared::process_cntrl_client_win::
+#include "easyprospect-web-worker/easyprospect-process-message-actions.h"
+
+DWORD easyprospect::service::web_worker::process_cntrl_client_win::
 run_process_cntrl_thread(void* vptr)
 {
     auto* wcntl = static_cast<process_cntrl_client_win*>(vptr);
@@ -19,7 +22,7 @@ run_process_cntrl_thread(void* vptr)
     return EXIT_SUCCESS;
 }
 
-void easyprospect::service::shared::process_cntrl_client_win::
+void easyprospect::service::web_worker::process_cntrl_client_win::
 start()
 {
     process_control_thread_handle_ = CreateThread(
@@ -31,13 +34,13 @@ start()
         &process_control_thread_id_);
 }
 
-void easyprospect::service::shared::process_cntrl_client_win::
+void easyprospect::service::web_worker::process_cntrl_client_win::
 stop()
 {
     ;
 }
 
-void easyprospect::service::shared::process_cntrl_client_win::
+void easyprospect::service::web_worker::process_cntrl_client_win::
 listen_loop()
 {
     DWORD dwWait;
@@ -257,7 +260,12 @@ listen_loop()
                                 read_queue.push(std::move(res));
 
                                 // TODO: KP. Callback for boost::asio::post to ASIO here
-                               // static_assert(false, "dispatch to ASIO maybe via callback");
+                                boost::asio::post([=]()
+                                {
+                                    // Handle the message sent to this client
+                                    auto msg = std::move(this->read_queue.front());
+                                    process_message_actions::do_action(*msg);
+                                });
                             }
 
                             // std::string o(input_buffer.begin(), input_buffer.end());
@@ -345,13 +353,13 @@ listen_loop()
     while (!stop);
 }
 
-void easyprospect::service::shared::process_cntrl_client_win::
+void easyprospect::service::web_worker::process_cntrl_client_win::
 setup()
 {
 
 }
 
-void easyprospect::service::shared::process_cntrl_client_win::
+void easyprospect::service::web_worker::process_cntrl_client_win::
 send(control::process_message_base& obj)
 {
     if( !is_running() )
@@ -370,12 +378,12 @@ send(control::process_message_base& obj)
     }
 }
 
-void easyprospect::service::shared::process_cntrl_client_win::
+void easyprospect::service::web_worker::process_cntrl_client_win::
 register_handler()
 {
 }
 
-bool easyprospect::service::shared::process_cntrl_client_win::
+bool easyprospect::service::web_worker::process_cntrl_client_win::
 is_running()
 {
     bool result = false;

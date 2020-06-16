@@ -7,9 +7,8 @@
 #include <easyprospect-service-shared/rpc.hpp>
 #include <easyprospect-service-shared/types.hpp>
 
-#include "easyprospect-http-request.h"
-#include "easyprospect-process-cntrl-client.h"
-#include "service.hpp"
+#include <easyprospect-service-shared/easyprospect-http-request.h>
+#include <easyprospect-service-shared/service.hpp>
 
 namespace easyprospect
 {

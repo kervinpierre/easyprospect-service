@@ -4,7 +4,7 @@
 #include <string>
 #include <tchar.h>
 
-#include <easyprospect-service-shared/easyprospect-process-cntrl-client-base.h>
+#include <easyprospect-web-worker/easyprospect-process-cntrl-client-base.h>
 #include <windows.h>
 
 #include <easyprospect-service-control/epprocess-message.h>
@@ -18,7 +18,7 @@ namespace easyprospect
 {
 namespace service
 {
-    namespace shared
+    namespace web_worker
     {
         class process_cntrl_client_win final : public process_cntrl_client_base
         {
