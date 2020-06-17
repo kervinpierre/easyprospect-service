@@ -19,22 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\easyprospect-service-control\epprocess-message.cpp" />
+    <ClCompile Include="src\easyprospect-os-utils\easyprospect-os-utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\easyprospect-service-control\easyprospect-service-control.h" />
-    <ClInclude Include="include\easyprospect-service-control\epprocess-message.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="easyprospect-os-utils.vcxproj">
-      <Project>{c9cab0f9-8c6d-4fe0-a21a-9afac5ea493a}</Project>
-    </ProjectReference>
+    <ClInclude Include="include\easyprospect-os-utils\easyprospect-os-utils.h" />
+    <ClInclude Include="include\easyprospect-os-utils\getpid-linux.h" />
+    <ClInclude Include="include\easyprospect-os-utils\getpid-win.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{FEDAB78B-C134-49A6-B839-0C622D91E8E2}</ProjectGuid>
+    <ProjectGuid>{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>easyprospectservicecontrol</RootNamespace>
+    <RootNamespace>easyprospectosutils</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -56,7 +52,6 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -102,13 +97,12 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_ITERATOR_DEBUG_LEVEL=0;BOOST_ALL_NO_LIB;Boost_NO_SYSTEM_PATHS;Boost_USE_STATIC_LIBS;Boost_USE_STATIC_RUNTIME;_WIN32_WINNT=0x0601;_SCL_SECURE_NO_WARNINGS=1;_CRT_SECURE_NO_WARNINGS=1;OPENSSL_USE_STATIC_LIBS;BOOST_ASIO_NO_DEPRECATED=1;BOOST_ASIO_DISABLE_BOOST_ARRAY=1;BOOST_ASIO_DISABLE_BOOST_BIND=1;BOOST_ASIO_DISABLE_BOOST_DATE_TIME=1;BOOST_ASIO_DISABLE_BOOST_REGEX=1;URI_STATIC_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>false</ConformanceMode>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include\;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\msgpack\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp14</LanguageStandard>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

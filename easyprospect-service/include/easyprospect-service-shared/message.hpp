@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <easyprospect-service-shared/config.hpp>
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/core/exchange.hpp>
 #include <atomic>

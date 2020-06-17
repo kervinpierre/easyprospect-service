@@ -29,6 +29,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "epworkercntl", "epworkercnt
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-service-control", "easyprospect-service-control.vcxproj", "{FEDAB78B-C134-49A6-B839-0C622D91E8E2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "easyprospect-os-utils", "easyprospect-os-utils.vcxproj", "{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -181,6 +183,22 @@ Global
 		{FEDAB78B-C134-49A6-B839-0C622D91E8E2}.RelWithDebInfo|x64.Build.0 = Release|x64
 		{FEDAB78B-C134-49A6-B839-0C622D91E8E2}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
 		{FEDAB78B-C134-49A6-B839-0C622D91E8E2}.RelWithDebInfo|x86.Build.0 = Release|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Debug|x64.ActiveCfg = Debug|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Debug|x64.Build.0 = Debug|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Debug|x86.ActiveCfg = Debug|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Debug|x86.Build.0 = Debug|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.MinSizeRel|x64.Build.0 = Release|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.MinSizeRel|x86.ActiveCfg = Release|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.MinSizeRel|x86.Build.0 = Release|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Release|x64.ActiveCfg = Release|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Release|x64.Build.0 = Release|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Release|x86.ActiveCfg = Release|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.Release|x86.Build.0 = Release|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
+		{C9CAB0F9-8C6D-4FE0-A21A-9AFAC5EA493A}.RelWithDebInfo|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

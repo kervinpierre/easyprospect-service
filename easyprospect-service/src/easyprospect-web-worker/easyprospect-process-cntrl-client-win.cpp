@@ -257,14 +257,24 @@ listen_loop()
                             if (read_bytes > 0)
                             {
                                 auto res = control::process_message_base::process_input(input_buffer, read_bytes);
-                                read_queue.push(std::move(res));
+                                {
+                                    std::lock_guard<std::mutex> lock(read_mutex);
+                                    read_queue.push(std::move(res));
+                                }
 
                                 // TODO: KP. Callback for boost::asio::post to ASIO here
                                 boost::asio::post([=]()
                                 {
                                     // Handle the message sent to this client
-                                    auto msg = std::move(this->read_queue.front());
-                                    process_message_actions::do_action(*msg);
+                                    std::unique_ptr<control::process_message_base> msg;
+                                    {
+                                        std::lock_guard<std::mutex> lock(read_mutex);
+                                        msg = std::move(this->read_queue.front());
+                                        read_queue.pop();
+                                    }
+                                    std::vector<std::unique_ptr<control::process_message_base>> arg;
+                                    arg.push_back(std::move(msg));
+                                    process_message_actions::do_action(std::move(arg));
                                 });
                             }
 

@@ -6,6 +6,8 @@
 #include <sstream>
 #include <spdlog/spdlog.h>
 
+#include "easyprospect-os-utils/easyprospect-os-utils.h"
+
 #define MSGPACK_USE_DEFINE_MAP
 
 namespace easyprospect
@@ -28,7 +30,7 @@ namespace service
         struct process_message_base
         {
             process_message_type type;
-            int                  pid;
+            long                 pid;
             int                  port;
             uint64_t             id1;
             uint64_t             id2;
@@ -37,10 +39,10 @@ namespace service
 
             process_message_base()
             {
-                config(process_message_type::BASE, 0, 0, 0, 0, -1);
+                config(process_message_type::BASE, -1, 0, 0, 0, -1);
             }
 
-            process_message_base(int pi, int po, uint64_t i1, uint64_t i2, long long ct)
+            process_message_base(long pi, int po, uint64_t i1, uint64_t i2, long long ct)
             {
                 config(process_message_type::BASE, pi, po, i1, i2, ct);
             }
@@ -50,14 +52,43 @@ namespace service
 
             static std::unique_ptr<msgpack::sbuffer> pack(const process_message_base& o);
 
+            static std::string to_string(const process_message_base &m)
+            {
+                std::ostringstream os;
+
+                switch (m.type)
+                {
+                case process_message_type::NONE:
+                    os << "type: NONE" << std::endl;
+                    break;
+                case process_message_type::BASE: break;
+                case process_message_type::START: break;
+                case process_message_type::PING: break;
+                case process_message_type::PONG: break;
+                case process_message_type::CMD_STOP: break;
+                case process_message_type::CMD_RESULT:
+                    os << "type: CMD_RESULT" << std::endl;
+                    break;
+                default: ;
+                }
+
+                std::string res = os.str();
+
+                return res;
+            }
+
         private:
-            void config(process_message_type ty, int pi, int po, uint64_t i1, uint64_t i2, long long ct)
+            void config(process_message_type ty, long pi, int po, uint64_t i1, uint64_t i2, long long ct)
             {
                 type = ty;
-                pid  = pi;
                 port = po;
                 id1  = i1;
                 id2  = i2;
+
+                if ( pid < 0 )
+                {
+                    pid = os_utils::ep_process_utils::getpid();
+                }
 
                 if (ct < 0)
                 {
