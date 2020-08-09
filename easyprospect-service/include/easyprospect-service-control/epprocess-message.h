@@ -3,6 +3,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <msgpack.hpp>
+#include <random>
 #include <sstream>
 #include <spdlog/spdlog.h>
 
@@ -62,12 +63,44 @@ namespace service
             {
                 type = ty;
                 port = po;
-                id1  = i1;
-                id2  = i2;
 
-                if ( pid < 0 )
+#ifdef _DEBUG
+                std::mt19937 gen;
+#else
+                std::random_device rd;
+                std::mt19937 gen(rd());
+#endif
+
+                std::uniform_int_distribution<unsigned long long> id_dis(
+                    1,
+                    std::numeric_limits<std::uint64_t>::max()
+                );
+
+                if( !i1 )
+                {
+                    id1  = id_dis(gen);
+                }
+                else
+                {
+                    id1  = i1;
+                }
+
+                if( !i2 )
+                {
+                    id2  = id_dis(gen);
+                }
+                else
+                {
+                    id2  = i2;
+                }
+
+                if ( pi < 0 )
                 {
                     pid = os_utils::ep_process_utils::getpid();
+                }
+                else
+                {
+                    pid = pi;
                 }
 
                 if (ct < 0)
