@@ -16,6 +16,8 @@ namespace service
 {
     namespace control
     {
+        struct process_message_cmd_result;
+
         enum class process_message_type
         {
             NONE       = 0,
@@ -52,30 +54,8 @@ namespace service
 
             static std::unique_ptr<msgpack::sbuffer> pack(const process_message_base& o);
 
-            static std::string to_string(const process_message_base &m)
-            {
-                std::ostringstream os;
-
-                switch (m.type)
-                {
-                case process_message_type::NONE:
-                    os << "type: NONE" << std::endl;
-                    break;
-                case process_message_type::BASE: break;
-                case process_message_type::START: break;
-                case process_message_type::PING: break;
-                case process_message_type::PONG: break;
-                case process_message_type::CMD_STOP: break;
-                case process_message_type::CMD_RESULT:
-                    os << "type: CMD_RESULT" << std::endl;
-                    break;
-                default: ;
-                }
-
-                std::string res = os.str();
-
-                return res;
-            }
+            static std::string to_string(const process_message_cmd_result& m);
+            static std::string to_string(const process_message_base& m);
 
         private:
             void config(process_message_type ty, long pi, int po, uint64_t i1, uint64_t i2, long long ct)

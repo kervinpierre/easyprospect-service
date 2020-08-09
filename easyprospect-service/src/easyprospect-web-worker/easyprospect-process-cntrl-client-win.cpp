@@ -257,6 +257,11 @@ listen_loop()
                             if (read_bytes > 0)
                             {
                                 auto res = control::process_message_base::process_input(input_buffer, read_bytes);
+
+                                spdlog::debug(
+                                    "process_cntrl_client_win::listen_loop() : \n{}",
+                                    control::process_message_base::to_string(*res));
+
                                 {
                                     std::lock_guard<std::mutex> lock(read_mutex);
                                     read_queue.push(std::move(res));
@@ -376,6 +381,8 @@ send(control::process_message_base& obj)
     {
         throw std::logic_error("Control thread not running.");
     }
+
+    spdlog::debug("process_cntrl_client_win::send() : \n{}", control::process_message_base::to_string(obj));
 
     std::lock_guard<std::mutex> lock(write_mutex);
     auto buff = control::process_message_base::pack(obj);

@@ -282,6 +282,10 @@ void process_control_win::listen_loop()
                             std::lock_guard<std::mutex> lock(read_mutex);
 
                             auto res = control::process_message_base::process_input(input_buffer, read_bytes);
+                            spdlog::debug(
+                                "process_control_win::listen_loop() : \n{}",
+                                control::process_message_base::to_string(*res));
+
                             read_queue[ovlp_id_].push(std::move(res));
                         }
 
@@ -379,6 +383,9 @@ void process_control_win::send(int i, const control::process_message_base& obj)
     BOOL fSuccess = FALSE;
 
     auto buff = control::process_message_base::pack(obj);
+
+    spdlog::debug("process_control_win::send() : queue {}\n{}", 
+                   i, control::process_message_base::to_string(obj));
 
     std::lock_guard<std::mutex> lock(write_mutex);
     pipe_write_ready[i] = true;

@@ -81,3 +81,62 @@ std::unique_ptr<process_message_base>
 
     return nullptr;
 }
+
+std::string process_message_base::to_string(const process_message_base& m)
+{
+    std::ostringstream os;
+
+    {
+        std::chrono::milliseconds ct(m.current_time);
+        std::chrono::time_point<std::chrono::system_clock> dt(ct);
+        std::time_t tt = std::chrono::system_clock::to_time_t(dt);
+        std::tm ttm = *std::gmtime(&tt);
+        os << "time: " << std::put_time(&ttm, "UTC %Y-%m-%d %H:%M:%S") << '.' <<
+            std::setfill('0')
+            << std::setw(3) << m.current_time % 1000 << std::endl;
+    }
+
+    os << "pid: " << m.pid << std::endl;
+    os << "port: " << m.port << std::endl;
+    os << "id1: " << m.id1 << std::endl;
+    os << "id2: " << m.id2 << std::endl;
+
+    switch (m.type)
+    {
+    case process_message_type::NONE:
+        os << "type: NONE" << std::endl;
+        break;
+
+    case process_message_type::BASE:
+        os << "type: BASE" << std::endl;
+        break;
+
+    case process_message_type::START:
+        os << "type: START" << std::endl;
+        break;
+
+    case process_message_type::PING: break;
+    case process_message_type::PONG: break;
+    case process_message_type::CMD_STOP: break;
+    case process_message_type::CMD_RESULT:
+        os << "type: CMD_RESULT" << std::endl;
+        os << to_string(static_cast<const process_message_cmd_result&>(m));
+        break;
+
+    default: ;
+    }
+
+    std::string res = os.str();
+
+    return res;
+}
+
+std::string process_message_base::to_string(const process_message_cmd_result& m)
+{
+    std::ostringstream os;
+    os << "result: " << m.result << std::endl;
+
+    std::string res = os.str();
+
+    return res;
+}
