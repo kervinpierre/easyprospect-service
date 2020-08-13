@@ -28,7 +28,9 @@ namespace service
             boost::asio::ip::tcp::endpoint                                         ep,
             boost::beast::flat_buffer                                          storage);
 
-        bool run_listener(application_impl_base& srv, config::easyprospect_config_service_listener_conf cfg);
+        bool run_listener(application_impl_base& srv, 
+                           config::easyprospect_config_service_listener_conf cfg,
+            std::shared_ptr<config::easyprospect_registry>    reg);
 
 
         // extern void run_ws_session(

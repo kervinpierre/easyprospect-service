@@ -32,6 +32,9 @@
       <Project>{33c62223-7936-4376-b14d-fa7bc5e19f17}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\test01\argsClient01.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{5A449070-3330-49EB-926C-C621BDA20AD9}</ProjectGuid>

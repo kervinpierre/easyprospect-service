@@ -76,7 +76,7 @@ namespace service
                         ep_full_exit = 1;
                     }
 
-                    auto m = pcntl->next_message(i);
+                     auto m = pcntl->next_message(i);
                     if ( m == nullptr )
                     {
                         std::this_thread::sleep_for(std::chrono::seconds(1));

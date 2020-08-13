@@ -7,6 +7,9 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{c7f60b43-7943-45e7-a69d-a0e233efd448}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Work Files">
+      <UniqueIdentifier>{25ab4860-54c9-4237-a852-0fe690a0f5e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\epworker\epworker.cpp">
@@ -17,5 +20,10 @@
     <ClInclude Include="include\epworker\epworker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\test01\argsClient01.txt">
+      <Filter>Work Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

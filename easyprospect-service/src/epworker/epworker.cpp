@@ -7,6 +7,8 @@
 
 #include <easyprospect-web-worker/worker-server.h>
 
+#include "easyprospect-config/easyprospect-registry.h"
+
 //#ifdef BOOST_MSVC
 //#ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
 //#define WIN32_LEAN_AND_MEAN
@@ -121,7 +123,10 @@ int main(int argc, char* argv[])
 
     auto vb = res.get_verbosity();
 
-    spdlog::debug("starting ep-web-worker");
+    spdlog::debug("starting epworker");
+
+    spdlog::info("Logging set to {}", 
+                   to_string_view(spdlog::default_logger()->level()));
 
     spdlog::debug(res.str());
 
@@ -132,8 +137,10 @@ int main(int argc, char* argv[])
 
     spdlog::debug(sstr.str());
 
+    auto reg = std::make_shared<easyprospect::service::config::easyprospect_registry>();
+
     // Create the worker server
-    auto srv = easyprospect::service::web_worker::make_server(res);
+    auto srv = easyprospect::service::web_worker::make_server(res, reg);
     if (srv == nullptr)
     {
         spdlog::error("Worker Server failed.");

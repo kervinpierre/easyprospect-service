@@ -2,6 +2,8 @@
 #include <easyprospect-web-worker/worker-server-app.h>
 #include <easyprospect-v8/easyprospect-v8.h>
 
+#include "easyprospect-config/easyprospect-registry.h"
+
 namespace easyprospect
 {
 namespace service
@@ -9,9 +11,10 @@ namespace service
     namespace web_worker
     {
         application_impl::application_impl(
-            easyprospect::service::config::easyprospect_config_service_core
-            cfg):
-            cfg_(std::move(cfg)), timer_(this->make_executor()),
+            config::easyprospect_config_service_core
+            cfg,
+            std::shared_ptr<config::easyprospect_registry> reg):
+            cfg_(std::move(cfg)), reg_(reg), timer_(this->make_executor()),
             signals_(timer_.get_executor(), SIGINT, SIGTERM),
             shutdown_time_(never()), stop_(false),
             channel_list_(make_channel_list(*this))
@@ -85,7 +88,7 @@ namespace service
             // Create the control server
             try
             {
-                control_client_ = easyprospect::service::web_worker::make_control_server(cfg);
+                control_client_ = easyprospect::service::web_worker::make_control_server(cfg, reg);
             }
             catch (std::logic_error& ex)
             {
@@ -100,9 +103,6 @@ namespace service
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
-
-            control::process_message_startup st;
-            control_client_->send(st);
 
             // TODO: KP. Move URL parsing to some place needed.
             // Base
@@ -138,6 +138,11 @@ namespace service
             // Capture SIGINT and SIGTERM to perform a clean shutdown
             signals_.async_wait(boost::beast::bind_front_handler(&application_impl::on_signal, this));
 
+            auto                             ports     = reg_->get_ports();
+            int                              curr_port = ports.empty() ? 0 : ports[0];
+            control::process_message_startup st(curr_port);
+            control_client_->send(st);
+
 #ifndef LOUNGE_USE_SYSTEM_EXECUTOR
             std::vector<std::thread> vt;
             while (vt.size() < cfg_.get_num_threads())
@@ -154,12 +159,12 @@ namespace service
             for (auto const& sp : agents)
                 sp->on_stop();
 
-                // services must be kept alive until after
-                // all executor threads are joined.
+            // services must be kept alive until after
+            // all executor threads are joined.
 
-                // If we get here, then the server has
-                // stopped, so join the threads before
-                // destroying them.
+            // If we get here, then the server has
+            // stopped, so join the threads before
+            // destroying them.
 
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
             boost::asio::system_executor{}.context().join();

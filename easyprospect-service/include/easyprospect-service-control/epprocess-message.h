@@ -64,12 +64,9 @@ namespace service
                 type = ty;
                 port = po;
 
-#ifdef _DEBUG
-                std::mt19937 gen;
-#else
+                // std::mt19937 gen;
                 std::random_device rd;
                 std::mt19937 gen(rd());
-#endif
 
                 std::uniform_int_distribution<unsigned long long> id_dis(
                     1,
@@ -121,9 +118,10 @@ namespace service
 
         struct process_message_startup final : process_message_base
         {
-            process_message_startup()
+            process_message_startup(int po = 0)
             {
                 type = process_message_type::START;
+                port = po;
             }
         };
 

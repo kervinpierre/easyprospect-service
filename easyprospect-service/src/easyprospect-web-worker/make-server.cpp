@@ -12,7 +12,9 @@ namespace service
     namespace web_worker
     {
         std::unique_ptr<shared::server> make_server(
-            config::easyprospect_config_service_core curr_config)
+            config::easyprospect_config_service_core curr_config,
+            std::shared_ptr<config::easyprospect_registry> curr_reg
+        )
         {
             boost::beast::error_code ec;
 
@@ -22,7 +24,7 @@ namespace service
                 try
                 {
                     // Create the server
-                    srv = boost::make_unique<easyprospect::service::web_worker::application_impl>(curr_config);
+                    srv = boost::make_unique<easyprospect::service::web_worker::application_impl>(curr_config, curr_reg);
                 }
                 catch (boost::beast::system_error const& e)
                 {
@@ -42,7 +44,7 @@ namespace service
                 {
                     try
                     {
-                        if (!run_listener(*srv, e))
+                        if (!run_listener(*srv, e, curr_reg))
                             return nullptr;
                     }
                     catch (boost::beast::system_error const& ex)
@@ -58,7 +60,8 @@ namespace service
         }
 
         std::unique_ptr<process_cntrl_client> make_control_server(
-            config::easyprospect_config_service_core curr_config)
+            config::easyprospect_config_service_core curr_config,
+            std::shared_ptr<config::easyprospect_registry> reg)
         {
             auto pcntl = std::make_unique<process_cntrl_client>();
             pcntl->register_handler();

@@ -13,6 +13,14 @@
 
 #include "easyprospect-web-worker/easyprospect-process-cntrl-client.h"
 
+namespace easyprospect {
+    namespace service {
+        namespace config {
+            class easyprospect_registry;
+        }
+    }
+}
+
 namespace easyprospect
 {
 namespace service
@@ -27,9 +35,11 @@ namespace service
         
         std::unique_ptr<channel_list_impl> make_channel_list(web_worker::application_impl& srv);
         void                               make_room(channel_list& list, boost::beast::string_view name);
-        extern std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config);
+        extern std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config,
+                                                            std::shared_ptr<config::easyprospect_registry> curr_reg);
         extern std::unique_ptr<process_cntrl_client> make_control_server(
-            config::easyprospect_config_service_core curr_config);
+            config::easyprospect_config_service_core curr_config,
+            std::shared_ptr<config::easyprospect_registry> curr_reg);
         extern void                            make_system_channel(application_impl& srv);
         extern void                            make_blackjack_service(web_worker::application_impl& srv);
 

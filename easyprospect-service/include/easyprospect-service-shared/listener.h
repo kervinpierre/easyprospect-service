@@ -8,6 +8,7 @@
 #include <boost/asio/ssl/context.hpp>
 
 #include <easyprospect-config/easyprospect-config-service.h>
+#include <easyprospect-config/easyprospect-registry.h>
 //#include <easyprospect-service-shared/session.hpp>
 #include "service.hpp"
 //#include "types.hpp"
@@ -20,6 +21,14 @@
 //#include <easyprospect-service-shared/session.hpp>
 //#include <nlohmann/json.hpp>
 //#include "server_certificate.hpp"
+
+namespace easyprospect {
+    namespace service {
+        namespace config {
+            class easyprospect_registry;
+        }
+    }
+}
 
 namespace easyprospect
 {
@@ -87,6 +96,7 @@ namespace service
             shared::application_impl_base&                    srv_;
             std::mutex                                        mutex_;
             config::easyprospect_config_service_listener_conf cfg_;
+            std::shared_ptr<config::easyprospect_registry> reg_;
             boost::asio::ssl::context                                ctx_;
             boost::asio::basic_socket_acceptor<tcp_ex, executor_type> acceptor_;
             boost::container::flat_set<session*>              sessions_;
@@ -95,7 +105,9 @@ namespace service
             int current_port_;
 
           public:
-            listener_impl(application_impl_base& srv, config::easyprospect_config_service_listener_conf cfg);
+            listener_impl(application_impl_base& srv, 
+                           config::easyprospect_config_service_listener_conf cfg,
+                std::shared_ptr<config::easyprospect_registry>   reg);
 
             ~listener_impl();
 

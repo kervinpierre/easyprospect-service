@@ -194,7 +194,8 @@ namespace easyprospect
             }
 
             listener_impl::listener_impl(application_impl_base& srv,
-                                         easyprospect::service::config::easyprospect_config_service_listener_conf cfg):
+                config::easyprospect_config_service_listener_conf cfg,
+                std::shared_ptr<config::easyprospect_registry>                          reg) :
                 srv_(srv)
                 , ctx_(boost::asio::ssl::context::tlsv12)
                 , acceptor_(srv_.make_executor())
@@ -203,6 +204,8 @@ namespace easyprospect
                     cfg.get_name(), cfg.get_address(), cfg.get_port(),
                     cfg.get_min_port(), cfg.get_max_port(),
                     config::easyprospect_config_service_listener_conf::to_string(config::listener_kind::allow_tls));
+
+                reg_ = reg;
 
                 // This holds the self-signed certificate used by the server
                 load_server_certificate(ctx_);
@@ -245,6 +248,8 @@ namespace easyprospect
 
                     return false;
                 }
+
+                reg_->set_ports({port});
 
                 spdlog::debug("open_port(): {}:{} succeeded", addr.to_string(), port);
                 return true;
@@ -402,10 +407,11 @@ namespace easyprospect
 
 
             bool run_listener(application_impl_base& srv,
-                config::easyprospect_config_service_listener_conf cfg)
+                config::easyprospect_config_service_listener_conf cfg,
+                std::shared_ptr<config::easyprospect_registry> reg)
             {
                 auto sp = boost::make_unique<listener_impl>(
-                    srv, cfg);
+                    srv, cfg, reg);
                 bool open = sp->open();
                 if (!open)
                     return false;

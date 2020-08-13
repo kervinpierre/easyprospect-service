@@ -97,7 +97,9 @@ int main(int argc, char* argv[])
 
     auto vb = res.get_verbosity();
 
-    spdlog::debug("starting ep-web-worker");
+    spdlog::debug("starting epworkercntl");
+
+    spdlog::info("Logging set to {}", to_string_view(spdlog::default_logger()->level()));
 
     spdlog::debug(res.str());
 

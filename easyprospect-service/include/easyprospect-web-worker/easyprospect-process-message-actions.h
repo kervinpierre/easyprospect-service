@@ -10,7 +10,8 @@ namespace service
         class process_message_actions final
         {
           public:
-            static std::vector<std::unique_ptr<control::process_message_base>> do_action_cmd_result(
+            static std::vector<std::unique_ptr<control::process_message_base>>
+            do_action_cmd_result(
                 std::vector<std::unique_ptr<control::process_message_base>> msg)
             {
                 std::vector<std::unique_ptr<control::process_message_base>> res;

@@ -23,6 +23,7 @@
     <ClCompile Include="src\easyprospect-config\easyprospect-config-v8.cpp" />
     <ClCompile Include="src\easyprospect-config\easyprospect-config-wcntl.cpp" />
     <ClCompile Include="src\easyprospect-config\easyprospect-config.cpp" />
+    <ClCompile Include="src\easyprospect-config\easyprospect-registry.cpp" />
     <ClCompile Include="src\easyprospect-config\ep-listener-config.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -31,6 +32,7 @@
     <ClInclude Include="include\easyprospect-config\easyprospect-config-wcntl.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-defaults.h" />
+    <ClInclude Include="include\easyprospect-config\easyprospect-registry.h" />
     <ClInclude Include="include\easyprospect-config\ep-listener-config.h" />
     <ClInclude Include="include\easyprospect-config\logging.h" />
   </ItemGroup>
