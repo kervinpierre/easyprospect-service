@@ -8,12 +8,13 @@
 #include <boost/asio/ssl/context.hpp>
 
 #include <easyprospect-config/easyprospect-config-service.h>
-#include <easyprospect-config/easyprospect-registry.h>
 //#include <easyprospect-service-shared/session.hpp>
 #include "service.hpp"
 //#include "types.hpp"
 
 #include <easyprospect-service-shared/session.hpp>
+
+#include <easyprospect-config/easyprospect-registry.h>
 
 //#include <easyprospect-service-shared/types.hpp>
 //#include <easyprospect-service-shared/server.h>
@@ -21,14 +22,6 @@
 //#include <easyprospect-service-shared/session.hpp>
 //#include <nlohmann/json.hpp>
 //#include "server_certificate.hpp"
-
-namespace easyprospect {
-    namespace service {
-        namespace config {
-            class easyprospect_registry;
-        }
-    }
-}
 
 namespace easyprospect
 {

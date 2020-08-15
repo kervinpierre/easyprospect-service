@@ -139,7 +139,7 @@ namespace service
             signals_.async_wait(boost::beast::bind_front_handler(&application_impl::on_signal, this));
 
             auto                             ports     = reg_->get_ports();
-            int                              curr_port = ports.empty() ? 0 : ports[0];
+            auto                             curr_port = ports.empty() ? 0 : ports[0];
             control::process_message_startup st(curr_port);
             control_client_->send(st);
 
@@ -159,12 +159,12 @@ namespace service
             for (auto const& sp : agents)
                 sp->on_stop();
 
-            // services must be kept alive until after
-            // all executor threads are joined.
+                // services must be kept alive until after
+                // all executor threads are joined.
 
-            // If we get here, then the server has
-            // stopped, so join the threads before
-            // destroying them.
+                // If we get here, then the server has
+                // stopped, so join the threads before
+                // destroying them.
 
 #ifdef LOUNGE_USE_SYSTEM_EXECUTOR
             boost::asio::system_executor{}.context().join();

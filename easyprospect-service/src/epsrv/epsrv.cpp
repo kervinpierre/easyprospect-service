@@ -142,9 +142,11 @@ int main(int argc, char *argv[])
 
     spdlog::debug(sstr.str());
 
+    auto reg = std::make_shared<easyprospect::service::config::easyprospect_registry>();
+
     // Create the server
      boost::beast::error_code ec;
-    auto srv = easyprospect::service::web_server::make_server(res);
+    auto srv = easyprospect::service::web_server::make_server(res, reg);
     if (!srv)
         return EXIT_FAILURE;
 

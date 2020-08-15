@@ -11,15 +11,9 @@
 
 #include <easyprospect-service-shared/user_base.hpp>
 
-#include "easyprospect-web-worker/easyprospect-process-cntrl-client.h"
 
-namespace easyprospect {
-    namespace service {
-        namespace config {
-            class easyprospect_registry;
-        }
-    }
-}
+#include <easyprospect-config/easyprospect-registry.h>
+#include <easyprospect-web-worker/easyprospect-process-cntrl-client.h>
 
 namespace easyprospect
 {

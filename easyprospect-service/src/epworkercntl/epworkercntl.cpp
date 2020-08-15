@@ -109,8 +109,9 @@ int main(int argc, char* argv[])
          << "cwd: '" << boost::filesystem::current_path() << std::endl;
 
     spdlog::debug(sstr.str());
+    auto reg = std::make_shared<easyprospect::service::config::easyprospect_registry>();
 
-    easyprospect::service::control_worker::make_server(res);
+    easyprospect::service::control_worker::make_server(res, reg);
     // Create the server
     //auto srv = easyprospect::service::control_worker::make_server(res);
     //if (!srv)

@@ -304,7 +304,8 @@ namespace service
         */
         //------------------------------------------------------------------------------
 
-        std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config)
+        std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config,
+                    std::shared_ptr<config::easyprospect_registry> curr_reg)
         {
             boost::beast::error_code ec;
 
@@ -331,7 +332,7 @@ namespace service
                 {
                     try
                     {
-                        if (!run_listener(*srv, e))
+                        if (!run_listener(*srv, e, curr_reg))
                             return nullptr;
                     }
                     catch (boost::beast::system_error const& ex)

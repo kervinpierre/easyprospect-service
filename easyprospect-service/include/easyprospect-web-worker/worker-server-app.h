@@ -6,7 +6,8 @@
 //
 #include <easyprospect-service-shared/utility.hpp>
 
-#include "easyprospect-config/easyprospect-registry.h"
+
+#include <easyprospect-config/easyprospect-registry.h>
 
 namespace easyprospect
 {

@@ -1,6 +1,8 @@
 #include <epworkercntl/epprocess.h>
 #include <epworkercntl/make-server.h>
 
+#include "easyprospect-config/easyprospect-registry.h"
+
 extern volatile int ep_full_exit = 0;
 
 namespace easyprospect
@@ -9,7 +11,8 @@ namespace service
 {
     namespace control_worker
     {
-        void make_server(config::easyprospect_config_wcntl_core curr_config)
+        void make_server(config::easyprospect_config_wcntl_core curr_config,
+                          std::shared_ptr<config::easyprospect_registry> curr_reg)
         {
             std::string command, command_line, command_args;
             std::string args = curr_config.get_worker_args();
@@ -54,6 +57,8 @@ namespace service
                 proc_list.emplace_back(std::make_unique<process>(command, command_line, command_args));
                 proc_list[i]->setup();
                 proc_list[i]->start();
+
+                curr_reg->get_worker_clients().emplace_back();
             }
 
             do
@@ -93,6 +98,10 @@ namespace service
                     {
                         auto s = std::unique_ptr<control::process_message_startup>(
                             static_cast<control::process_message_startup*>(m.release()));
+
+                        curr_reg->get_worker_clients()[i].get_pid().push_back(s->pid);
+                        curr_reg->get_worker_clients()[i].get_port().push_back(s->port);
+
                         proc_start_messages[i].push_back(std::move(s));
 
                         auto res = std::make_unique<control::process_message_cmd_result>();
