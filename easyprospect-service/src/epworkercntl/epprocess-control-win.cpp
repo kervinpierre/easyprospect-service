@@ -44,6 +44,12 @@ void process_control_win::start()
 
 void process_control_win::stop()
 {
+    stop_loop = true;
+
+    // FIXME: Not ideal, but let's give the loop
+    //        5 second to process the final message.
+    spdlog::info("process_control_win::stop(): Waiting 5s to empty process loop...");
+    std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
 void process_control_win::setup()
@@ -120,7 +126,6 @@ void process_control_win::listen_loop()
 
     std::vector<unsigned char> input_buffer(50000);
     DWORD                      read_bytes;
-    bool                       stop = false;
 
     // Only for debugging
     int64_t debug_read_count  = 0;
@@ -128,6 +133,9 @@ void process_control_win::listen_loop()
 
     do
     {
+        if (stop_loop)
+            break;
+
         for (auto i = 0; i < INSTANCES; i++)
         {
             if (pipe_read_ready[i])
@@ -229,6 +237,8 @@ void process_control_win::listen_loop()
             }
         }
 
+        if ( stop_loop ) break;
+
         // Wait for the event object to be signaled, indicating
         // completion of an overlapped read, write, or
         // connect operation.
@@ -237,7 +247,7 @@ void process_control_win::listen_loop()
             INSTANCES * 2, // number of event objects
             hEvents,       // array of event objects
             FALSE,         // does not wait for all
-            5000);         // waits indefinitely
+            3000); 
 
         switch (dwWait)
         {
@@ -250,7 +260,7 @@ void process_control_win::listen_loop()
             std::stringstream err;
             err << "Wait for server IO failed:\n" << geterror_to_string();
             spdlog::error(err.str());
-            stop = true;
+            stop_loop = true;
         }
         break;
 
@@ -281,7 +291,7 @@ void process_control_win::listen_loop()
                         {
                             std::lock_guard<std::mutex> lock(read_mutex);
 
-                            auto res = control::process_message_base::process_input(input_buffer, read_bytes);
+auto res = control::process_message_base::process_input(input_buffer, read_bytes);
                             spdlog::debug(
                                 "process_control_win::listen_loop() : \n{}",
                                 control::process_message_base::to_string(*res));
@@ -361,7 +371,9 @@ void process_control_win::listen_loop()
         }
         break;
         }
-    } while (!stop);
+    } while (!stop_loop);
+
+    spdlog::debug("process_control_win::listen_loop() completed.");
 }
 
 std::unique_ptr<easyprospect::service::control::process_message_base>

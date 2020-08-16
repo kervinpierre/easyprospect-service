@@ -22,9 +22,9 @@ namespace service
 #endif
 
           public:
-            void setup()
+            void setup(std::function<void()> asf)
             {
-                p_obj_.setup();
+                p_obj_.setup(asf);
             }
 
             void start()

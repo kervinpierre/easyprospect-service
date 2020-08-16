@@ -103,6 +103,8 @@ namespace service
             volatile bool                                 read_pending[INSTANCES]     = {false};
             volatile bool                                 write_pending[INSTANCES]    = {false};
 
+            volatile bool                                 stop_loop = false;
+
             std::mutex                                    write_mutex;
             std::mutex                                    read_mutex;
 

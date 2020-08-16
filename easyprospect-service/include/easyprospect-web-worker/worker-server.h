@@ -33,7 +33,8 @@ namespace service
                                                             std::shared_ptr<config::easyprospect_registry> curr_reg);
         extern std::unique_ptr<process_cntrl_client> make_control_server(
             config::easyprospect_config_service_core curr_config,
-            std::shared_ptr<config::easyprospect_registry> curr_reg);
+            std::shared_ptr<config::easyprospect_registry> curr_reg,
+            std::function<void()> shutdown_func);
         extern void                            make_system_channel(application_impl& srv);
         extern void                            make_blackjack_service(web_worker::application_impl& srv);
 

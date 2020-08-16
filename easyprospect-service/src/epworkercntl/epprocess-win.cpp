@@ -391,7 +391,7 @@ BOOL WINAPI easyprospect::service::control_worker::ep_win_console_handler(DWORD 
     if (signal == CTRL_C_EVENT)
     {
         ep_full_exit = 1;
-        spdlog::debug("Ctrl-C handled\n"); // do cleanup
+        spdlog::info("Ctrl-C handled\n"); // do cleanup
     }
 
     return TRUE;

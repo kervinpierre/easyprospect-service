@@ -16,7 +16,7 @@ namespace service
             }
             virtual void listen_loop()                                   = 0;
             virtual void send(control::process_message_base& obj) = 0;
-            virtual void setup()                                         = 0;
+            virtual void setup(std::function<void()> app_shutdown_func)  = 0;
             virtual void stop()                                         = 0;
             virtual void start()                                         = 0;
             virtual void register_handler()                              = 0;

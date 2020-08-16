@@ -3,7 +3,8 @@
 using namespace easyprospect::service::control;
 
 std::unique_ptr<process_message_base> 
-    process_message_base::process_input(std::vector<unsigned char>& in, size_t bytes)
+    process_message_base::process_input(std::vector<unsigned char>& in, 
+        size_t                              bytes)
 {
     if (bytes < 1)
     {
@@ -65,7 +66,15 @@ std::unique_ptr<process_message_base>
 
         case process_message_type::PING: break;
         case process_message_type::PONG: break;
-        case process_message_type::CMD_STOP: break;
+        case process_message_type::CMD_STOP:
+        {
+            auto rs = std::make_unique<process_message_stop>();
+            deserialized.convert<process_message_stop>(*rs);
+
+            return rs;
+        }
+        break;
+
         case process_message_type::CMD_RESULT:
             {
                 auto rs = std::make_unique<process_message_cmd_result>();
@@ -117,7 +126,11 @@ std::string process_message_base::to_string(const process_message_base& m)
 
     case process_message_type::PING: break;
     case process_message_type::PONG: break;
-    case process_message_type::CMD_STOP: break;
+
+    case process_message_type::CMD_STOP:
+        os << "type: STOP" << std::endl;
+        break;
+
     case process_message_type::CMD_RESULT:
         os << "type: CMD_RESULT" << std::endl;
         os << to_string(static_cast<const process_message_cmd_result&>(m));

@@ -68,6 +68,11 @@ namespace service
                 p_obj_.start();
             }
 
+            void stop()
+            {
+                p_obj_.stop();
+            }
+
             void send(int i, const control::process_message_base& obj)
             {
                 p_obj_.send(i, obj);

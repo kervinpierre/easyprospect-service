@@ -256,7 +256,8 @@ listen_loop()
 
                             if (read_bytes > 0)
                             {
-                                auto res = control::process_message_base::process_input(input_buffer, read_bytes);
+                                auto res
+                                = control::process_message_base::process_input(input_buffer, read_bytes);
 
                                 spdlog::debug(
                                     "process_cntrl_client_win::listen_loop() : \n{}",
@@ -279,7 +280,7 @@ listen_loop()
                                     }
                                     std::vector<std::unique_ptr<control::process_message_base>> arg;
                                     arg.push_back(std::move(msg));
-                                    process_message_actions::do_action(std::move(arg));
+                                    process_message_actions::do_action(std::move(arg), app_shutdown_func);
                                 });
                             }
 
@@ -368,10 +369,9 @@ listen_loop()
     while (!stop);
 }
 
-void easyprospect::service::web_worker::process_cntrl_client_win::
-setup()
+void easyprospect::service::web_worker::process_cntrl_client_win::setup(std::function<void()> asf)
 {
-
+    app_shutdown_func = asf;
 }
 
 void easyprospect::service::web_worker::process_cntrl_client_win::

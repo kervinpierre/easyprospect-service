@@ -184,6 +184,13 @@ namespace service
             }
             break;
 
+            case process_message_type::CMD_STOP:
+            {
+                auto& p = static_cast<const process_message_stop&>(o); // UB at runtime
+                msgpack::pack<msgpack::sbuffer, process_message_stop>(*sbuf, p);
+            }
+            break;
+
             default:
                 spdlog::error("Pack message type unknown: {}", o.type);
                 throw std::logic_error("Message type unknown");

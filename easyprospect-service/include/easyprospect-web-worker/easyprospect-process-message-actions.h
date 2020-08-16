@@ -37,9 +37,26 @@ namespace service
                 return res;
             }
 
+            static std::vector<std::unique_ptr<control::process_message_base>> do_action_stop(
+                std::vector<std::unique_ptr<control::process_message_base>> msg,
+                std::function<void()> shutdown_func)
+            {
+                std::vector<std::unique_ptr<control::process_message_base>> res;
+
+                for (auto& m : msg)
+                {
+                    spdlog::debug("do_action_stop():\n{}", control::process_message_base::to_string(*m));
+
+                    shutdown_func();
+                }
+
+                return res;
+            }
+
             static std::vector<std::unique_ptr<control::process_message_base>>
             do_action(
-                std::vector<std::unique_ptr<control::process_message_base>> msg)
+                std::vector<std::unique_ptr<control::process_message_base>> msg,
+                std::function<void()> shutdown_func)
             {
                 std::vector<std::unique_ptr<control::process_message_base>> res;
                 std::stringstream os;
@@ -54,9 +71,16 @@ namespace service
                     res = do_action_start(std::move(msg));
                 }
                     break;
+
                 case control::process_message_type::PING: break;
                 case control::process_message_type::PONG: break;
-                case control::process_message_type::CMD_STOP: break;
+                case control::process_message_type::CMD_STOP:
+                {
+                    spdlog::debug("Processing STOP");
+                    res = do_action_stop(std::move(msg), shutdown_func);
+                }
+                break;
+
                 case control::process_message_type::CMD_RESULT:
                     {
                         spdlog::debug("Processing CMD_RESULT");

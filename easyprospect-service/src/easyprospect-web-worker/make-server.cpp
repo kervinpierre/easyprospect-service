@@ -61,11 +61,12 @@ namespace service
 
         std::unique_ptr<process_cntrl_client> make_control_server(
             config::easyprospect_config_service_core curr_config,
-            std::shared_ptr<config::easyprospect_registry> reg)
+            std::shared_ptr<config::easyprospect_registry> reg,
+            std::function<void()>                          shutdown_func)
         {
             auto pcntl = std::make_unique<process_cntrl_client>();
             pcntl->register_handler();
-            pcntl->setup();
+            pcntl->setup(shutdown_func);
             pcntl->start();
 
             // do

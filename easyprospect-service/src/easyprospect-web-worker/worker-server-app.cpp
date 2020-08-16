@@ -88,7 +88,11 @@ namespace service
             // Create the control server
             try
             {
-                control_client_ = easyprospect::service::web_worker::make_control_server(cfg, reg);
+                control_client_ = easyprospect::service::web_worker::make_control_server(cfg, reg, [=]()
+                {
+                    // asio post this?
+                    this->shutdown(std::chrono::seconds(5));
+                });
             }
             catch (std::logic_error& ex)
             {

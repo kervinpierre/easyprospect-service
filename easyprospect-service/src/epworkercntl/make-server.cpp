@@ -63,7 +63,6 @@ namespace service
 
             do
             {
-
                 for (auto i = 0; i < proc_count; i++)
                 {
                     if(proc_list[i]==nullptr)
@@ -128,7 +127,25 @@ namespace service
 
             } while (!ep_full_exit) ;
 
+            for (auto i = 0; i < proc_count; i++)
+            {
+                auto res = std::make_unique<control::process_message_stop>();
+                pcntl->send(i, *res);
+            }
+
+            // FIXME: This isn't ideal, but let's
+            // give child processes some warning for
+            // a clean shutdown.
+            std::this_thread::sleep_for(std::chrono::seconds(6));
+
+            for (auto i = 0; i < proc_count; i++)
+            {
+                pcntl->stop();
+            }
+
             spdlog::debug("Control Server stopped.");
+
+            // process_control terminates child-processes here
         }
 
 

@@ -10,6 +10,7 @@
 #include <easyprospect-service-control/epprocess-message.h>
 #include <spdlog/spdlog.h>
 
+
 #include "epworkercntl/epprocess-win.h"
 
 #define BUFSIZE 4096
@@ -38,6 +39,9 @@ namespace service
             std::mutex read_mutex;
             std::queue<std::unique_ptr<msgpack::sbuffer>>  write_queue;
             std::queue<std::unique_ptr<control::process_message_base>> read_queue;
+
+            std::function<void()> app_shutdown_func;
+
         public:
             process_cntrl_client_win()
             {
@@ -54,7 +58,7 @@ namespace service
             void start() override;
             void stop() override;
             void listen_loop() override;
-            void setup() override;
+            void setup(std::function<void()> asf) override;
             void send(control::process_message_base& obj) override;
             void register_handler() override;
             bool is_running() override;
