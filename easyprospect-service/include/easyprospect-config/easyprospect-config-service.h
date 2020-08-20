@@ -18,6 +18,7 @@ namespace service
         {
           private:
             const bool                                                   worker_;
+            const bool                                                   control_protocol_;
             const bool                                                   worker_exe_use_path_;
             const int                                                    num_threads_;
             const int                                                    num_workers_;
@@ -38,6 +39,7 @@ namespace service
                 bool                                                   dh,
                 bool                                                   dv,
                 bool                                                   wk,
+                bool                                                   cp,
                 bool                                                   wkup,
                 int                                                    nt,
                 int                                                    np,
@@ -61,11 +63,17 @@ namespace service
                 boost::optional<boost::filesystem::path>               lstdir,
                 std::vector<easyprospect_config_service_listener_conf> ls) :
                 easyprospect_config_core(mse, dh, dv, verb, db, remArgs, epjs_upr, epjs_upr_str, mtypes, of, lf, af, cf, pf, pd),
-                num_threads_(nt), num_workers_(np), worker_(wk), worker_exe_(wkexe), worker_exe_use_path_(wkup),
+                num_threads_(nt), num_workers_(np), worker_(wk), control_protocol_(cp), worker_exe_(wkexe), worker_exe_use_path_(wkup),
                 worker_args_(wargs), worker_conf_(wkconf), listen_file_(lstfile), listen_dir_path_(lstdir),
                 webroot_dir_(sf), listeners_(ls){};
 
           public:
+
+            const bool get_control_protocol()
+            {
+                return control_protocol_;
+            }
+
             const boost::optional<boost::filesystem::path> get_webroot_dir() const
             {
                 return webroot_dir_;
@@ -90,6 +98,7 @@ namespace service
         class easyprospect_config_service_core_builder final : public easyprospect_config_core_builder
         {
             bool                                                   worker_;
+            bool                                                   control_protocol_;
             bool                                                   worker_exe_use_path_;
             int                                                    num_threads_;
             int                                                    num_workers_;
@@ -116,6 +125,16 @@ namespace service
             void set_worker(std::string w)
             {
                 worker_ = boost::lexical_cast<bool>(w);
+            }
+
+            void set_control_protocol(bool c)
+            {
+                control_protocol_ = c;
+            }
+
+            void set_control_protocol(std::string c)
+            {
+                control_protocol_ = boost::lexical_cast<bool>(c);
             }
 
             void set_worker_exe_use_path(bool u)

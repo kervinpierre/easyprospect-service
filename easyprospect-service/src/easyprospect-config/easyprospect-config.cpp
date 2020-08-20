@@ -139,9 +139,17 @@ boost::program_options::variables_map easyprospect_config_cmd::get_map(
             }
             catch (boost::wrapexcept<boost::program_options::unknown_option>& ex)
             {
-                std::cout << desc << std::endl;
+                std::cout << "Invalid option" << std::endl
+                        << desc << std::endl;
 
                 std::throw_with_nested(std::logic_error("invalid option"));
+            }
+            catch (boost::wrapexcept<boost::program_options::multiple_occurrences>& ex)
+            {
+                std::cout << "Multiple occurrences of a switch" << std::endl
+                            << desc << std::endl;
+
+                std::throw_with_nested(std::logic_error("multiple occurrences"));
             }
 
             // Technically we can keep processing options

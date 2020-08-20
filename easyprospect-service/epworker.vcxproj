@@ -35,6 +35,9 @@
   <ItemGroup>
     <Text Include="data\test01\argsClient01.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="data\test01\config01.json" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{5A449070-3330-49EB-926C-C621BDA20AD9}</ProjectGuid>

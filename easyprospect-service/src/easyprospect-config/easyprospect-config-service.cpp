@@ -14,6 +14,10 @@ easyprospect_config_service_shell::get_options(
         boost::program_options::value<bool>(),
         "Whether this process is a worker process. Boolean.");
 
+    desc.add_options()(
+        "control-protocol", boost::program_options::value<bool>(), 
+        "Whether to setup the local client/server protocol. Boolean.");
+
     desc.add_options()("worker-exe-use-path",
         boost::program_options::value<bool>(),
         "Whether to use the path for finding launched workers. Boolean.");
@@ -149,7 +153,7 @@ easyprospect_config_service_core_builder::to_config()
     easyprospect_config_service_core_builder builder;
      
     easyprospect_config_service_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_,
-        display_version_, worker_, worker_exe_use_path_, num_threads_, num_workers_, worker_args_, verbosity_,debug_level_, remainder_args_,
+        display_version_, worker_, control_protocol_, worker_exe_use_path_, num_threads_, num_workers_, worker_args_, verbosity_,debug_level_, remainder_args_,
         epjs_url_path_regex_, epjs_url_path_regex_str_,
         mime_types_,
         out_file_,

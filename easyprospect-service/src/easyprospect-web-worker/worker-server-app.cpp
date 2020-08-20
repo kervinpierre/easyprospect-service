@@ -86,24 +86,26 @@ namespace service
                 });
 
             // Create the control server
-            try
+            if (cfg.get_control_protocol())
             {
-                control_client_ = easyprospect::service::web_worker::make_control_server(cfg, reg, [=]()
+                try
                 {
-                    // asio post this?
-                    this->shutdown(std::chrono::seconds(5));
-                });
-            }
-            catch (std::logic_error& ex)
-            {
-                spdlog::error("Control server failed. {}", ex.what());
-                throw std::logic_error("control server failed.");
-            }
+                    control_client_ = web_worker::make_control_server(cfg, reg, [=]() {
+                        // asio post this?
+                        this->shutdown(std::chrono::seconds(5));
+                    });
+                }
+                catch (std::logic_error& ex)
+                {
+                    spdlog::error("Control server failed. {}", ex.what());
+                    throw std::logic_error("control server failed.");
+                }
 
-            if (control_client_ == nullptr)
-            {
-                spdlog::error("Control server failed.");
-                throw std::logic_error("control server failed.");
+                if (control_client_ == nullptr)
+                {
+                    spdlog::error("Control server failed.");
+                    throw std::logic_error("control server failed.");
+                }
             }
 
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -142,10 +144,13 @@ namespace service
             // Capture SIGINT and SIGTERM to perform a clean shutdown
             signals_.async_wait(boost::beast::bind_front_handler(&application_impl::on_signal, this));
 
-            auto                             ports     = reg_->get_ports();
-            auto                             curr_port = ports.empty() ? 0 : ports[0];
-            control::process_message_startup st(curr_port);
-            control_client_->send(st);
+            if (cfg_.get_control_protocol())
+            {
+                auto                             ports     = reg_->get_ports();
+                auto                             curr_port = ports.empty() ? 0 : ports[0];
+                control::process_message_startup st(curr_port);
+                control_client_->send(st);
+            }
 
 #ifndef LOUNGE_USE_SYSTEM_EXECUTOR
             std::vector<std::thread> vt;
