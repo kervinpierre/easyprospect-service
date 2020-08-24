@@ -89,6 +89,7 @@ namespace service
             const boost::optional<boost::filesystem::path> pid_dir_path_;
 
             friend class easyprospect_config_core_builder;
+            friend class easyprospect_config_server_core_builder;
 
           protected:
             struct make_shared_enabler

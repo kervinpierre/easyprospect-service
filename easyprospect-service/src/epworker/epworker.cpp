@@ -7,7 +7,9 @@
 
 #include <easyprospect-web-worker/worker-server.h>
 
-#include "easyprospect-config/easyprospect-registry.h"
+#include <easyprospect-config/easyprospect-registry.h>
+
+#include "easyprospect-config/easyprospect-config-worker.h"
 
 //#ifdef BOOST_MSVC
 //#ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
@@ -31,12 +33,12 @@
 
 int main(int argc, char* argv[])
 {
-    easyprospect::service::config ::easyprospect_config_service_shell       shell;
-    easyprospect::service::config::easyprospect_config_service_core_builder builder;
+    easyprospect::service::config ::easyprospect_config_worker_shell       shell;
+    easyprospect::service::config::easyprospect_config_worker_core_builder builder;
 
     try
     {
-        builder = easyprospect::service::config ::easyprospect_config_service_shell ::init_args(argc, argv);
+        builder = easyprospect::service::config ::easyprospect_config_worker_shell ::init_args(argc, argv);
     }
     catch (std::logic_error& ex)
     {

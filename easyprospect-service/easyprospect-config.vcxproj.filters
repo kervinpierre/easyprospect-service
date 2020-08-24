@@ -27,6 +27,12 @@
     <ClCompile Include="src\easyprospect-config\easyprospect-registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\easyprospect-config\easyprospect-config-server.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-config\easyprospect-config-worker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h">
@@ -51,6 +57,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-config\easyprospect-registry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-config\easyprospect-config-server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-config\easyprospect-config-worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

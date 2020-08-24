@@ -12,6 +12,7 @@
 #include <easyprospect-service-shared/user_base.hpp>
 
 
+#include <easyprospect-config/easyprospect-config-worker.h>
 #include <easyprospect-config/easyprospect-registry.h>
 #include <easyprospect-web-worker/easyprospect-process-cntrl-client.h>
 
@@ -29,7 +30,7 @@ namespace service
         
         std::unique_ptr<channel_list_impl> make_channel_list(web_worker::application_impl& srv);
         void                               make_room(channel_list& list, boost::beast::string_view name);
-        extern std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config,
+        extern std::unique_ptr<shared::server> make_server(config::easyprospect_config_worker_core curr_config,
                                                             std::shared_ptr<config::easyprospect_registry> curr_reg);
         extern std::unique_ptr<process_cntrl_client> make_control_server(
             config::easyprospect_config_service_core curr_config,

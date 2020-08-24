@@ -8,6 +8,10 @@
 
 #include <easyprospect-config/logging.h>
 
+#include <easyprospect-config/easyprospect-registry.h>
+
+#include "easyprospect-config/easyprospect-config-server.h"
+
 #ifdef BOOST_MSVC
 # ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
 #  define WIN32_LEAN_AND_MEAN
@@ -32,13 +36,13 @@
 int main(int argc, char *argv[])
 {
     easyprospect::service::config
-        ::easyprospect_config_service_shell shell;
-    easyprospect::service::config::easyprospect_config_service_core_builder builder;
+        ::easyprospect_config_server_shell shell;
+    easyprospect::service::config::easyprospect_config_server_core_builder builder;
 
     try
     {
         builder = easyprospect::service::config
-            ::easyprospect_config_service_shell
+            ::easyprospect_config_server_shell
 	            ::init_args(argc, argv);
     }
     catch (std::logic_error ex)

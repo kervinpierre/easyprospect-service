@@ -3,18 +3,20 @@
 #include <easyprospect-config/easyprospect-config.h>
 #include <easyprospect-config/ep-listener-config.h>
 
+#include <easyprospect-config/easyprospect-config-service.h>
+
 namespace easyprospect
 {
 namespace service
 {
     namespace config
     {
-        class easyprospect_config_service_core_builder;
+        class easyprospect_config_server_core_builder;
 
         /************************************************************************/
         /* EpService core configuration object                                  */
         /************************************************************************/
-        class easyprospect_config_service_core : public easyprospect_config_core
+        class easyprospect_config_server_core final : public easyprospect_config_service_core
         {
           private:
             const bool                                                   worker_;
@@ -31,11 +33,11 @@ namespace service
             const boost::optional<boost::filesystem::path> listen_file_;
             const boost::optional<boost::filesystem::path> listen_dir_path_;
 
-            friend class easyprospect_config_service_core_builder;
+            friend class easyprospect_config_server_core_builder;
 
           protected:
-            easyprospect_config_service_core(
-                const make_shared_enabler&                             mse,
+            easyprospect_config_server_core(
+                const make_shared_enabler& mse,
                 bool                                                   dh,
                 bool                                                   dv,
                 bool                                                   wk,
@@ -62,7 +64,7 @@ namespace service
                 boost::optional<boost::filesystem::path>               lstfile,
                 boost::optional<boost::filesystem::path>               lstdir,
                 std::vector<easyprospect_config_service_listener_conf> ls) :
-                easyprospect_config_core(mse, dh, dv, verb, db, remArgs, epjs_upr, epjs_upr_str, mtypes, of, lf, af, cf, pf, pd),
+                easyprospect_config_service_core(mse, dh, dv, wk, cp, wkup, nt, np, wargs, verb, db, remArgs, epjs_upr, epjs_upr_str, mtypes, of, lf, af, cf, pf, pd, sf, wkconf, wkexe, lstfile, lstdir, ls),
                 num_threads_(nt), num_workers_(np), worker_(wk), control_protocol_(cp), worker_exe_(wkexe), worker_exe_use_path_(wkup),
                 worker_args_(wargs), worker_conf_(wkconf), listen_file_(lstfile), listen_dir_path_(lstdir),
                 webroot_dir_(sf), listeners_(ls){};
@@ -95,7 +97,7 @@ namespace service
         /************************************************************************/
         /* EpService core configuration object                                  */
         /************************************************************************/
-        class easyprospect_config_service_core_builder : public easyprospect_config_core_builder
+        class easyprospect_config_server_core_builder final : public easyprospect_config_service_core_builder
         {
             bool                                                   worker_;
             bool                                                   control_protocol_;
@@ -111,7 +113,7 @@ namespace service
             boost::optional<boost::filesystem::path>               listen_dir_path_;
 
           public:
-            easyprospect_config_service_core_builder() : easyprospect_config_core_builder()
+            easyprospect_config_server_core_builder() : easyprospect_config_service_core_builder()
             {
                 webroot_dir_ = "wwwroot";
                 num_threads_ = 1;
@@ -253,20 +255,20 @@ namespace service
                 set_listen_dir(res);
             }
 
-            const easyprospect_config_service_core to_config();
+            const easyprospect_config_server_core to_config();
         };
 
         /************************************************************************/
         /* EpServiceShell configuration                                         */
         /************************************************************************/
-        class easyprospect_config_service_shell : public easyprospect_config_cmd
+        class easyprospect_config_server_shell final : public easyprospect_config_service_shell
         {
           public:
             static std::string get_description();
 
-            static boost::program_options::options_description get_options(easyprospect_config_service_shell& config);
+            static boost::program_options::options_description get_options(easyprospect_config_server_shell& config);
 
-            static easyprospect_config_service_core_builder init_args(int test_argc, char* test_argv[]);
+            static easyprospect_config_server_core_builder init_args(int test_argc, char* test_argv[]);
 
             void parse_options(
                 easyprospect_config_service_core_builder&   builder,

@@ -3,7 +3,8 @@
 #include <easyprospect-config/easyprospect-config-service.h>
 #include <easyprospect-service-shared/server.h>
 
-#include "easyprospect-config/easyprospect-registry.h"
+#include <easyprospect-config/easyprospect-registry.h>
+#include <easyprospect-config/easyprospect-config-server.h>
 
 namespace easyprospect
 {
@@ -13,7 +14,7 @@ namespace easyprospect
         {
             std::unique_ptr<shared::server>
                 make_server(
-                    config::easyprospect_config_service_core curr_config,
+                    config::easyprospect_config_server_core curr_config,
                     std::shared_ptr<config::easyprospect_registry> reg);
         }
     }

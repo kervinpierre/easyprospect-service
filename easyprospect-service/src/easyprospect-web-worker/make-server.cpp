@@ -5,6 +5,8 @@
 #include <easyprospect-web-worker/worker-server-app.h>
 #include <easyprospect-web-worker/easyprospect-process-cntrl-client.h>
 
+#include <easyprospect-config/easyprospect-config-worker.h>
+
 namespace easyprospect
 {
 namespace service
@@ -12,7 +14,7 @@ namespace service
     namespace web_worker
     {
         std::unique_ptr<shared::server> make_server(
-            config::easyprospect_config_service_core curr_config,
+            config::easyprospect_config_worker_core curr_config,
             std::shared_ptr<config::easyprospect_registry> curr_reg
         )
         {

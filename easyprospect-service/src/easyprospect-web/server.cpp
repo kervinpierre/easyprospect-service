@@ -27,6 +27,8 @@
 #include <easyprospect-config/logging.h>
 #include <uriparser/Uri.h>
 
+#include "easyprospect-config/easyprospect-config-server.h"
+
 namespace easyprospect
 {
 namespace service
@@ -304,7 +306,7 @@ namespace service
         */
         //------------------------------------------------------------------------------
 
-        std::unique_ptr<shared::server> make_server(config::easyprospect_config_service_core curr_config,
+        std::unique_ptr<shared::server> make_server(config::easyprospect_config_server_core curr_config,
                     std::shared_ptr<config::easyprospect_registry> curr_reg)
         {
             boost::beast::error_code ec;
