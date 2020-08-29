@@ -48,7 +48,7 @@ namespace service
             using clock_type = std::chrono::steady_clock;
             using time_point = clock_type::time_point;
 
-            easyprospect::service::config::easyprospect_config_service_core                            cfg_;
+            config::easyprospect_config_server_core                            cfg_;
             std::vector<std::unique_ptr<shared::service>>                                              services_;
             boost::asio::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
             boost::asio::basic_signal_set<executor_type>                                                      signals_;
@@ -64,7 +64,7 @@ namespace service
             }
 
           public:
-            explicit server_impl(easyprospect::service::config::easyprospect_config_service_core cfg) :
+            explicit server_impl(config::easyprospect_config_server_core cfg) :
                 cfg_(std::move(cfg)), timer_(this->make_executor()), signals_(timer_.get_executor(), SIGINT, SIGTERM),
                 shutdown_time_(never()), stop_(false)
             {
@@ -77,10 +77,20 @@ namespace service
                     {
                         shared::easyprospect_http_request_result res;
 
-                        std::string host = "";
-                        std::string port = "";
-                        std::string target  = "";
-                        int version = 0;
+                        // choose a backend
+                        auto bes = this->cfg_.get_backends();
+                        if ( !bes )
+                        {
+                            spdlog::error("No backends found");
+                            throw std::logic_error("No backends found");
+                        }
+
+                        auto be = bes->at(0);
+
+                        std::string host = be.get_address();
+                        std::string port = be.get_port();
+                        std::string target  = req.get_url();
+                        int version = 11; // 10 or 11 for HTTP 1.0 or 1.1
 
                         // Launch the asynchronous operation
                         //boost::asio::spawn(
@@ -94,10 +104,10 @@ namespace service
                         //        this->ioc_,
                         //        std::placeholders::_1));
 
-                            boost::asio::spawn(this->ioc_, [this, host, port, target, version](boost::asio::yield_context yield)
-                            {
-                                proxy_action(host,port,target,version,this->ioc_,yield);
-                            });
+                        boost::asio::spawn(this->ioc_, [this, host, port, target, version](boost::asio::yield_context yield)
+                        {
+                            proxy_action(host,port,target,version,this->ioc_,yield);
+                        });
 
                         return res         ;
                     });
@@ -124,8 +134,6 @@ namespace service
                 // spdlog::debug(req.to_string());
 
                 // Send to a proxy process using Beast Request
-
-                //  boost::beast::error_code ec;
 
                 // These objects perform our I/O
                 boost::asio::ip::tcp::resolver resolver(ioc);
@@ -183,7 +191,9 @@ namespace service
                 }
 
                 // Write the message to standard out
-                // spdlog::debug("proxy response: {}", res);
+                std::stringstream resStr;
+                resStr << res;
+                spdlog::debug("proxy response: {}", resStr.str());
 
                 // Gracefully close the socket
                 stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
