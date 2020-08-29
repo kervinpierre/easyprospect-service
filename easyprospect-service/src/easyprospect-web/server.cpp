@@ -8,15 +8,20 @@
 //
 
 #include <atomic>
+#include <boost/system/config.hpp>
 #include <boost/asio/basic_signal_set.hpp>
 #include <boost/asio/basic_waitable_timer.hpp>
+#include <boost/asio/spawn.hpp>
+
 #include <boost/assert.hpp>
 #include <boost/make_unique.hpp>
-#include <boost/process.hpp>
+//#include <boost/process.hpp>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 #include <vector>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
 
 #include <easyprospect-service-shared/server.h>
 
@@ -67,18 +72,36 @@ namespace service
 
                 timer_.expires_at(never());
 
-                set_send_worker_req_impl([this](shared::easyprospect_http_request req, boost::beast::error_code& ec) {
-                    shared::easyprospect_http_request_result res;
+                set_send_worker_req_impl(
+                    [this](shared::easyprospect_http_request req, boost::beast::error_code& ec)
+                    {
+                        shared::easyprospect_http_request_result res;
 
-                    spdlog::debug(BOOST_CURRENT_FUNCTION);
-                    spdlog::debug(req.to_string());
+                        std::string host = "";
+                        std::string port = "";
+                        std::string target  = "";
+                        int version = 0;
 
-                    // Send to a proxy process using Beast Request
+                        // Launch the asynchronous operation
+                        //boost::asio::spawn(
+                        //    this->ioc_,
+                        //    std::bind(
+                        //        &proxy_action,
+                        //        std::string(host),
+                        //        std::string(port),
+                        //        std::string(target),
+                        //        version,
+                        //        this->ioc_,
+                        //        std::placeholders::_1));
 
-                    return res;
-                });
+                            boost::asio::spawn(this->ioc_, [this, host, port, target, version](boost::asio::yield_context yield)
+                            {
+                                proxy_action(host,port,target,version,this->ioc_,yield);
+                            });
 
-                // TODO: KP. Move URL parsing to some place needed.
+                        return res         ;
+                    });
+                    // TODO: KP. Move URL parsing to some place needed.
                 // Base
                 // UriUriW baseUri;
                 // int res = uriParseSingleUriW(&baseUri, L"example.com", NULL);
@@ -86,6 +109,100 @@ namespace service
                 //{
                 //    ;
                 //}
+            }
+
+            void proxy_action(
+                std::string const&         host,
+                std::string const&         port,
+                std::string const&         target,
+                int                        version,
+                boost::asio::io_context&   ioc,
+                boost::asio::yield_context yield)
+            {
+                boost::beast::error_code ec;
+                spdlog::debug(BOOST_CURRENT_FUNCTION);
+                // spdlog::debug(req.to_string());
+
+                // Send to a proxy process using Beast Request
+
+                //  boost::beast::error_code ec;
+
+                // These objects perform our I/O
+                boost::asio::ip::tcp::resolver resolver(ioc);
+                boost::beast::tcp_stream       stream(ioc);
+
+                // Look up the domain name
+                // auto const results = resolver.async_resolve(host, port, yield[ec]);
+                auto const results = resolver.async_resolve(host, port, yield[ec]);
+                if (ec)
+                {
+                    spdlog::debug("resolve : {}", ec.message());
+                    return;
+                }
+
+                // Set the timeout.
+                stream.expires_after(std::chrono::seconds(30));
+
+                // Make the connection on the IP address we get from a lookup
+                stream.async_connect(results, yield[ec]);
+                if (ec)
+                {
+                    spdlog::debug("connect : {}", ec.message());
+                    return;
+                }
+
+                // Set up an HTTP GET request message
+                boost::beast::http::request<boost::beast::http::string_body> req{
+                    boost::beast::http::verb::get, target, version};
+                req.set(boost::beast::http::field::host, host);
+                req.set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+
+                // Set the timeout.
+                stream.expires_after(std::chrono::seconds(30));
+
+                // Send the HTTP request to the remote host
+                boost::beast::http::async_write(stream, req, yield[ec]);
+                if (ec)
+                {
+                    spdlog::debug("write : {}", ec.message());
+                    return;
+                }
+
+                // This buffer is used for reading and must be persisted
+                boost::beast::flat_buffer b;
+
+                // Declare a container to hold the response
+                boost::beast::http::response<boost::beast::http::dynamic_body> res;
+
+                // Receive the HTTP response
+                boost::beast::http::async_read(stream, b, res, yield[ec]);
+                if (ec)
+                {
+                    spdlog::debug("read : {}", ec.message());
+                    return;
+                }
+
+                // Write the message to standard out
+                // spdlog::debug("proxy response: {}", res);
+
+                // Gracefully close the socket
+                stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+
+                // not_connected happens sometimes
+                // so don't bother reporting it.
+                //
+                if (ec && ec != boost::beast::errc::not_connected)
+                {
+                    spdlog::debug("shutdown : {}", ec.message());
+                    return;
+                }
+
+                // If we get here then the connection is closed gracefully
+                // Connect downstream
+
+                // Send request
+
+                // return res;
             }
 
             ~server_impl()
@@ -120,34 +237,34 @@ namespace service
                     vt.emplace_back([this] { this->ioc_.run(); });
 #endif
 
-                std::vector<boost::process::child> pt;
-                boost::process::group              ptg;
+                //std::vector<boost::process::child> pt;
+                //boost::process::group              ptg;
 
-                // Create process pool here.
+                //// Create process pool here.
 
-                // TODO: KP. Start the processes, pass in the arguments, save their PIDs
-                // How can we get the child to dump to our console?
-                // How do I monitor the process group?
-                
-                // while (pt.size() < cfg_.get_num_threads())
-                while (pt.size() < 2)
-                {
-                    // boost::process::child c(boost::process::search_path("epwebworker"),
-                    // "--conf", "../../../data/test01/args01.txt");
-                    //  ptg.add(c);
+                //// TODO: KP. Start the processes, pass in the arguments, save their PIDs
+                //// How can we get the child to dump to our console?
+                //// How do I monitor the process group?
+                //
+                //// while (pt.size() < cfg_.get_num_threads())
+                //while (pt.size() < 2)
+                //{
+                //    // boost::process::child c(boost::process::search_path("epwebworker"),
+                //    // "--conf", "../../../data/test01/args01.txt");
+                //    //  ptg.add(c);
 
-                    // while (c.running())
-                    //    do_some_stuff();
+                //    // while (c.running())
+                //    //    do_some_stuff();
 
-                    // c.wait(); //wait for the process to exit
-                    // int result = c.exit_code();
-                    // pt.emplace_back(boost::process::search_path("epwebworker"), "--conf",
-                    // "../../../data/test01/args01.txt");
-                    pt.emplace_back("epworker.exe", "--conf", "../../../data/test01/argsClient01.txt");
-                    boost::process::child& c = pt.back();
+                //    // c.wait(); //wait for the process to exit
+                //    // int result = c.exit_code();
+                //    // pt.emplace_back(boost::process::search_path("epwebworker"), "--conf",
+                //    // "../../../data/test01/args01.txt");
+                //    pt.emplace_back("epworker.exe", "--conf", "../../../data/test01/argsClient01.txt");
+                //    boost::process::child& c = pt.back();
 
-                    ptg.add(c);
-                }
+                //    ptg.add(c);
+                //}
 
                 // Block the main thread until stop() is called
                 {

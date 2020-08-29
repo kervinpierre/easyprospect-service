@@ -37,6 +37,7 @@
     <ClInclude Include="include\easyprospect-config\easyprospect-config.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-defaults.h" />
     <ClInclude Include="include\easyprospect-config\easyprospect-registry.h" />
+    <ClInclude Include="include\easyprospect-config\ep-backend-config.h" />
     <ClInclude Include="include\easyprospect-config\ep-listener-config.h" />
     <ClInclude Include="include\easyprospect-config\logging.h" />
   </ItemGroup>

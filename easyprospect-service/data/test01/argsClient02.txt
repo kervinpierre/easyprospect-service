@@ -5,5 +5,5 @@
 --listener name=ipv4,address=0.0.0.0,min-port=8081,max-port=8090 \
 --debug-level ep_debug       \
 --verbosity maximum          \
---control-protocol true     \
+--control-protocol false     \
 --config-file "../../../data/test01/config01.json"

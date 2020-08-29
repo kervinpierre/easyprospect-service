@@ -4,7 +4,8 @@
 --webroot-dir "../../../data/test01/wwwroot"     \
 --listener name=ipv4,address=0.0.0.0,port=8080   \
 --log-file "../../../data/test01/log01.txt"      \
---backends be1=127.0.0.1:9101,be2=127.0.0.1:9102 \
+--backend name=be1,address=127.0.0.1,port=9101 \
+--backend name=be2,address=127.0.0.1,port=9102 \
 --debug-level ep_trace       \
 --verbosity maximum
 

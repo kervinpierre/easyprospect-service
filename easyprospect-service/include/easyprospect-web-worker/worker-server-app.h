@@ -21,7 +21,7 @@ namespace service
             using clock_type = std::chrono::steady_clock;
             using time_point = clock_type::time_point;
 
-            config::easyprospect_config_service_core                            cfg_;
+            config::easyprospect_config_worker_core                            cfg_;
             std::shared_ptr<config::easyprospect_registry>                                        reg_;
             std::vector<std::unique_ptr<easyprospect::service::shared::service>>                       services_;
             boost::asio::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
@@ -42,7 +42,7 @@ namespace service
 
           public:
             explicit application_impl(
-                config::easyprospect_config_service_core
+                config::easyprospect_config_worker_core
                 cfg,
                 std::shared_ptr<config::easyprospect_registry> reg);
 

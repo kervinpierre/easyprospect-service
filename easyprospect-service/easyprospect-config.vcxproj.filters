@@ -65,5 +65,8 @@
     <ClInclude Include="include\easyprospect-config\easyprospect-config-worker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\easyprospect-config\ep-backend-config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

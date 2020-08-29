@@ -11,7 +11,7 @@ namespace service
     namespace web_worker
     {
         application_impl::application_impl(
-            config::easyprospect_config_service_core
+            config::easyprospect_config_worker_core
             cfg,
             std::shared_ptr<config::easyprospect_registry> reg):
             cfg_(std::move(cfg)), reg_(reg), timer_(this->make_executor()),

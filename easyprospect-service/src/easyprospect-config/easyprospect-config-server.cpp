@@ -9,92 +9,40 @@ using namespace easyprospect::service::config;
 boost::program_options::options_description
 easyprospect_config_server_shell::get_options(
     easyprospect_config_server_shell& config)
-{    auto desc = easyprospect_config_cmd::get_options(config);
+{
+    auto desc = easyprospect_config_service_shell::get_options(config);
 
-    desc.add_options()("worker",
-        boost::program_options::value<bool>(),
-        "Whether this process is a worker process. Boolean.");
+     desc.add_options()("backend", 
+        boost::program_options::value<std::vector<std::string>>(), 
+        "Backend configurations. e.g. be1=127.0.0.1:9101,be2=127.0.0.1:9102");
 
-    desc.add_options()(
-        "control-protocol", boost::program_options::value<bool>(), 
-        "Whether to setup the local client/server protocol. Boolean.");
-
-    desc.add_options()("worker-exe-use-path",
-        boost::program_options::value<bool>(),
-        "Whether to use the path for finding launched workers. Boolean.");
-
-    desc.add_options()("webroot-dir",
-        boost::program_options::value<std::string>(),
-        "Webroot directory");
-
-    desc.add_options()("num-threads",
-        boost::program_options::value<std::string>(),
-        "Number of threads");
-
-    desc.add_options()("num-workers",
-        boost::program_options::value<std::string>(),
-        "Number of workers in our process pool.");
-
-    desc.add_options()("worker-args",
-        boost::program_options::value<std::string>(),
-        "Quited string of arguments to pass to launched workers");
-
-    desc.add_options()("worker-conf",
-        boost::program_options::value<std::string>(),
-        "A args file for launching workers.");
-
-    desc.add_options()("worker-exe",
-        boost::program_options::value<std::string>(),
-        "Executable used for the worker.");
-
-    desc.add_options()("listener",
-        boost::program_options::value< std::vector<std::string> >(),
-        "Listener configurations in a comma-delimited list 'name,address,port,min' ( without quotes )");
-
-    desc.add_options()("listen-file",
-        boost::program_options::value<std::string>(),
-        "Where we install listen file");
-
-    desc.add_options()("listen-exe-dir",
-        boost::program_options::value<std::string>(),
-        "Directory for storing generated listen files");
     return desc;
 }
 
 void
 easyprospect_config_server_shell::parse_options(
-    easyprospect_config_service_core_builder& builder,
+    easyprospect_config_server_core_builder& builder,
     boost::program_options::variables_map vm,
     boost::program_options::options_description desc)
 {
-    if (vm.count("webroot-dir"))
+    if (vm.count("backend"))
     {
-        builder.set_webroot_dir(vm["webroot-dir"].as<std::string>());
-    }
-
-    if (vm.count("num-threads"))
-    {
-        builder.set_num_threads(vm["num-threads"].as<std::string>());
-    }
-
-    if (vm.count("listener"))
-    {
-        auto sListeners = vm["listener"].as<std::vector<std::string>>();
-        if (sListeners.empty())
+        auto sBackends = vm["backend"].as<std::vector<std::string>>();
+        if (sBackends.empty())
         {
-            throw std::logic_error("Missing Listener configuration 'name,address,port'");
+            throw std::logic_error("Backend configurations. e.g. be1=127.0.0.1:9101,be2=127.0.0.1:9102");
         }
 
-        builder.set_listeners(sListeners);
+        builder.set_backends(sBackends);
     }
 
-    easyprospect_config_cmd::parse_options(builder,vm,desc);
+    easyprospect_config_service_shell::parse_options(builder,vm,desc);
 }
 
 std::string 
 easyprospect_config_server_shell::get_description()
 {
-    std::ostringstream res( "EasyProspect Service Configuration.");
+    std::ostringstream res( "EasyProspect Server Configuration.");
 
     return res.str();
 }
@@ -102,11 +50,13 @@ easyprospect_config_server_shell::get_description()
 easyprospect_config_server_core_builder
 easyprospect_config_server_shell::init_args(int test_argc, char* test_argv[])
 {
-    easyprospect_config_service_shell cnf;
+    easyprospect_config_server_shell cnf;
+
     boost::program_options::options_description opts
-        = easyprospect_config_service_shell::get_options(cnf);
+        = easyprospect_config_server_shell::get_options(cnf);
+
     boost::program_options::variables_map vm
-        = easyprospect_config_service_shell
+        = easyprospect_config_server_shell
         ::get_map(opts, test_argc, test_argv);
 
     auto builder
@@ -145,6 +95,17 @@ std::string easyprospect_config_server_core::str()
         }
     }
 
+    sstr << "\nbackend\t: \n";
+
+    auto rbargs = get_backends();
+    if (rbargs)
+    {
+        for (auto arg : *rbargs)
+        {
+            sstr << "'" << arg.str() << "', ";
+        }
+    }
+
     return sstr.str();
 }
 
@@ -154,12 +115,12 @@ easyprospect_config_server_core_builder::to_config()
     easyprospect_config_server_core_builder builder;
      
     easyprospect_config_server_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_,
-        display_version_, worker_, control_protocol_, worker_exe_use_path_, num_threads_, num_workers_, worker_args_, verbosity_,debug_level_, remainder_args_,
+        display_version_, num_threads_, verbosity_,debug_level_, remainder_args_,
         epjs_url_path_regex_, epjs_url_path_regex_str_,
         mime_types_,
         out_file_,
-        log_file_,arg_file_,cnf_file_,pid_file_,pid_dir_path_, webroot_dir_, worker_conf_, worker_exe_, listen_file_,
-        listen_dir_path_, listeners_);
+        log_file_,arg_file_,cnf_file_,pid_file_,pid_dir_path_, webroot_dir_, listen_file_,
+        listen_dir_path_, listeners_, backends_);
 
     return res;
 }

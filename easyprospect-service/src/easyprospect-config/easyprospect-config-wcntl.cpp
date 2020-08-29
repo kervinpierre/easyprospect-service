@@ -7,7 +7,7 @@ using namespace easyprospect::service::config;
 boost::program_options::options_description easyprospect_config_wcntl_shell::get_options(
     easyprospect_config_wcntl_shell& config)
 {
-    auto desc = easyprospect_config_cmd::get_options(config);
+    auto desc = easyprospect_config_service_shell::get_options(config);
 
     desc.add_options()(
         "worker-exe-use-path",
@@ -68,7 +68,7 @@ void easyprospect_config_wcntl_shell::parse_options(
         builder.set_worker_args_file(vm["worker-args-file"].as<std::string>());
     }
 
-    easyprospect_config_cmd::parse_options(builder, vm, desc);
+    easyprospect_config_service_shell::parse_options(builder, vm, desc);
 }
 
 std::string easyprospect_config_wcntl_shell::get_description()
@@ -106,6 +106,8 @@ std::string easyprospect_config_wcntl_core::str()
 
     sstr << easyprospect_config_core::str() << std::endl;
 
+    sstr << "worker exe\t: " << (get_worker_exe() ? get_worker_exe()->generic_string() : "") << std::endl;
+
     return sstr.str();
 }
 
@@ -118,6 +120,7 @@ const easyprospect_config_wcntl_core easyprospect_config_wcntl_core_builder::to_
         display_help_,
         display_version_,
         worker_exe_use_path_,
+        num_threads_,
         num_workers_,
         worker_args_,
         verbosity_,
@@ -132,9 +135,10 @@ const easyprospect_config_wcntl_core easyprospect_config_wcntl_core_builder::to_
         cnf_file_,
         pid_file_,
         pid_dir_path_,
+        webroot_dir_, log_file_, listen_dir_path_,
         worker_conf_,
         worker_args_file_,
-        worker_exe_);
+        worker_exe_, listeners_);
 
     return res;
 }

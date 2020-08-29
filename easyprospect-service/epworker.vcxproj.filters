@@ -25,6 +25,9 @@
     <Text Include="data\test01\argsClient01.txt">
       <Filter>Work Files</Filter>
     </Text>
+    <Text Include="data\test01\argsClient02.txt">
+      <Filter>Work Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\test01\config01.json">

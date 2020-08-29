@@ -141,7 +141,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\uriparser\$(configuration)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libcrypto.lib;libssl.lib;crypt32.lib;uriparser.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;crypt32.lib;uriparser.lib;libboost_coroutine-vc142-mt-sgd-x64-1_71.lib;libboost_system-vc142-mt-sgd-x64-1_71.lib;libboost_context-vc142-mt-sgd-x64-1_71.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

@@ -149,7 +149,7 @@ void process_win::listen_loop()
             &pi)              // Pointer to PROCESS_INFORMATION structure
     )
     {
-        spdlog::debug("CreateProcess failed ({}).\n", GetLastError());
+        spdlog::debug("CreateProcess failed ({}).\n", geterror_to_string());
         return;
     }
 

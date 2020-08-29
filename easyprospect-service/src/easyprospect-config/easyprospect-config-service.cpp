@@ -10,18 +10,6 @@ easyprospect_config_service_shell::get_options(
 {
     auto desc = easyprospect_config_cmd::get_options(config);
 
-    desc.add_options()("worker",
-        boost::program_options::value<bool>(),
-        "Whether this process is a worker process. Boolean.");
-
-    desc.add_options()(
-        "control-protocol", boost::program_options::value<bool>(), 
-        "Whether to setup the local client/server protocol. Boolean.");
-
-    desc.add_options()("worker-exe-use-path",
-        boost::program_options::value<bool>(),
-        "Whether to use the path for finding launched workers. Boolean.");
-
     desc.add_options()("webroot-dir",
         boost::program_options::value<std::string>(),
         "Webroot directory");
@@ -29,22 +17,6 @@ easyprospect_config_service_shell::get_options(
     desc.add_options()("num-threads",
         boost::program_options::value<std::string>(),
         "Number of threads");
-
-    desc.add_options()("num-workers",
-        boost::program_options::value<std::string>(),
-        "Number of workers in our process pool.");
-
-    desc.add_options()("worker-args",
-        boost::program_options::value<std::string>(),
-        "Quited string of arguments to pass to launched workers");
-
-    desc.add_options()("worker-conf",
-        boost::program_options::value<std::string>(),
-        "A args file for launching workers.");
-
-    desc.add_options()("worker-exe",
-        boost::program_options::value<std::string>(),
-        "Executable used for the worker.");
 
     desc.add_options()("listener",
         boost::program_options::value< std::vector<std::string> >(),
@@ -153,11 +125,11 @@ easyprospect_config_service_core_builder::to_config()
     easyprospect_config_service_core_builder builder;
      
     easyprospect_config_service_core res(easyprospect_config_core::make_shared_enabler{ 0 }, display_help_,
-        display_version_, worker_, control_protocol_, worker_exe_use_path_, num_threads_, num_workers_, worker_args_, verbosity_,debug_level_, remainder_args_,
+        display_version_, num_threads_, verbosity_,debug_level_, remainder_args_,
         epjs_url_path_regex_, epjs_url_path_regex_str_,
         mime_types_,
         out_file_,
-        log_file_,arg_file_,cnf_file_,pid_file_,pid_dir_path_, webroot_dir_, worker_conf_, worker_exe_, listen_file_,
+        log_file_,arg_file_,cnf_file_,pid_file_,pid_dir_path_, webroot_dir_, listen_file_,
         listen_dir_path_, listeners_);
 
     return res;

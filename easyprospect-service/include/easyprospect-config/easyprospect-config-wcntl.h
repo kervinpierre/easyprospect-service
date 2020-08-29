@@ -7,6 +7,8 @@
 
 #include <easyprospect-config/ep-listener-config.h>
 
+#include "easyprospect-config-service.h"
+
 namespace easyprospect
 {
 namespace service
@@ -18,7 +20,7 @@ namespace service
         /************************************************************************/
         /* EpService core configuration object                                  */
         /************************************************************************/
-        class easyprospect_config_wcntl_core final : public easyprospect_config_core
+        class easyprospect_config_wcntl_core final : public easyprospect_config_service_core
         {
           private:
             const bool                                     worker_exe_use_path_;
@@ -36,6 +38,7 @@ namespace service
                 bool                                      dh,
                 bool                                      dv,
                 bool                                      wkup,
+                int                                       nt,
                 int                                       np,
                 std::string                               wargs,
                 ep_verbosity_type                         verb,
@@ -50,13 +53,18 @@ namespace service
                 boost::optional<boost::filesystem::path>  cf,
                 boost::optional<boost::filesystem::path>  pf,
                 boost::optional<boost::filesystem::path>  pd,
+                boost::optional<boost::filesystem::path>  sf,
+                boost::optional<boost::filesystem::path>  lstfile,
+                boost::optional<boost::filesystem::path>  lstdir,
                 boost::optional<boost::filesystem::path>  wkconf,
                 boost::optional<boost::filesystem::path>  wkargs,
-                boost::optional<boost::filesystem::path>  wkexe) :
-                easyprospect_config_core(
+                boost::optional<boost::filesystem::path>  wkexe,
+                std::vector<easyprospect_config_service_listener_conf> ls) :
+                easyprospect_config_service_core(
                     mse,
                     dh,
                     dv,
+                    nt,
                     verb,
                     db,
                     remArgs,
@@ -68,7 +76,7 @@ namespace service
                     af,
                     cf,
                     pf,
-                    pd),
+                    pd, sf, lstfile, lstdir, ls),
                 num_workers_(np), worker_exe_(wkexe), worker_exe_use_path_(wkup), worker_args_(wargs),
                 worker_conf_(wkconf), worker_args_file_(wkargs){};
 
@@ -109,7 +117,7 @@ namespace service
         /************************************************************************/
         /* EpService core configuration object                                  */
         /************************************************************************/
-        class easyprospect_config_wcntl_core_builder final : public easyprospect_config_core_builder
+        class easyprospect_config_wcntl_core_builder final : public easyprospect_config_service_core_builder
         {
             bool                                     worker_exe_use_path_;
             int                                      num_workers_;
@@ -120,7 +128,7 @@ namespace service
 
           public:
             easyprospect_config_wcntl_core_builder() :
-                easyprospect_config_core_builder(){
+                easyprospect_config_service_core_builder(){
 
                 };
             void set_worker_exe_use_path(bool u)
@@ -192,7 +200,7 @@ namespace service
         /************************************************************************/
         /* EpServiceShell configuration                                         */
         /************************************************************************/
-        class easyprospect_config_wcntl_shell final : public easyprospect_config_cmd
+        class easyprospect_config_wcntl_shell final : public easyprospect_config_service_shell
         {
           public:
             static std::string get_description();
