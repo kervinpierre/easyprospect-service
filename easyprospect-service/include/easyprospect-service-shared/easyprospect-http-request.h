@@ -146,6 +146,30 @@ namespace service
 
                 return str.str();
             }
+
+            boost::beast::http::request<boost::beast::http::string_body> to_beast_request()
+            {
+                boost::beast::http::request<boost::beast::http::string_body> res;
+                res.method(boost::beast::http::verb::get);
+                res.target(url_);
+                res.version(11);
+
+                if (has_body())
+                {
+                    res.body() = get_body();
+                }
+
+                for ( auto h : headers_ )
+                {
+                    res.set(h.first, h.second);
+                }
+               //boost::beast::http::request<boost::beast::http::string_body> be_req{
+               //boost::beast::http::verb::get, target, version};
+               // be_req.set(boost::beast::http::field::host, host);
+               // be_req.set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+
+                return res;
+            }
         };
 
         class easyprospect_http_request_builder final
@@ -156,6 +180,7 @@ namespace service
             boost::optional<std::string>                     raw_;
             boost::optional<std::string>                     content_type_;
             std::string                                      url_;
+            std::string                                      host_;
             std::vector<std::pair<std::string, std::string>> headers_;
 
           public:
@@ -173,6 +198,11 @@ namespace service
             void set_body(std::string b)
             {
                 body_ = b;
+            }
+
+            void set_host(std::string h)
+            {
+                host_ = h;
             }
 
             void set_headers(std::vector<std::pair<std::string, std::string>> h)
@@ -202,6 +232,7 @@ namespace service
                 set_body(req.body());
                 set_content_length(req_p.content_length());
                 set_content_type( req[boost::beast::http::field::content_type].to_string());
+                set_host( req[boost::beast::http::field::host].to_string());
                 set_url(req.target().to_string());
 
                 std::vector<std::pair<std::string, std::string>> h;

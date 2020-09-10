@@ -17,5 +17,8 @@
     <ClInclude Include="include\easyprospect-web\server.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\easyprospect-web\easyprospect-server-downstream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

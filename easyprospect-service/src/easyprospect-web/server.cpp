@@ -33,6 +33,7 @@
 #include <uriparser/Uri.h>
 
 #include "easyprospect-config/easyprospect-config-server.h"
+#include "easyprospect-web/easyprospect-server-downstream.h"
 
 namespace easyprospect
 {
@@ -57,6 +58,7 @@ namespace service
             time_point                                                                                 shutdown_time_;
             bool                                                                                       running_ = false;
             std::atomic<bool>                                                                          stop_;
+            std::unique_ptr<easyprospect_server_downstream>                     downstream_;
 
             static std::chrono::steady_clock::time_point never() noexcept
             {
@@ -72,25 +74,20 @@ namespace service
 
                 timer_.expires_at(never());
 
+                downstream_ = std::make_unique<easyprospect_server_downstream>();
+
+                if (cfg.get_backends())
+                {
+                    downstream_->set_backends(cfg.get_backends().get());
+                }
+
+                // TODO: kp. initialize downstream backends.
+
                 set_send_worker_req_impl(
-                    [this](shared::easyprospect_http_request req, boost::beast::error_code& ec)
+                    [this](shared::easyprospect_http_request &req, boost::beast::error_code& ec)
                     {
                         shared::easyprospect_http_request_result res;
 
-                        // choose a backend
-                        auto bes = this->cfg_.get_backends();
-                        if ( !bes )
-                        {
-                            spdlog::error("No backends found");
-                            throw std::logic_error("No backends found");
-                        }
-
-                        auto be = bes->at(0);
-
-                        std::string host = be.get_address();
-                        std::string port = be.get_port();
-                        std::string target  = req.get_url();
-                        int version = 11; // 10 or 11 for HTTP 1.0 or 1.1
 
                         // Launch the asynchronous operation
                         //boost::asio::spawn(
@@ -103,10 +100,11 @@ namespace service
                         //        version,
                         //        this->ioc_,
                         //        std::placeholders::_1));
-
-                        boost::asio::spawn(this->ioc_, [this, host, port, target, version](boost::asio::yield_context yield)
+                       
+                        int backend_id = 0 ;
+                        boost::asio::spawn(this->ioc_, [this, req, backend_id](boost::asio::yield_context yield)
                         {
-                            proxy_action(host,port,target,version,this->ioc_,yield);
+                            this->downstream_->start_request(backend_id, req, this->ioc_, yield);
                         });
 
                         return res         ;
@@ -121,99 +119,7 @@ namespace service
                 //}
             }
 
-            void proxy_action(
-                std::string const&         host,
-                std::string const&         port,
-                std::string const&         target,
-                int                        version,
-                boost::asio::io_context&   ioc,
-                boost::asio::yield_context yield)
-            {
-                boost::beast::error_code ec;
-                spdlog::debug(BOOST_CURRENT_FUNCTION);
-                // spdlog::debug(req.to_string());
 
-                // Send to a proxy process using Beast Request
-
-                // These objects perform our I/O
-                boost::asio::ip::tcp::resolver resolver(ioc);
-                boost::beast::tcp_stream       stream(ioc);
-
-                // Look up the domain name
-                // auto const results = resolver.async_resolve(host, port, yield[ec]);
-                auto const results = resolver.async_resolve(host, port, yield[ec]);
-                if (ec)
-                {
-                    spdlog::debug("resolve : {}", ec.message());
-                    return;
-                }
-
-                // Set the timeout.
-                stream.expires_after(std::chrono::seconds(30));
-
-                // Make the connection on the IP address we get from a lookup
-                stream.async_connect(results, yield[ec]);
-                if (ec)
-                {
-                    spdlog::debug("connect : {}", ec.message());
-                    return;
-                }
-
-                // Set up an HTTP GET request message
-                boost::beast::http::request<boost::beast::http::string_body> req{
-                    boost::beast::http::verb::get, target, version};
-                req.set(boost::beast::http::field::host, host);
-                req.set(boost::beast::http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-
-                // Set the timeout.
-                stream.expires_after(std::chrono::seconds(30));
-
-                // Send the HTTP request to the remote host
-                boost::beast::http::async_write(stream, req, yield[ec]);
-                if (ec)
-                {
-                    spdlog::debug("write : {}", ec.message());
-                    return;
-                }
-
-                // This buffer is used for reading and must be persisted
-                boost::beast::flat_buffer b;
-
-                // Declare a container to hold the response
-                boost::beast::http::response<boost::beast::http::dynamic_body> res;
-
-                // Receive the HTTP response
-                boost::beast::http::async_read(stream, b, res, yield[ec]);
-                if (ec)
-                {
-                    spdlog::debug("read : {}", ec.message());
-                    return;
-                }
-
-                // Write the message to standard out
-                std::stringstream resStr;
-                resStr << res;
-                spdlog::debug("proxy response: {}", resStr.str());
-
-                // Gracefully close the socket
-                stream.socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-
-                // not_connected happens sometimes
-                // so don't bother reporting it.
-                //
-                if (ec && ec != boost::beast::errc::not_connected)
-                {
-                    spdlog::debug("shutdown : {}", ec.message());
-                    return;
-                }
-
-                // If we get here then the connection is closed gracefully
-                // Connect downstream
-
-                // Send request
-
-                // return res;
-            }
 
             ~server_impl()
             {

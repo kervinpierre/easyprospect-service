@@ -10,3 +10,4 @@ Debug
 *.nupkg
 /easyprospect-service/epsrv.vcxproj.user
 *.vcxproj.user
+/easyprospect-service/data/test01/log01.txt

@@ -79,6 +79,10 @@ namespace service
                 // TODO: KP. PROXY the HTTP request to a process here
                 if (send_worker_req_impl_)
                 {
+                    // Write the message to standard out
+                    std::stringstream reqStr;
+                    reqStr << pr_.get().get();
+                    spdlog::debug("Before send_worker_req_impl_() req: {}", reqStr.str());
                     send_worker_req_impl_(easyprospect_http_request_builder{*pr_}.to_request(), ec);
                 }
 

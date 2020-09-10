@@ -163,6 +163,7 @@
     <ClCompile Include="src\easyprospect-web\server.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\easyprospect-web\easyprospect-server-downstream.h" />
     <ClInclude Include="include\easyprospect-web\server.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
