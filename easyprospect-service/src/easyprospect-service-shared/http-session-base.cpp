@@ -11,6 +11,10 @@ namespace service
         void http_session_base<Derived>::operator()(boost::beast::error_code ec, std::size_t bytes_transferred, bool need_eof)
         {
             boost::ignore_unused(bytes_transferred);
+            std::stringstream reqStr;
+            bool header_is_done = false;
+            std::shared_ptr<easyprospect_http_request_builder> current_request_builder;
+
             reenter(*this)
             {
                 // Set the expiration
@@ -23,48 +27,116 @@ namespace service
                 pr_->body_limit(64 * 1024);
                 pr_->header_limit(2048);
 
-                //// 1. Read from impl()->stream()
-                //// 2. Save in a local buffer and also send the the Beast request parser
-                //// 3. Check the parser for an arbitrary header
-                //// 4. Decide to if to stop parsing the stream
-                //// 5. If parsing the stream is done send all data to a selected open socket
-                //// 6. continue reading impl()->stream(), and passing data directly to that open socket
-                //// bool header_found = false;
-                // do
-                //{
-                //    // auto& strm = impl()->stream();
-                //    // boost::beast::ssl_stream<stream_type> strm = impl()->stream();
-                //
-                //    yield impl()->stream().async_read_some(storage_.prepare(100), bind_front(this));
-                //    if (ec)
-                //    {
-                //        spdlog::debug(ec.message());
-                //    }
-                //    storage_.commit(bytes_transferred);
-                //
-                //    spdlog::debug(storage_.size());
-                //
-                //    ec = boost::system::error_code();
-                //
-                //    // TODO: KP. check error code
-                //    // auto pr_res = pr_->put(storage_, ec);
-                //    pr_->put(storage_.cdata(), ec);
-                //    if (ec)
-                //    {
-                //        spdlog::debug(ec.message());
-                //    }
-                //    spdlog::debug((char*)(storage_.data().data()));
-                //    spdlog::debug(storage_.capacity());
-                //    spdlog::debug(storage_.size());
-                //    // ep_make_req(*pr_);
-                //    // TODO: KP. Check for ec code, keep in mind header may be invalid
-                //    // TODO: KP. Check header for arbitrary header, set "header_found" boolean variable or break
-                //    ;
-                //    // } while (!(pr_->is_header_done() && header_found));
-                //} while (!(pr_->is_header_done())); // or is_done()
+                if (send_worker_req_impl_)
+                {
+                    // PROXY the HTTP request to a process here
+                    do
+                    {
+                        // auto& strm = impl()->stream();
+                        // boost::beast::ssl_stream<stream_type> strm = impl()->stream();
 
-                // // Read the next HTTP request
-                yield boost::beast::http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
+                        yield impl()->stream().async_read_some(storage_.prepare(100), bind_front(this));
+                        if (ec)
+                        {
+                            spdlog::debug(ec.message());
+                        }
+                        storage_.commit(bytes_transferred);
+
+                        spdlog::debug(storage_.size());
+
+                        ec = boost::system::error_code();
+
+                        // TODO: KP. check error code
+                        // auto pr_res = pr_->put(storage_, ec);
+                        pr_->put(storage_.cdata(), ec);
+                        if (ec)
+                        {
+                            spdlog::debug(ec.message());
+                        }
+                        spdlog::debug((char*)(storage_.data().data()));
+                        spdlog::debug(storage_.capacity());
+                        spdlog::debug(storage_.size());
+
+                        // TODO: KP. Check for ec code, keep in mind header may be invalid
+
+                        if (pr_->is_header_done())
+                        {
+                            if (header_is_done == false)
+                            {
+                                header_is_done = true;
+
+                                // Write the message to standard out
+                                reqStr.clear();
+                                reqStr << pr_.get().get();
+                                spdlog::debug("Before send_worker_req_impl_() req: {}", reqStr.str());
+
+                                current_request_builder = std::make_shared<easyprospect_http_request_builder>(*pr_);
+                                current_request_builder->set_header_done(pr_->is_header_done());
+                                current_request_builder->set_done(pr_->is_done());
+                                current_request_builder->set_input_buffer_capacity(100);
+                                current_request_builder->set_input_buffer_contents(
+                                    static_cast<char*>(storage_.data().data()), storage_.size());
+
+                                yield handle_worker_request(
+                                    current_request_builder,
+                                    ec,
+                                    // Use bind_front() to copy "this" object in a way that a regular capture doesn't
+                                    // seem to do.  This is needed because we're spawning a coroutine in the calling
+                                    // function.
+                                    [self = bind_front(this), impl = this->impl()](
+                                        boost::beast::http::response<boost::beast::http::string_body>&& msg) {
+                                        std::stringstream sstr;
+                                        sstr << "worker_send_lambda() : " << msg.base() << std::endl;
+
+                                        spdlog::debug(sstr.str());
+
+                                        // The lifetime of the message has to extend
+                                        // for the duration of the async operation so
+                                        // we use a shared_ptr to manage it.
+                                        // auto sp = std::make_shared<boost::beast::http::message<isRequest, Body,
+                                        // Fields>>(std::move(msg));
+                                        auto sp = std::make_shared<std::remove_reference_t<decltype(msg)>>(
+                                            std::forward<decltype(msg)>(msg));
+
+                                        // Write the response
+                                        // auto self = bind_front(&this_);
+                                        boost::beast::http::async_write(
+                                            impl->stream(),
+                                            *sp,
+                                            [self, sp](boost::beast::error_code ec, std::size_t bytes_transferred) {
+                                                self(ec, bytes_transferred, sp->need_eof());
+                                            });
+                                    });
+
+                                // while( async_read_some )
+                                //     (yield) read body chunk
+                                //     (yield) call handle_worker_request( current_chunk )
+                                //     post(chunk)
+                                //
+                                // yield connect_to_worker(...);
+                                // yield c_.create_request()
+                                //
+                                // while (async_read_some)
+                            }
+                            else
+                            {
+                                // header has already been sent
+                                current_request_builder->set_done(pr_->is_done());
+                                current_request_builder->set_input_buffer_contents(
+                                    static_cast<char*>(storage_.data().data()), storage_.size());
+
+                                current_request_builder->set_total_bytes_read(
+                                    current_request_builder->get_total_bytes_read()+bytes_transferred);
+                            }
+                        }
+                        // } while (!(pr_->is_header_done() ));
+                    } while (!(pr_->is_done())); // or is_done()
+                }
+                else
+                {
+                    // Read the next HTTP request
+                    yield boost::beast::http::async_read(impl()->stream(), storage_, *pr_, bind_front(this));
+                }
 
                 // This means they closed the connection
                 if (ec == boost::beast::http::error::end_of_stream)
@@ -76,15 +148,7 @@ namespace service
                 if (ec)
                     return impl()->fail(ec, "boost::beast::http::async_read");
 
-                // TODO: KP. PROXY the HTTP request to a process here
-                if (send_worker_req_impl_)
-                {
-                    // Write the message to standard out
-                    std::stringstream reqStr;
-                    reqStr << pr_.get().get();
-                    spdlog::debug("Before send_worker_req_impl_() req: {}", reqStr.str());
-                    send_worker_req_impl_(easyprospect_http_request_builder{*pr_}.to_request(), ec);
-                }
+
 
                 // if (1)
                 //{

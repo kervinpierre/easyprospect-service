@@ -328,6 +328,14 @@ namespace service
             {
                 send_worker_req_impl_ = val;
             }
+
+            void handle_worker_request(
+                std::shared_ptr<easyprospect_http_request_builder>                                 req,
+                boost::beast::error_code&                                                          ec,
+                std::function<void(boost::beast::http::response<boost::beast::http::string_body>)> send_res) const
+            {
+                send_worker_req_impl_(req, ec, send_res);
+            }
         };
 
         enum class ws_session_kind
@@ -778,6 +786,8 @@ namespace service
         }
 
         boost::beast::string_view mime_type(boost::beast::string_view path);
+
+
 
         // This function produces an HTTP response for the given
         // request. The type of the response object depends on the

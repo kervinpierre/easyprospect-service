@@ -10,12 +10,19 @@ namespace service
 {
     namespace shared
     {
+        class easyprospect_http_request_builder;
         class easyprospect_http_request;
         class easyprospect_http_request_result;
-        using send_worker_req_impl_type = std::function<easyprospect_http_request_result(easyprospect_http_request, boost::beast::error_code &ec)>;
+        using send_worker_req_impl_type = std::function<void(
+                                            std::shared_ptr<easyprospect_http_request_builder>,
+                                            boost::beast::error_code&,
+                                            std::function<void(boost::beast::http::response<boost::beast::http::string_body>)>)>;
 
         class easyprospect_http_request final
         {
+            //has_more_data()
+            //async_get_more_data()
+            //forward_rest(Stream)
         private:
             boost::optional<unsigned long long> content_length_;
             boost::optional<std::string> body_;
@@ -170,6 +177,7 @@ namespace service
 
                 return res;
             }
+
         };
 
         class easyprospect_http_request_builder final
@@ -182,6 +190,10 @@ namespace service
             std::string                                      url_;
             std::string                                      host_;
             std::vector<std::pair<std::string, std::string>> headers_;
+            std::vector<char>                                input_buffer_;
+            bool                                             header_done = false;
+            bool                                             done        = false;
+            int                                              total_bytes_read_ = 0;
 
           public:
 
@@ -218,6 +230,43 @@ namespace service
             void set_url(std::string u)
             {
                 url_ = u;
+            }
+
+            bool is_header_done() const
+            {
+                return header_done;
+            }
+            void set_header_done(bool val)
+            {
+                header_done = val;
+            }
+            bool is_done() const
+            {
+                return done;
+            }
+            void set_done(bool val)
+            {
+                done = val;
+            }
+
+            void set_input_buffer_capacity(int cap)
+            {
+                input_buffer_.resize(cap);
+            }
+
+            void set_input_buffer_contents(char *val, int size)
+            {
+                input_buffer_.insert(input_buffer_.end(), val, val+size);
+            }
+
+            void set_total_bytes_read(int t)
+            {
+                total_bytes_read_ = t;
+            }
+
+            int get_total_bytes_read()
+            {
+                return total_bytes_read_;
             }
 
             easyprospect_http_request_builder(boost::beast::http::parser<true, boost::beast::http::string_body>& req_p)

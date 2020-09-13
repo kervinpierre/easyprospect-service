@@ -258,16 +258,15 @@ namespace service
 
             }
 
-            void start_request( int backend_id, 
-                                shared::easyprospect_http_request req,
+            void start_request( std::function<void(boost::beast::http::response<boost::beast::http::string_body>)> send_res,
+                                int backend_id, 
+                                std::shared_ptr<shared::easyprospect_http_request_builder>                                 req,
                                 boost::asio::io_context &ioc,
                                 boost::asio::yield_context yield)
             {
                 boost::beast::error_code ec;
                 spdlog::debug(BOOST_CURRENT_FUNCTION);
                 // spdlog::debug(req.to_string());
-
-
 
                 auto curr_sess = get_session();
                 auto conn = get_connection(backend_id, curr_sess->get_id());
@@ -278,7 +277,7 @@ namespace service
                 }
 
                 // Set up an HTTP GET request message
-                auto be_req = req.to_beast_request();
+                auto be_req = req->to_request().to_beast_request();
 
                 // Write the message to standard out
                 std::stringstream reqStr;
@@ -302,7 +301,7 @@ namespace service
                 boost::beast::flat_buffer b;
 
                 // Declare a container to hold the response
-                boost::beast::http::response<boost::beast::http::dynamic_body> res;
+                boost::beast::http::response<boost::beast::http::string_body> res;
 
                 // Receive the HTTP response
                 boost::beast::http::async_read(*conn->get_stream(), b, res, yield[ec]);
@@ -329,9 +328,18 @@ namespace service
                 // If we get here then the connection is closed gracefully
                 // Connect downstream
 
-                // Send request
+                //// Send request
+                //boost::beast::http::response<boost::beast::http::string_body> res;
+                //res.version(req.version());
+                //res.result(boost::beast::http::status::ok);
+                //res.set(boost::beast::http::field::server, BOOST_BEAST_VERSION_STRING);
+                //// res.set(boost::beast::http::field::content_type, mime_type(curr_path.generic_string()));
+                //// res.content_length(size);
+                //res.keep_alive(req.keep_alive());
+                //res.body() = output;
+                //res.prepare_payload();
 
-                // return res;
+                return send_res(std::move(res));
             }
         };
     }

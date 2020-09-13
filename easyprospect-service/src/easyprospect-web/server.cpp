@@ -84,10 +84,13 @@ namespace service
                 // TODO: kp. initialize downstream backends.
 
                 set_send_worker_req_impl(
-                    [this](shared::easyprospect_http_request &req, boost::beast::error_code& ec)
+                    [this](
+                        std::shared_ptr<shared::easyprospect_http_request_builder> &req,
+                        boost::beast::error_code& ec,
+                                std::function<void(boost::beast::http::response<boost::beast::http::string_body>)> send_res
+)
                     {
                         shared::easyprospect_http_request_result res;
-
 
                         // Launch the asynchronous operation
                         //boost::asio::spawn(
@@ -100,14 +103,15 @@ namespace service
                         //        version,
                         //        this->ioc_,
                         //        std::placeholders::_1));
-                       
+
+                        // std::function<>
                         int backend_id = 0 ;
-                        boost::asio::spawn(this->ioc_, [this, req, backend_id](boost::asio::yield_context yield)
+                        boost::asio::spawn(this->ioc_, [this, req, backend_id, send_res](boost::asio::yield_context yield)
                         {
-                            this->downstream_->start_request(backend_id, req, this->ioc_, yield);
+                            this->downstream_->start_request(send_res, backend_id, req, this->ioc_, yield);
                         });
 
-                        return res         ;
+                       // return res         ;
                     });
                     // TODO: KP. Move URL parsing to some place needed.
                 // Base
