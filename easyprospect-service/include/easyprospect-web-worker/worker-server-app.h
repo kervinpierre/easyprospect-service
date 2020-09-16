@@ -15,7 +15,7 @@ namespace service
 {
     namespace web_worker
     {
-        class application_impl : public easyprospect::service::shared::application_impl_base,
+        class application_impl : public shared::application_impl_base,
                                  public boost::enable_shared_from
         {
             using clock_type = std::chrono::steady_clock;
@@ -23,7 +23,7 @@ namespace service
 
             config::easyprospect_config_worker_core                            cfg_;
             std::shared_ptr<config::easyprospect_registry>                                        reg_;
-            std::vector<std::unique_ptr<easyprospect::service::shared::service>>                       services_;
+            std::vector<std::unique_ptr<shared::service>>                       services_;
             boost::asio::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
             boost::asio::basic_signal_set<executor_type>                                                      signals_;
             std::condition_variable                                                                    cv_;
@@ -34,6 +34,8 @@ namespace service
             std::unique_ptr<process_cntrl_client>                                                      control_client_;
 
             std::unique_ptr<channel_list_impl> channel_list_;
+
+            boost::asio::io_context network_ioc_;
 
             static std::chrono::steady_clock::time_point never() noexcept
             {
@@ -73,6 +75,11 @@ namespace service
             void insert(std::unique_ptr<shared::service> sp) override;
 
             void run() override;
+
+            executor_type make_network_executor() 
+            {
+                return boost::asio::make_strand(network_ioc_.get_executor());
+            }
 
             //--------------------------------------------------------------------------
             //

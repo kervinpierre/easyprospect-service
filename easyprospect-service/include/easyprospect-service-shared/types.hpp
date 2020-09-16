@@ -29,13 +29,8 @@
 */
 
 /// The type of executor agents and sessions will use
-#ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-using executor_type = boost::asio::strand<
-    boost::asio::system_executor>;
-#else
 using executor_type = boost::asio::strand<
     boost::asio::io_context::executor_type>;
-#endif
 
 /// The type of socket for agents to use
 using socket_type =

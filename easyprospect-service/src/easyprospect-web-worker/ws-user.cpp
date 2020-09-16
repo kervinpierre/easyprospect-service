@@ -635,7 +635,7 @@ namespace service
 
           public:
             explicit table(web_worker::application_impl& srv) :
-                channel(3, "Blackjack", srv.channel_list()), srv_(srv), timer_(srv.make_executor()), g_(*this, 1)
+                channel(3, "Blackjack", srv.channel_list()), srv_(srv), timer_(srv.make_upstream_executor()), g_(*this, 1)
             {
                 boost::ignore_unused(srv_);
             }
@@ -1014,7 +1014,7 @@ namespace service
 #ifndef LOUNGE_USE_SYSTEM_EXECUTOR
             std::vector<std::thread> vt;
             while (vt.size() < cfg_.get_num_threads())
-                vt.emplace_back([this] { this->ioc_.run(); });
+                vt.emplace_back([this] { this->network_ioc_.run(); });
 #endif
             // Block the main thread until stop() is called
             {

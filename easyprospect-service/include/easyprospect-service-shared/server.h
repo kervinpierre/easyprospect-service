@@ -32,7 +32,7 @@ namespace service
 
             /** Return a new executor to use.
              */
-            virtual executor_type make_executor() = 0;
+           // virtual executor_type make_application_executor() = 0;
 
             /** Add a service to the server.
 
@@ -77,16 +77,12 @@ namespace service
             send_worker_req_impl_type  send_worker_req_impl_;
 
           public:
-            boost::asio::io_context ioc_;
+            boost::asio::io_context application_ioc_;
 
-            executor_type make_executor() override
-            {
-#ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-                return boost::asio::make_strand(boost::asio::system_executor{});
-#else
-                return boost::asio::make_strand(ioc_.get_executor());
-#endif
-            }
+            //executor_type make_application_executor() override
+            //{
+            //    return boost::asio::make_strand(application_ioc_.get_executor());
+            //}
 
             //   virtual void dispatch(shared::rpc_call& rpc, shared::user& u, shared::ws_session_t& sess) = 0;
             dispatch_impl_type get_dispatch_impl() const

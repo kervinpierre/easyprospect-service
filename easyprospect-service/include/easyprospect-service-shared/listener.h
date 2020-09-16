@@ -91,16 +91,22 @@ namespace service
             config::easyprospect_config_service_listener_conf cfg_;
             std::shared_ptr<config::easyprospect_registry> reg_;
             boost::asio::ssl::context                                ctx_;
+
+            // executor_ used to initialize acceptor_ so should be first
+            executor_type executor_;
             boost::asio::basic_socket_acceptor<tcp_ex, executor_type> acceptor_;
+
             boost::container::flat_set<session*>              sessions_;
             boost::asio::ip::tcp::endpoint                                     ep_;
+
 
             int current_port_;
 
           public:
             listener_impl(application_impl_base& srv, 
                            config::easyprospect_config_service_listener_conf cfg,
-                std::shared_ptr<config::easyprospect_registry>   reg);
+                std::shared_ptr<config::easyprospect_registry>   reg,
+                boost::asio::io_context&                           ioc);
 
             ~listener_impl();
 
@@ -132,7 +138,7 @@ namespace service
             //--------------------------------------------------------------------------
 
             /// Called when the server starts
-            void on_start() override;
+            void on_start(executor_type) override;
 
             /// Called when the server stops
             void on_stop() override;

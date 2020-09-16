@@ -174,11 +174,11 @@ namespace easyprospect
                 sessions_.erase(p);
             }
 
-            void listener_impl::on_start()
+            void listener_impl::on_start(executor_type exe)
             {
                 // Accept the first connection
                 acceptor_.async_accept(
-                    srv_.make_executor(),
+                    exe, //srv_.make_upstream_executor(),
                     ep_,
                     bind_front(this));
             }
@@ -195,15 +195,19 @@ namespace easyprospect
 
             listener_impl::listener_impl(application_impl_base& srv,
                 config::easyprospect_config_service_listener_conf cfg,
-                std::shared_ptr<config::easyprospect_registry>                          reg) :
-                srv_(srv)
-                , ctx_(boost::asio::ssl::context::tlsv12)
-                , acceptor_(srv_.make_executor())
+                std::shared_ptr<config::easyprospect_registry>                          reg,
+                boost::asio::io_context& ioc) :
+                srv_(srv),
+                ctx_(boost::asio::ssl::context::tlsv12),
+                // TODO: Why do we need get_executor() here?
+            executor_(ioc.get_executor()), acceptor_(executor_),
+                 current_port_(0)
             {
                 cfg_ = config::easyprospect_config_service_listener_conf(
                     cfg.get_name(), cfg.get_address(), cfg.get_port(),
                     cfg.get_min_port(), cfg.get_max_port(),
-                    config::easyprospect_config_service_listener_conf::to_string(config::listener_kind::allow_tls));
+                    config::easyprospect_config_service_listener_conf::to_string(
+                        config::listener_kind::allow_tls));
 
                 reg_ = reg;
 
@@ -396,7 +400,7 @@ namespace easyprospect
 
                         // Accept the next connection
                         yield acceptor_.async_accept(
-                            srv_.make_executor(),
+                            //srv_.make_upstream_executor(),
                             ep_,
                             bind_front(this));
                     }
@@ -404,14 +408,13 @@ namespace easyprospect
             }
 #include <boost/asio/unyield.hpp>
 
-
-
             bool run_listener(application_impl_base& srv,
                 config::easyprospect_config_service_listener_conf cfg,
-                std::shared_ptr<config::easyprospect_registry> reg)
+                std::shared_ptr<config::easyprospect_registry> reg,
+                boost::asio::io_context& ioc)
             {
                 auto sp = boost::make_unique<listener_impl>(
-                    srv, cfg, reg);
+                    srv, cfg, reg, ioc);
                 bool open = sp->open();
                 if (!open)
                     return false;

@@ -8,7 +8,7 @@
 //
 
 #pragma once
-
+#include <easyprospect-service-shared/types.hpp>
 namespace easyprospect
 {
     namespace service
@@ -32,7 +32,7 @@ namespace easyprospect
                 */
                 virtual
                     void
-                    on_start() = 0;
+                    on_start(executor_type exe) = 0;
 
                 /** Called when the server stops.
 

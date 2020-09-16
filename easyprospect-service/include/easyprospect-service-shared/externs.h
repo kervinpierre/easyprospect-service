@@ -30,7 +30,8 @@ namespace service
 
         bool run_listener(application_impl_base& srv, 
                            config::easyprospect_config_service_listener_conf cfg,
-            std::shared_ptr<config::easyprospect_registry>    reg);
+            std::shared_ptr<config::easyprospect_registry>    reg,
+            boost::asio::io_context&                           ioc);
 
 
         // extern void run_ws_session(

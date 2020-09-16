@@ -14,7 +14,7 @@ namespace service
             config::easyprospect_config_worker_core
             cfg,
             std::shared_ptr<config::easyprospect_registry> reg):
-            cfg_(std::move(cfg)), reg_(reg), timer_(this->make_executor()),
+            cfg_(std::move(cfg)), reg_(reg), timer_(this->make_upstream_executor()),
             signals_(timer_.get_executor(), SIGINT, SIGTERM),
             shutdown_time_(never()), stop_(false),
             channel_list_(make_channel_list(*this))
@@ -152,11 +152,12 @@ namespace service
                 control_client_->send(st);
             }
 
-#ifndef LOUNGE_USE_SYSTEM_EXECUTOR
-            std::vector<std::thread> vt;
-            while (vt.size() < cfg_.get_num_threads())
-                vt.emplace_back([this] { this->ioc_.run(); });
-#endif
+            std::vector<std::thread> app_vt;
+            while (app_vt.size() < cfg_.get_num_threads())
+                app_vt.emplace_back([this] { this->application_ioc_.run(); });
+
+            auto network_thread = std::thread([this]{this->network_ioc_.run(); });
+
             // Block the main thread until stop() is called
             {
                 std::unique_lock<std::mutex> lock(mutex_);
@@ -175,12 +176,10 @@ namespace service
                 // stopped, so join the threads before
                 // destroying them.
 
-#ifdef LOUNGE_USE_SYSTEM_EXECUTOR
-            boost::asio::system_executor{}.context().join();
-#else
-            for (auto& t : vt)
+            network_thread.join();
+
+            for (auto& t : app_vt)
                 t.join();
-#endif
         }
     } // namespace web_worker
 } // namespace service
