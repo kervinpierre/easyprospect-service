@@ -14,7 +14,7 @@ namespace service
             config::easyprospect_config_worker_core
             cfg,
             std::shared_ptr<config::easyprospect_registry> reg):
-            cfg_(std::move(cfg)), reg_(reg), timer_(this->make_upstream_executor()),
+            cfg_(std::move(cfg)), reg_(reg), timer_(network_ioc_),
             signals_(timer_.get_executor(), SIGINT, SIGTERM),
             shutdown_time_(never()), stop_(false),
             channel_list_(make_channel_list(*this))
@@ -139,7 +139,7 @@ namespace service
 
             // Start all agents
             for (auto const& sp : services_)
-                sp->on_start();
+                sp->on_start(boost::asio::make_strand(network_ioc_.get_executor()));
 
             // Capture SIGINT and SIGTERM to perform a clean shutdown
             signals_.async_wait(boost::beast::bind_front_handler(&application_impl::on_signal, this));

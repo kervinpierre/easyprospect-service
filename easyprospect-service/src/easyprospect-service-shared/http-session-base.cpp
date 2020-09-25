@@ -1,5 +1,6 @@
 #include <easyprospect-service-shared/session.hpp>
 #include <boost/asio/yield.hpp>
+#include <boost/beast/http/error.hpp>
 
 namespace easyprospect
 {
@@ -14,6 +15,11 @@ namespace service
             std::stringstream reqStr;
             bool header_is_done = false;
             std::shared_ptr<easyprospect_http_request_builder> current_request_builder;
+            std::shared_ptr<easyprospect_http_request_continuation_builder> current_continuation_builder;
+            std::shared_ptr<const easyprospect_http_request> current_req;
+            std::shared_ptr<const easyprospect_http_request_continuation> current_cont;
+            auto current_pos = 1;
+            auto processed_octets = 0;
 
             reenter(*this)
             {
@@ -42,17 +48,38 @@ namespace service
                         }
                         storage_.commit(bytes_transferred);
 
-                        spdlog::debug(storage_.size());
+                        spdlog::trace("async_read_some() : {}", storage_.size());
 
                         ec = boost::system::error_code();
 
                         // TODO: KP. check error code
                         // auto pr_res = pr_->put(storage_, ec);
-                        pr_->put(storage_.cdata(), ec);
+                        processed_octets = pr_->put(storage_.cdata(), ec);
                         if (ec)
                         {
-                            spdlog::debug(ec.message());
+                            spdlog::debug("ec = {}, {}", ec.value(), ec.message());
+
+                            if (ec==boost::beast::http::error::need_more)
+                            {
+                                // https://www.boost.org/doc/libs/develop/libs/beast/doc/html/beast/ref/boost__beast__http__parser/put.html
+                                // need_more implies more data is needed for forward progress
+                                continue;
+                            }
+                            else
+                            {
+                                spdlog::error("Parser failed.");
+                            }
                         }
+                        else if (processed_octets>0)
+                        {
+                            // forward progress was made
+                            spdlog::debug("{} octets processed", processed_octets);
+                        }
+                        else
+                        {
+                            spdlog::debug("{} octets returned. Progress not made.", processed_octets);
+                        }
+
                         spdlog::debug((char*)(storage_.data().data()));
                         spdlog::debug(storage_.capacity());
                         spdlog::debug(storage_.size());
@@ -73,12 +100,14 @@ namespace service
                                 current_request_builder = std::make_shared<easyprospect_http_request_builder>(*pr_);
                                 current_request_builder->set_header_done(pr_->is_header_done());
                                 current_request_builder->set_done(pr_->is_done());
-                                current_request_builder->set_input_buffer_capacity(100);
-                                current_request_builder->set_input_buffer_contents(
-                                    static_cast<char*>(storage_.data().data()), storage_.size());
+
+                                // FIXME: I probably shouldn't allocate, but I don't want to deal with std::move and stack
+                                //        right now.  Fix this at some point.
+                                current_req = std::make_shared<const easyprospect_http_request>(
+                                        current_request_builder->to_request());
 
                                 yield handle_worker_request(
-                                    current_request_builder,
+                                    current_req, 0, nullptr,
                                     ec,
                                     // Use bind_front() to copy "this" object in a way that a regular capture doesn't
                                     // seem to do.  This is needed because we're spawning a coroutine in the calling
@@ -121,12 +150,46 @@ namespace service
                             else
                             {
                                 // header has already been sent
-                                current_request_builder->set_done(pr_->is_done());
-                                current_request_builder->set_input_buffer_contents(
+                                current_continuation_builder->set_done(pr_->is_done());
+                                current_continuation_builder->set_input_buffer_contents(
                                     static_cast<char*>(storage_.data().data()), storage_.size());
 
-                                current_request_builder->set_total_bytes_read(
-                                    current_request_builder->get_total_bytes_read()+bytes_transferred);
+                                current_cont = std::make_shared<const easyprospect_http_request_continuation>(
+                                    current_continuation_builder->to_continuation());
+
+                              //  current_request_builder->set_total_bytes_read(
+                               //     current_request_builder->get_total_bytes_read()+bytes_transferred);
+                               //
+                               yield handle_worker_request(
+                                    current_req, current_pos++, current_cont,
+                                    ec,
+                                    // Use bind_front() to copy "this" object in a way that a regular capture doesn't
+                                    // seem to do.  This is needed because we're spawning a coroutine in the calling
+                                    // function.
+                                    [self = bind_front(this), impl = this->impl()](
+                                        boost::beast::http::response<boost::beast::http::string_body>&& msg) {
+                                    std::stringstream sstr;
+                                    sstr << "worker_send_lambda() : " << msg.base() << std::endl;
+
+                                    spdlog::debug(sstr.str());
+
+                                    // The lifetime of the message has to extend
+                                    // for the duration of the async operation so
+                                    // we use a shared_ptr to manage it.
+                                    // auto sp = std::make_shared<boost::beast::http::message<isRequest, Body,
+                                    // Fields>>(std::move(msg));
+                                    auto sp = std::make_shared<std::remove_reference_t<decltype(msg)>>(
+                                        std::forward<decltype(msg)>(msg));
+
+                                    // Write the response
+                                    // auto self = bind_front(&this_);
+                                    boost::beast::http::async_write(
+                                        impl->stream(),
+                                        *sp,
+                                        [self, sp](boost::beast::error_code ec, std::size_t bytes_transferred) {
+                                            self(ec, bytes_transferred, sp->need_eof());
+                                        });
+                                    });
                             }
                         }
                         // } while (!(pr_->is_header_done() ));

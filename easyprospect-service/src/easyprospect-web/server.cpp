@@ -63,12 +63,12 @@ namespace service
 
             set_send_worker_req_impl(
                 [this](
-                std::shared_ptr<shared::easyprospect_http_request_builder>& req,
-                boost::beast::error_code& ec,
-                std::function<void(
-                    boost::beast::http::response<boost::beast::http::string_body
-                    >)>
-                send_res)
+                    std::shared_ptr<const shared::easyprospect_http_request>                     first_req,
+                    int                                                                          position,
+                    std::shared_ptr<const shared::easyprospect_http_request_continuation>        req_continuation,
+                    boost::beast::error_code& ec,
+                    std::function<void(
+                        boost::beast::http::response<boost::beast::http::string_body>)>          send_res)
                 {
                     shared::easyprospect_http_request_result res;
 
@@ -91,11 +91,11 @@ namespace service
                     int backend_id = 0;
                     boost::asio::spawn(
                         this->downstream_ioc_,
-                        [this, req, backend_id, send_res](
+                        [this, first_req, position, req_continuation, backend_id, send_res](
                         boost::asio::yield_context yield)
                         {
                             this->downstream_->start_request(
-                                send_res, backend_id, req,
+                                send_res, backend_id, first_req, position, req_continuation,
                                 this->downstream_ioc_, yield);
                         });
 
@@ -150,35 +150,6 @@ namespace service
 
             auto upstream_thread   = std::thread([this] { this->upstream_ioc_.run(); });
             auto downstream_thread = std::thread([this] { this->downstream_ioc_.run(); });
-
-            // std::vector<boost::process::child> pt;
-            // boost::process::group              ptg;
-
-            //// Create process pool here.
-
-            //// TODO: KP. Start the processes, pass in the arguments, save their PIDs
-            //// How can we get the child to dump to our console?
-            //// How do I monitor the process group?
-            //
-            //// while (pt.size() < cfg_.get_num_threads())
-            // while (pt.size() < 2)
-            //{
-            //    // boost::process::child c(boost::process::search_path("epwebworker"),
-            //    // "--conf", "../../../data/test01/args01.txt");
-            //    //  ptg.add(c);
-
-            //    // while (c.running())
-            //    //    do_some_stuff();
-
-            //    // c.wait(); //wait for the process to exit
-            //    // int result = c.exit_code();
-            //    // pt.emplace_back(boost::process::search_path("epwebworker"), "--conf",
-            //    // "../../../data/test01/args01.txt");
-            //    pt.emplace_back("epworker.exe", "--conf", "../../../data/test01/argsClient01.txt");
-            //    boost::process::child& c = pt.back();
-
-            //    ptg.add(c);
-            //}
 
             // Block the main thread until stop() is called
             {

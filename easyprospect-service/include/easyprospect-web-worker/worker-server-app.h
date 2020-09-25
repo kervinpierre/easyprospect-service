@@ -76,11 +76,6 @@ namespace service
 
             void run() override;
 
-            executor_type make_network_executor() 
-            {
-                return boost::asio::make_strand(network_ioc_.get_executor());
-            }
-
             //--------------------------------------------------------------------------
             //
             // shutdown / stop

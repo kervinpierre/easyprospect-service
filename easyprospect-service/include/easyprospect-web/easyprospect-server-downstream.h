@@ -260,13 +260,17 @@ namespace service
 
             void start_request( std::function<void(boost::beast::http::response<boost::beast::http::string_body>)> send_res,
                                 int backend_id, 
-                                std::shared_ptr<shared::easyprospect_http_request_builder>                                 req,
+                                std::shared_ptr<const shared::easyprospect_http_request>              first_req,
+                                int                                                                   position,
+                                std::shared_ptr<const shared::easyprospect_http_request_continuation> req_continuation,
                                 boost::asio::io_context &ioc,
                                 boost::asio::yield_context yield)
             {
                 boost::beast::error_code ec;
                 spdlog::debug(BOOST_CURRENT_FUNCTION);
                 // spdlog::debug(req.to_string());
+
+                // TODO: kp. Check Position and req_continuation to know if this is a new "session" or continuation
 
                 auto curr_sess = get_session();
                 auto conn = get_connection(backend_id, curr_sess->get_id());
@@ -277,7 +281,9 @@ namespace service
                 }
 
                 // Set up an HTTP GET request message
-                auto be_req = req->to_request().to_beast_request();
+                shared::easyprospect_http_request_builder bld{*first_req};
+                // TODO: kp. Modify the request here.
+                auto be_req = bld.to_request().to_beast_request();
 
                 // Write the message to standard out
                 std::stringstream reqStr;

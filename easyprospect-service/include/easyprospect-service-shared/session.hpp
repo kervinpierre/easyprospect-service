@@ -330,11 +330,13 @@ namespace service
             }
 
             void handle_worker_request(
-                std::shared_ptr<easyprospect_http_request_builder>                                 req,
+                std::shared_ptr<const easyprospect_http_request>                                 first_req,
+                int position,
+                std::shared_ptr<const easyprospect_http_request_continuation>  req_continuation,
                 boost::beast::error_code&                                                          ec,
                 std::function<void(boost::beast::http::response<boost::beast::http::string_body>)> send_res) const
             {
-                send_worker_req_impl_(req, ec, send_res);
+                send_worker_req_impl_(first_req, position, req_continuation, ec, send_res);
             }
         };
 

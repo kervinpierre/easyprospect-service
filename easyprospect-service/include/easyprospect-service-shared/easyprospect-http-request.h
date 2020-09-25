@@ -10,11 +10,13 @@ namespace service
 {
     namespace shared
     {
-        class easyprospect_http_request_builder;
+        class easyprospect_http_request_continuation;
         class easyprospect_http_request;
         class easyprospect_http_request_result;
         using send_worker_req_impl_type = std::function<void(
-                                            std::shared_ptr<easyprospect_http_request_builder>,
+            std::shared_ptr<const easyprospect_http_request>              first_req,
+            int                                                           position,
+            std::shared_ptr<const easyprospect_http_request_continuation> req_continuation,
                                             boost::beast::error_code&,
                                             std::function<void(boost::beast::http::response<boost::beast::http::string_body>)>)>;
 
@@ -29,6 +31,7 @@ namespace service
             boost::optional<std::string> raw_;
             boost::optional<std::string> content_type_;
             std::string                  url_;
+            std::string                  host_;
             std::vector<std::pair<std::string,std::string>> headers_;
 
         public:
@@ -119,6 +122,11 @@ namespace service
                 return url_;
             }
 
+            std::string get_host() const
+            {
+                return host_;
+            }
+
             std::string to_string()
             {
                 std::stringstream str;
@@ -154,7 +162,7 @@ namespace service
                 return str.str();
             }
 
-            boost::beast::http::request<boost::beast::http::string_body> to_beast_request()
+            boost::beast::http::request<boost::beast::http::string_body> to_beast_request() const
             {
                 boost::beast::http::request<boost::beast::http::string_body> res;
                 res.method(boost::beast::http::verb::get);
@@ -177,7 +185,20 @@ namespace service
 
                 return res;
             }
+        };
 
+        class easyprospect_http_request_continuation final
+        {
+          private:
+            std::shared_ptr<const easyprospect_http_request> firt_request_;
+            const std::vector<char>                          buffer_;
+            bool                                             done_;
+
+          public:
+            bool is_done() const
+            {
+                return done_;
+            }
         };
 
         class easyprospect_http_request_builder final
@@ -240,10 +261,7 @@ namespace service
             {
                 header_done = val;
             }
-            bool is_done() const
-            {
-                return done;
-            }
+
             void set_done(bool val)
             {
                 done = val;
@@ -264,9 +282,19 @@ namespace service
                 total_bytes_read_ = t;
             }
 
-            int get_total_bytes_read()
+            explicit easyprospect_http_request_builder(const easyprospect_http_request &req)
             {
-                return total_bytes_read_;
+                set_url(req.get_url());
+                set_headers(req.get_headers());
+                set_body(req.get_body());
+
+                if ( req.has_content_length())
+                    set_content_length(req.get_content_length());
+
+                if (req.has_content_type())
+                    set_content_type(req.get_content_type());
+
+                set_host(req.get_host());
             }
 
             easyprospect_http_request_builder(boost::beast::http::parser<true, boost::beast::http::string_body>& req_p)
@@ -292,13 +320,45 @@ namespace service
                 set_headers(h);
             }
 
-            easyprospect_http_request to_request() const
+            const easyprospect_http_request to_request() const
             {
-                easyprospect_http_request r(content_length_, body_, raw_, content_type_, url_, headers_);
+                const easyprospect_http_request r(content_length_, body_, raw_, content_type_, url_, headers_);
 
                 return r;
             }
 
+        };
+
+        class easyprospect_http_request_continuation_builder final
+        {
+          private:
+            std::vector<char> input_buffer_;
+            bool              done_;
+
+          public:
+
+            void set_done(bool val)
+            {
+                done_ = val;
+            }
+
+            void set_input_buffer_capacity(int cap)
+            {
+                input_buffer_.resize(cap);
+            }
+
+            void set_input_buffer_contents(char* val, int size)
+            {
+                input_buffer_.insert(input_buffer_.end(), val, val + size);
+            }
+
+            const easyprospect_http_request_continuation to_continuation() const
+            {
+                const easyprospect_http_request_continuation
+                r; //(content_length_, body_, raw_, content_type_, url_, headers_);
+
+                return r;
+            }
         };
 
         class easyprospect_http_request_result final
