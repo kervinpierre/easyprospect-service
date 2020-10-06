@@ -182,6 +182,9 @@ namespace service
             listener&                                lst_;
             boost::asio::ip::tcp::endpoint                            ep_;
             boost::beast::flat_buffer                             storage_;
+            boost::optional<boost::beast::http::request_parser<boost::beast::http::buffer_body>> pr_;
+            char                                                                                 pr_buffer_[4096];
+            std::shared_ptr<const easyprospect_http_request>                                     current_req;
             std::vector<std::regex>                  epjs_exts_;
             boost::optional<boost::filesystem::path> doc_root_;
 
@@ -192,7 +195,6 @@ namespace service
             // ep_session_ssl_function_type run_ws_session_ssl_func;
             //  ep_session_plain_function_type run_ws_session_plain_func;
 
-            boost::optional<boost::beast::http::request_parser<boost::beast::http::string_body>> pr_;
 
           public:
             http_session_base(application_impl_base& srv, listener& lst, boost::asio::ip::tcp::endpoint ep, boost::beast::flat_buffer storage);
@@ -808,7 +810,8 @@ namespace service
 
             std::stringstream sstr;
 
-            sstr << "\nweb_root: " << doc_root->generic_string() << std::endl << req << std::endl;
+           // sstr << "\nweb_root: " << doc_root->generic_string() << std::endl << req << std::endl;
+            sstr << "\nweb_root: " << doc_root->generic_string() << std::endl;
 
             spdlog::debug(sstr.str());
 

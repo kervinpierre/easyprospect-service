@@ -5,9 +5,10 @@
 #include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/http/dynamic_body.hpp>
 #include <boost/beast/http/read.hpp>
+#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/nil_generator.hpp>
 #include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
 #include <easyprospect-service-shared/server.h>
 
 #include <easyprospect-config/easyprospect-config-server.h>
@@ -57,7 +58,7 @@ namespace service
                 boost::asio::yield_context yield)
             {
                 boost::beast::error_code ec;
-                spdlog::debug(BOOST_CURRENT_FUNCTION);
+                //spdlog::trace(BOOST_CURRENT_FUNCTION);
 
                 std::string host    = be.get_address();
                 std::string port    = be.get_port();
@@ -130,13 +131,20 @@ namespace service
             std::shared_ptr<easyprospect_server_downstream_connection> conn_;
 
         public:
-            easyprospect_server_downstream_session()
+            easyprospect_server_downstream_session(boost::uuids::uuid i = boost::uuids::nil_uuid())
             {
-                boost::uuids::random_generator gen;
-                id_ = gen();
+                if (i == boost::uuids::nil_uuid())
+                {
+                    boost::uuids::random_generator gen;
+                    id_ = gen();
+                }
+                else
+                {
+                    id_ = i;
+                }
             }
 
-            auto get_conn()
+            auto get_conn() const
             {
                 return conn_;
             }
@@ -172,20 +180,12 @@ namespace service
             {
             }
 
-            /*
-             * Return a session by id, create a new one with a new id if not found.
-             */
-            std::shared_ptr<easyprospect_server_downstream_session>
-            get_session()
-            {
-                return get_session(boost::uuids::nil_uuid());
-            }
-
             std::shared_ptr<easyprospect_server_downstream_session>
             get_session(
-                boost::uuids::uuid sess,
+                boost::uuids::uuid sess             = boost::uuids::nil_uuid(),
                 bool               throw_on_missing = false)
             {
+                // TODO: kp. The returned session should expire after some specified or default time limit.
                 auto res = sessions_.find(sess);
                 if( res == sessions_.end())
                 {
@@ -194,7 +194,7 @@ namespace service
                         throw std::logic_error("session not found.");
                     }
 
-                    auto s = std::make_shared<easyprospect_server_downstream_session>();
+                    auto s = std::make_shared<easyprospect_server_downstream_session>(sess);
                     sessions_[s->get_id()] = s;
 
                     return s;
@@ -267,39 +267,74 @@ namespace service
                                 boost::asio::yield_context yield)
             {
                 boost::beast::error_code ec;
-                spdlog::debug(BOOST_CURRENT_FUNCTION);
-                // spdlog::debug(req.to_string());
+               // spdlog::trace(BOOST_CURRENT_FUNCTION);
 
-                // TODO: kp. Check Position and req_continuation to know if this is a new "session" or continuation
+                auto curr_req = first_req ? first_req : req_continuation->get_request();
 
-                auto curr_sess = get_session();
-                auto conn = get_connection(backend_id, curr_sess->get_id());
-                if ( !conn->is_initialized() )
+                auto curr_sess = get_session(curr_req->get_session_id());
+                auto conn      = get_connection(backend_id, curr_sess->get_id());
+                if (!conn->is_initialized())
                 {
                     auto be = get_backends()[backend_id];
-                    conn->init(be,ioc, yield);
+                    conn->init(be, ioc, yield);
                 }
 
-                // Set up an HTTP GET request message
-                shared::easyprospect_http_request_builder bld{*first_req};
-                // TODO: kp. Modify the request here.
-                auto be_req = bld.to_request().to_beast_request();
-
-                // Write the message to standard out
-                std::stringstream reqStr;
-                reqStr << be_req << std::endl;
-                spdlog::debug("proxy req: {}", reqStr.str());
-
-                // Set the timeout.
-                conn->get_stream()->expires_after(std::chrono::seconds(30));
-
-                // Send the HTTP request to the remote host
-                // TODO: kp. Use async_write_some, leave the stream open for new bytes
-                boost::beast::http::async_write(*(conn->get_stream()), be_req, yield[ec]);
-                if (ec)
+                if (first_req)
                 {
-                    // TODO: kp. Possibly reopen the connection and try again
-                    spdlog::debug("write : {}", ec.message());
+                    shared::easyprospect_http_request_builder bld{*first_req};
+                    // TODO: kp. Modify the request here.
+                    auto be_req = bld.to_request()->to_beast_request();
+
+                    // Write the message to standard out
+                    std::stringstream reqStr;
+                    reqStr << be_req << std::endl;
+                    spdlog::debug("proxy req: {}", reqStr.str());
+
+                    // Set the timeout.
+                    conn->get_stream()->expires_after(std::chrono::seconds(30));
+
+                    // Send the HTTP request to the remote host
+                    // TODO: kp. Use async_write_some, leave the stream open for new bytes
+                    boost::beast::http::async_write(*(conn->get_stream()), be_req, yield[ec]);
+                    if (ec)
+                    {
+                        // TODO: kp. Possibly reopen the connection and try again
+                        spdlog::debug("write : {}", ec.message());
+                        return;
+                    }
+                }
+                else if (req_continuation)
+                {
+                    // Write the message to standard out
+                    spdlog::debug("Downstream sending continuation size: {}", req_continuation->get_buffer().size());
+
+                    // Set the timeout.
+                    conn->get_stream()->expires_after(std::chrono::seconds(30));
+
+                    // Send the HTTP request to the remote host
+                    // TODO: kp. Use async_write_some, leave the stream open for new bytes
+                    auto curr_data = req_continuation->get_buffer().data();
+                    auto curr_data_size = req_continuation->get_buffer().size();
+                    auto bytes_written
+                        = conn->get_stream()->async_write_some(boost::asio::buffer(curr_data, curr_data_size), yield[ec]);
+                    if (ec)
+                    {
+                        // TODO: kp. Possibly reopen the connection and try again
+                        spdlog::debug("write : {}", ec.message());
+                        return;
+                    }
+
+                    spdlog::debug("Continuation bytes written : {}", bytes_written);
+                }
+                else
+                {
+                    spdlog::error("Downstream received neither a first or continuation package.");
+                }
+
+                // If not done
+                if (first_req && !first_req->is_done()
+                     || req_continuation && !req_continuation->is_done())
+                {
                     return;
                 }
 

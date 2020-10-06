@@ -2,8 +2,15 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <boost/beast/http/buffer_body.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/beast/http/write.hpp>
+#include <boost/beast/http/verb.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/nil_generator.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/uuid_io.hpp>
+
 namespace easyprospect
 {
 namespace service
@@ -32,16 +39,21 @@ namespace service
             boost::optional<std::string> content_type_;
             std::string                  url_;
             std::string                  host_;
+            std::string                  method_;
             std::vector<std::pair<std::string,std::string>> headers_;
+            bool                                             done_;
+            boost::uuids::uuid                              session_id_;
 
         public:
 
-            easyprospect_http_request(
-                const boost::optional<unsigned long long>         cl,
-                const boost::optional<std::string> b,
-                const boost::optional<std::string> r,
-                const boost::optional<std::string> ct,
-                const std::string                                      u,
+            easyprospect_http_request(const boost::optional<unsigned long long>              cl,
+                                    const boost::optional<std::string>                     b,
+                                    const boost::optional<std::string>                     r,
+                                    const boost::optional<std::string>                     ct,
+                                    const std::string                                      u,
+                                    const std::string                                      m,
+                                    const bool                                             d,
+                                    const boost::uuids::uuid                               s,
                 const std::vector<std::pair<std::string, std::string>> h)
             {
                 content_length_ = cl;
@@ -49,7 +61,10 @@ namespace service
                 raw_            = r;
                 content_type_   = ct;
                 url_            = u;
+                method_         = m;
+                done_           = d;
                 headers_        = h;
+                session_id_     = s;
             }
 
             bool has_raw() const
@@ -102,6 +117,11 @@ namespace service
                 throw std::logic_error("Request body not found");
             }
 
+            std::string get_method() const
+            {
+                return method_;
+            }
+
             std::string get_content_type() const
             {
                 if (has_content_type())
@@ -127,11 +147,23 @@ namespace service
                 return host_;
             }
 
-            std::string to_string()
+            auto get_session_id() const
+            {
+                return session_id_;
+            }
+
+            bool is_done() const
+            {
+                return done_;
+            }
+
+            std::string to_string() const
             {
                 std::stringstream str;
 
-                str << "url: " << get_url() << std::endl;
+                str << "url     : " << get_url() << std::endl;
+                str << "method  : " << get_method() << std::endl;
+                str << "session : " << get_session_id() << std::endl;
 
                 if ( content_length_ )
                 {
@@ -151,6 +183,8 @@ namespace service
                     str << "content type: (uninitialized)" << std::endl;
                 }
 
+                str << "is done: " << done_ << std::endl;
+
                 str << "headers: " << headers_.size() << std::endl;
                 for (auto& i : headers_)
                 {
@@ -165,13 +199,18 @@ namespace service
             boost::beast::http::request<boost::beast::http::string_body> to_beast_request() const
             {
                 boost::beast::http::request<boost::beast::http::string_body> res;
-                res.method(boost::beast::http::verb::get);
+                res.method(boost::beast::http::string_to_verb(get_method()));
                 res.target(url_);
                 res.version(11);
 
                 if (has_body())
                 {
                     res.body() = get_body();
+                }
+
+                if (get_session_id() != boost::uuids::nil_uuid())
+                {
+                    res.set("X-EP-SESSION-ID", boost::uuids::to_string(get_session_id()));
                 }
 
                 for ( auto h : headers_ )
@@ -190,12 +229,32 @@ namespace service
         class easyprospect_http_request_continuation final
         {
           private:
-            std::shared_ptr<const easyprospect_http_request> firt_request_;
-            const std::vector<char>                          buffer_;
-            bool                                             done_;
+            const std::shared_ptr<const easyprospect_http_request> first_request_;
+            const std::vector<unsigned char>                 buffer_{};
+            const bool                                       done_;
 
           public:
-            bool is_done() const
+            easyprospect_http_request_continuation(
+                const std::shared_ptr<const easyprospect_http_request> f,
+                const std::vector<unsigned char>& b,
+                const bool                                       d) :
+                first_request_(f),
+                buffer_(b), done_(d)
+            {
+                ;
+            }
+
+            auto get_request() const
+            {
+                return first_request_;
+            }
+
+            auto& get_buffer() const
+            {
+                return buffer_;
+            }
+
+            auto is_done() const
             {
                 return done_;
             }
@@ -210,13 +269,20 @@ namespace service
             boost::optional<std::string>                     content_type_;
             std::string                                      url_;
             std::string                                      host_;
+            std::string                                      method_;
             std::vector<std::pair<std::string, std::string>> headers_;
             std::vector<char>                                input_buffer_;
             bool                                             header_done = false;
             bool                                             done        = false;
             int                                              total_bytes_read_ = 0;
+            boost::uuids::uuid                               session_id_;
 
           public:
+
+            void set_session_id(boost::uuids::uuid id)
+            {
+                session_id_ = id;
+            }
 
             void set_content_length(boost::optional<unsigned long long> cl)
             {
@@ -236,6 +302,11 @@ namespace service
             void set_host(std::string h)
             {
                 host_ = h;
+            }
+
+            void set_method(std::string m)
+            {
+                method_ = m;
             }
 
             void set_headers(std::vector<std::pair<std::string, std::string>> h)
@@ -286,7 +357,7 @@ namespace service
             {
                 set_url(req.get_url());
                 set_headers(req.get_headers());
-                set_body(req.get_body());
+               // set_body(req.get_body());
 
                 if ( req.has_content_length())
                     set_content_length(req.get_content_length());
@@ -295,22 +366,40 @@ namespace service
                     set_content_type(req.get_content_type());
 
                 set_host(req.get_host());
+                set_method(req.get_method());
+                set_done(req.is_done());
+                set_session_id(req.get_session_id());
             }
 
-            easyprospect_http_request_builder(boost::beast::http::parser<true, boost::beast::http::string_body>& req_p)
+            easyprospect_http_request_builder(
+                boost::beast::http::parser<true, boost::beast::http::buffer_body>& req_p,
+                boost::uuids::uuid                                                 sess_id = boost::uuids::nil_uuid())
             {
                 auto& req = req_p.get();
 
+                if ( sess_id == boost::uuids::nil_uuid())
+                {
+                    boost::uuids::random_generator gen;
+                    set_session_id( gen());
+                }
+                else
+                {
+                    set_session_id(sess_id);     
+                }
+
                 std::stringstream str;
-                str << req;
+                //str << req;
 
                 spdlog::trace(str.str());
 
-                set_body(req.body());
+               // set_body(req.body());
                 set_content_length(req_p.content_length());
                 set_content_type( req[boost::beast::http::field::content_type].to_string());
                 set_host( req[boost::beast::http::field::host].to_string());
+                set_method( boost::beast::http::to_string(req.method()).to_string());
                 set_url(req.target().to_string());
+                set_done(req_p.is_done());
+                set_header_done(req_p.is_header_done());
 
                 std::vector<std::pair<std::string, std::string>> h;
                 for ( auto& i : req)
@@ -320,11 +409,11 @@ namespace service
                 set_headers(h);
             }
 
-            const easyprospect_http_request to_request() const
+            auto to_request() const
             {
-                const easyprospect_http_request r(content_length_, body_, raw_, content_type_, url_, headers_);
+                auto res = std::make_shared<easyprospect_http_request>(content_length_, body_, raw_, content_type_, url_, method_, done, session_id_, headers_);
 
-                return r;
+                return res;
             }
 
         };
@@ -332,32 +421,47 @@ namespace service
         class easyprospect_http_request_continuation_builder final
         {
           private:
-            std::vector<char> input_buffer_;
-            bool              done_;
+            std::shared_ptr<const easyprospect_http_request> first_request_;
+            std::vector<unsigned char> buffer_;
+            bool              done_ = false;
 
           public:
+
+            easyprospect_http_request_continuation_builder(
+                boost::beast::http::parser<true, boost::beast::http::buffer_body>& req_p,
+                const std::shared_ptr<const easyprospect_http_request> first_req)
+            {
+                set_done(req_p.is_done());
+                set_request(first_req);
+
+                auto b = req_p.get().body();
+
+                //buffer_.assign(b.size, (unsigned char)(b.data));
+                set_buffer_contents(static_cast<unsigned char*>(b.data), b.size);
+            }
 
             void set_done(bool val)
             {
                 done_ = val;
             }
 
-            void set_input_buffer_capacity(int cap)
+            void set_buffer_contents(unsigned char* val, u_int64 size)
             {
-                input_buffer_.resize(cap);
+                buffer_.clear();
+                buffer_.resize(size);
+                buffer_.insert(buffer_.end(), val, val + size);
             }
 
-            void set_input_buffer_contents(char* val, int size)
+            void set_request(std::shared_ptr<const easyprospect_http_request> r)
             {
-                input_buffer_.insert(input_buffer_.end(), val, val + size);
+                first_request_ = r;
             }
 
-            const easyprospect_http_request_continuation to_continuation() const
+            auto to_continuation() const
             {
-                const easyprospect_http_request_continuation
-                r; //(content_length_, body_, raw_, content_type_, url_, headers_);
+                auto res = std::make_shared<easyprospect_http_request_continuation>(first_request_, buffer_, done_);
 
-                return r;
+                return res;
             }
         };
 
