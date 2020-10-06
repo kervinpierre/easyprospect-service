@@ -154,7 +154,7 @@ namespace service
 
                         spdlog::trace("async_read_some() for request body : {}", storage_.size());
 
-                        ec = boost::system::error_code();
+                         ec = boost::system::error_code();
 
                         // Set up the body for writing into our small buffer
                         memset(&pr_buffer_, 0, sizeof(pr_buffer_));
@@ -189,7 +189,7 @@ namespace service
                             static_cast<const unsigned char*>(storage_.data().data()), storage_.size()));
                         spdlog::debug("storage capacity: '{}'", storage_.capacity());
                         spdlog::debug("storage size: '{}'", storage_.size());
-
+                      
                         storage_.consume(processed_octets);
 
                         //spdlog::debug("parser buffer size: '{}'", sizeof(pr_buffer_));
@@ -209,7 +209,9 @@ namespace service
                        handle_worker_request(
                             nullptr,
                             current_pos++,
-                            easyprospect_http_request_continuation_builder{*pr_, current_req}.to_continuation(),
+                            easyprospect_http_request_continuation_builder{
+                                *pr_, current_req, pr_buffer_, processed_octets}
+                                .to_continuation(),
                             ec,
                             // Use bind_front() to copy "this" object in a way that a regular capture doesn't
                             // seem to do.  This is needed because we're spawning a coroutine in the calling
@@ -241,6 +243,7 @@ namespace service
                     }
 
                     // The parser is done, we can return now
+                    spdlog::trace("UPSTREAM Parser is complete.");
 
                     return;
                 }

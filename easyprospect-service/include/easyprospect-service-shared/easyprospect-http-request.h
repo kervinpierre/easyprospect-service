@@ -429,15 +429,15 @@ namespace service
 
             easyprospect_http_request_continuation_builder(
                 boost::beast::http::parser<true, boost::beast::http::buffer_body>& req_p,
-                const std::shared_ptr<const easyprospect_http_request> first_req)
+                const std::shared_ptr<const easyprospect_http_request> first_req,
+                const unsigned char *buffer,
+                const u_int64                                                      buffer_size)
             {
                 set_done(req_p.is_done());
                 set_request(first_req);
 
-                auto b = req_p.get().body();
-
                 //buffer_.assign(b.size, (unsigned char)(b.data));
-                set_buffer_contents(static_cast<unsigned char*>(b.data), b.size);
+                set_buffer_contents(buffer, buffer_size);
             }
 
             void set_done(bool val)
@@ -445,10 +445,10 @@ namespace service
                 done_ = val;
             }
 
-            void set_buffer_contents(unsigned char* val, u_int64 size)
+            void set_buffer_contents(const unsigned char* val, u_int64 size)
             {
                 buffer_.clear();
-                buffer_.resize(size);
+                buffer_.reserve(size);
                 buffer_.insert(buffer_.end(), val, val + size);
             }
 

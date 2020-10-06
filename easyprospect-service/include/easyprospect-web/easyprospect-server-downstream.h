@@ -43,9 +43,16 @@ namespace service
             {
                 std::lock_guard<std::mutex> lock(stream_lock);
 
+                // Uninitialized session
                 if ( current_session_ == boost::uuids::nil_uuid())
                 {
                     current_session_ = s;
+                    return true;
+                }
+
+                // We already own this connection
+                if ( current_session_ == s)
+                {
                     return true;
                 }
 
@@ -131,7 +138,7 @@ namespace service
             std::shared_ptr<easyprospect_server_downstream_connection> conn_;
 
         public:
-            easyprospect_server_downstream_session(boost::uuids::uuid i = boost::uuids::nil_uuid())
+            explicit easyprospect_server_downstream_session(boost::uuids::uuid i = boost::uuids::nil_uuid())
             {
                 if (i == boost::uuids::nil_uuid())
                 {
@@ -195,6 +202,8 @@ namespace service
                     }
 
                     auto s = std::make_shared<easyprospect_server_downstream_session>(sess);
+                    spdlog::debug("Creating new session id : {}", boost::uuids::to_string(s->get_id()));
+
                     sessions_[s->get_id()] = s;
 
                     return s;
@@ -270,9 +279,15 @@ namespace service
                // spdlog::trace(BOOST_CURRENT_FUNCTION);
 
                 auto curr_req = first_req ? first_req : req_continuation->get_request();
-
                 auto curr_sess = get_session(curr_req->get_session_id());
-                auto conn      = get_connection(backend_id, curr_sess->get_id());
+
+                auto conn      = curr_sess->get_conn();
+                if ( !conn )
+                {
+                    conn = get_connection(backend_id, curr_sess->get_id());
+                    curr_sess->set_connection(conn);
+                }
+
                 if (!conn->is_initialized())
                 {
                     auto be = get_backends()[backend_id];
@@ -288,7 +303,7 @@ namespace service
                     // Write the message to standard out
                     std::stringstream reqStr;
                     reqStr << be_req << std::endl;
-                    spdlog::debug("proxy req: {}", reqStr.str());
+                    spdlog::debug("DOWNSTREAM proxy req: {}", reqStr.str());
 
                     // Set the timeout.
                     conn->get_stream()->expires_after(std::chrono::seconds(30));
@@ -299,14 +314,14 @@ namespace service
                     if (ec)
                     {
                         // TODO: kp. Possibly reopen the connection and try again
-                        spdlog::debug("write : {}", ec.message());
+                        spdlog::debug("DOWNSTREAM write : {}", ec.message());
                         return;
                     }
                 }
                 else if (req_continuation)
                 {
                     // Write the message to standard out
-                    spdlog::debug("Downstream sending continuation size: {}", req_continuation->get_buffer().size());
+                    spdlog::debug("DOWNSTREAM sending continuation size: {}", req_continuation->get_buffer().size());
 
                     // Set the timeout.
                     conn->get_stream()->expires_after(std::chrono::seconds(30));
@@ -320,21 +335,26 @@ namespace service
                     if (ec)
                     {
                         // TODO: kp. Possibly reopen the connection and try again
-                        spdlog::debug("write : {}", ec.message());
+                        spdlog::debug("DOWNSTREAM write : {} : {}", ec.value(), ec.message());
                         return;
                     }
 
-                    spdlog::debug("Continuation bytes written : {}", bytes_written);
+                    spdlog::debug("DOWNSTREAM Continuation bytes written : {}", bytes_written);
                 }
                 else
                 {
-                    spdlog::error("Downstream received neither a first or continuation package.");
+                    spdlog::error("DOWNSTREAM received neither a first or continuation package.");
                 }
 
                 // If not done
-                if (first_req && !first_req->is_done()
-                     || req_continuation && !req_continuation->is_done())
+                if (first_req && !first_req->is_done() )
                 {
+                    spdlog::trace("DOWNSTREAM Request sent but the message isn't done.");
+                    return;
+                }
+                else if(req_continuation && !req_continuation->is_done())
+                {
+                    spdlog::trace("DOWNSTREAM  Request sent but the message isn't done.");
                     return;
                 }
 
@@ -348,21 +368,21 @@ namespace service
                 boost::beast::http::async_read(*conn->get_stream(), b, res, yield[ec]);
                 if (ec)
                 {
-                    spdlog::debug("read : {}", ec.message());
+                    spdlog::debug("DOWNSTREAM read : {}", ec.message());
                     return;
                 }
 
                 // Write the message to standard out
                 std::stringstream resStr;
                 resStr << res;
-                spdlog::debug("proxy response: {}", resStr.str());
+                spdlog::debug("DOWNSTREAM proxy response: {}", resStr.str());
 
                 // not_connected happens sometimes
                 // so don't bother reporting it.
                 //
                  if (ec && ec != boost::beast::errc::not_connected)
                 {
-                    spdlog::debug("shutdown : {}", ec.message());
+                    spdlog::debug("DOWNSTREAM shutdown : {}", ec.message());
                     return;
                 }
 
@@ -379,6 +399,8 @@ namespace service
                 //res.keep_alive(req.keep_alive());
                 //res.body() = output;
                 //res.prepare_payload();
+
+                spdlog::trace("DOWNSTREAM call to send_res() function.");
 
                 return send_res(std::move(res));
             }
