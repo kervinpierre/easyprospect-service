@@ -28,6 +28,9 @@
     <ProjectReference Include="easyprospect-service-shared.vcxproj">
       <Project>{db1c25de-ae36-4999-b230-421fc5f8168c}</Project>
     </ProjectReference>
+    <ProjectReference Include="easyprospect-v8.vcxproj">
+      <Project>{a06623f7-7aaa-3123-ba00-d954e5dce761}</Project>
+    </ProjectReference>
     <ProjectReference Include="easyprospect-web-worker.vcxproj">
       <Project>{33c62223-7936-4376-b14d-fa7bc5e19f17}</Project>
     </ProjectReference>
@@ -121,7 +124,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libcrypto.lib;libssl.lib;crypt32.lib;easyprospect-v8.lib;uriparser.lib;v8pp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;libssl.lib;crypt32.lib;uriparser.lib;v8pp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\uriparser\$(configuration)\libs;$(SolutionDir)..\..\..\easyprospect-v8\git\easyprospect-v8\build\msvc\$(Configuration)\;$(SolutionDir)\packages\ep\v8pp\$(configuration)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
