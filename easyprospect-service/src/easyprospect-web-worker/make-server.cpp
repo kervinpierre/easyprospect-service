@@ -46,7 +46,7 @@ namespace service
                 {
                     try
                     {
-                        if (!run_listener(*srv, e, curr_reg))
+                        if (!run_listener(*srv, e, curr_reg,srv->get_network_ioc()))
                             return nullptr;
                     }
                     catch (boost::beast::system_error const& ex)

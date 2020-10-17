@@ -400,11 +400,11 @@ namespace service
             //
             //--------------------------------------------------------------------------
 
-            void on_start() override;
-
             void on_stop() override
             {
             }
+
+            void on_start(executor_type exe) override;
         };
     }
 } // namespace service

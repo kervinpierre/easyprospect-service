@@ -193,6 +193,16 @@ namespace service
             {
                 return cfg_.get_epjs_url_path_regex();
             }
+
+            boost::asio::io_context &get_network_ioc()
+            {
+                return network_ioc_;
+            }
+
+            boost::asio::io_context& get_application_ioc()
+            {
+                return application_ioc_;
+            }
         };
 
     } // namespace web_worker

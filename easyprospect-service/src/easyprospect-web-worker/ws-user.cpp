@@ -635,7 +635,8 @@ namespace service
 
           public:
             explicit table(web_worker::application_impl& srv) :
-                channel(3, "Blackjack", srv.channel_list()), srv_(srv), timer_(srv.make_upstream_executor()), g_(*this, 1)
+                channel(3, "Blackjack", srv.channel_list()), srv_(srv),
+                timer_(boost::asio::make_strand(srv.get_application_ioc().get_executor())), g_(*this, 1)
             {
                 boost::ignore_unused(srv_);
             }
@@ -958,7 +959,7 @@ namespace service
             }
         }
 
-        void blackjack_service::on_start()
+        void blackjack_service::on_start(executor_type exe)
         {
            // insert<table>(srv_.channel_list(), srv_);
 
@@ -1005,7 +1006,7 @@ namespace service
 
             // Start all agents
             for (auto const& sp : services_)
-                sp->on_start();
+                sp->on_start(boost::asio::make_strand(network_ioc_.get_executor()));
 
             // Capture SIGINT and SIGTERM to perform a clean shutdown
             signals_.async_wait(

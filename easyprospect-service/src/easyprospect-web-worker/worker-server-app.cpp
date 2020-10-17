@@ -14,7 +14,8 @@ namespace service
             config::easyprospect_config_worker_core
             cfg,
             std::shared_ptr<config::easyprospect_registry> reg):
-            cfg_(std::move(cfg)), reg_(reg), timer_(network_ioc_),
+            cfg_(std::move(cfg)),
+            reg_(reg), timer_(boost::asio::make_strand(network_ioc_.get_executor())),
             signals_(timer_.get_executor(), SIGINT, SIGTERM),
             shutdown_time_(never()), stop_(false),
             channel_list_(make_channel_list(*this))
