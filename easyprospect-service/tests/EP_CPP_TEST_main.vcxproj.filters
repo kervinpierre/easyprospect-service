@@ -34,9 +34,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\tools\gentests\gentests-linux.sh">
-      <Filter>scripts</Filter>
-    </None>
     <None Include="..\data\test\dataset0001\TC0001_T0001_Main-Simple-Math_Adds_integers_and_return_a_value.js" />
     <None Include="..\data\test\dataset0001\TC0001_T0002_Main-Simple-Math_Adds_integers_and_return_a_value.js" />
   </ItemGroup>
