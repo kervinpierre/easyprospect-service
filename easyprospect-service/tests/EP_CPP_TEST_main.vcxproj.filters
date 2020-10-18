@@ -7,6 +7,9 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{f8b631cc-0d3f-427e-b636-140f2af931b4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="scripts">
+      <UniqueIdentifier>{84f9063c-c32e-40cd-b3e5-e14a2c26caf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EP_CPP_TEST_main.cpp">
@@ -15,7 +18,13 @@
     <ClCompile Include="EPCT_Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EP_CPP_TEST_CmdlineV801.cpp">
+    <ClCompile Include="EPCT_TestMethodsSimple.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EPCT_gentests.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EPCT_Simple_V8_01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -23,5 +32,15 @@
     <ClInclude Include="EPCT_Utils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="EPCT_TestMethodsSimple.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\tools\gentests\gentests-linux.sh">
+      <Filter>scripts</Filter>
+    </None>
+    <None Include="..\data\test\dataset0001\TC0001_T0001_Main-Simple-Math_Adds_integers_and_return_a_value.js" />
+    <None Include="..\data\test\dataset0001\TC0001_T0002_Main-Simple-Math_Adds_integers_and_return_a_value.js" />
   </ItemGroup>
 </Project>

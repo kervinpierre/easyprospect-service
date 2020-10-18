@@ -89,7 +89,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\packages\ep\catch2\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include\easyprospect-v8\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\v8\$(configuration)\include;$(SolutionDir)\packages\ep\catch2\$(configuration)\include;$(SolutionDir)\packages\ep\v8pp\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>Default</CompileAs>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -119,12 +119,12 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\build\msvc\$(Configuration)\;$(SolutionDir)/tests/;$(SolutionDir)/data/;$(SolutionDir)/data/$(Configuration);$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\v8pp\$(configuration)\libs\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>v8pp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference />
     <ProjectReference>
@@ -266,22 +266,30 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="EPCT_gentests.cpp" />
+    <ClCompile Include="EPCT_Simple_V8_01.cpp" />
+    <ClCompile Include="EPCT_TestMethodsSimple.cpp" />
     <ClCompile Include="EPCT_Utils.cpp" />
-    <ClCompile Include="EP_CPP_TEST_CmdlineV801.cpp" />
     <ClCompile Include="EP_CPP_TEST_main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EPCT_TestMethodsSimple.h" />
     <ClInclude Include="EPCT_Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\easyprospect-config.vcxproj">
-      <Project>{3ef75984-9598-49d6-b4dc-ab71734e9cbc}</Project>
+    <ProjectReference Include="..\easyprospect-v8-plugin-print-console.vcxproj">
+      <Project>{148f0ba3-133b-4de0-a8c6-241578f262a6}</Project>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
-    <ProjectReference Include="..\easyprospect-web.vcxproj">
-      <Project>{1e3be921-ab36-49f7-980b-cde7cc3dbf61}</Project>
+    <ProjectReference Include="..\easyprospect-v8.vcxproj">
+      <Project>{a06623f7-7aaa-3123-ba00-d954e5dce761}</Project>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\data\test\dataset0001\TC0001_T0001_Main-Simple-Math_Adds_integers_and_return_a_value.js" />
+    <None Include="..\data\test\dataset0001\TC0001_T0002_Main-Simple-Math_Adds_integers_and_return_a_value.js" />
+    <None Include="..\tools\gentests\gentests-linux.sh" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
