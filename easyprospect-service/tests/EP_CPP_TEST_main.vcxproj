@@ -270,7 +270,6 @@
     <ClCompile Include="EPCT_Simple_V8_01.cpp" />
     <ClCompile Include="EPCT_TestMethodsSimple.cpp" />
     <ClCompile Include="EPCT_Utils.cpp" />
-    <ClCompile Include="EP_CPP_TEST_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EPCT_TestMethodsSimple.h" />
