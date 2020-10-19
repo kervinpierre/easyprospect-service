@@ -57,7 +57,6 @@ int main(int argc, char* argv[])
         std::cout << disStr.str();
     }
 
-    DebugBreak();
 
 #if BOOST_MSVC
     {
@@ -66,6 +65,8 @@ int main(int argc, char* argv[])
         _CrtSetDbgFlag(flags);
     }
 #endif
+
+    // DebugBreak();
 
     auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
 

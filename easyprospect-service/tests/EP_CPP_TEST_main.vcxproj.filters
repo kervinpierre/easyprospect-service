@@ -7,9 +7,6 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{f8b631cc-0d3f-427e-b636-140f2af931b4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="scripts">
-      <UniqueIdentifier>{84f9063c-c32e-40cd-b3e5-e14a2c26caf9}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EPCT_Utils.cpp">

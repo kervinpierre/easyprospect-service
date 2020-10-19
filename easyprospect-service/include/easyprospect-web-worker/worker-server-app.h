@@ -9,6 +9,8 @@
 
 #include <easyprospect-config/easyprospect-registry.h>
 
+#include "easyprospect-v8/easyprospect-v8.h"
+
 namespace easyprospect
 {
 namespace service
@@ -22,8 +24,11 @@ namespace service
             using time_point = clock_type::time_point;
 
             config::easyprospect_config_worker_core                            cfg_;
-            std::shared_ptr<config::easyprospect_registry>                                        reg_;
-            std::vector<std::unique_ptr<shared::service>>                       services_;
+            std::shared_ptr<config::easyprospect_registry>                     reg_;
+            std::vector<std::unique_ptr<shared::service>>                      services_;
+
+            boost::asio::io_context network_ioc_;
+
             boost::asio::basic_waitable_timer<clock_type, boost::asio::wait_traits<clock_type>, executor_type> timer_;
             boost::asio::basic_signal_set<executor_type>                                                      signals_;
             std::condition_variable                                                                    cv_;
@@ -33,9 +38,9 @@ namespace service
             std::atomic<bool>                                                                          stop_;
             std::unique_ptr<process_cntrl_client>                                                      control_client_;
 
-            std::unique_ptr<channel_list_impl> channel_list_;
+            std::unique_ptr<ep_v8::api::easyprospect_v8> v8_inst_;
 
-            boost::asio::io_context network_ioc_;
+            std::unique_ptr<channel_list_impl> channel_list_;
 
             static std::chrono::steady_clock::time_point never() noexcept
             {

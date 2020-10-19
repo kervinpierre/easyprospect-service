@@ -31,6 +31,11 @@ namespace service
                     this->channel_list_->dispatch(r, u, s);
                 });
 
+            auto platform = platform::NewDefaultPlatform();
+            v8_inst_ = ep_v8::api::easyprospect_v8::create<ep_v8::api::easyprospect_v8
+                >(std::move(platform));
+            v8_inst_->init();
+
             // process ebjs
             // TODO: KP. Pass in full URL including parameters, and all headers, including cookies.  Parsed or
             // unparsed.
@@ -61,25 +66,15 @@ namespace service
                     std::stringstream script_buff;
                     script_buff << t.rdbuf();
 
-                    std::shared_ptr<Platform> platform =
-                        platform::NewDefaultPlatform();
-                    std::unique_ptr<easyprospect::ep_v8::api::easyprospect_v8>
-                        ep =
-                            easyprospect::ep_v8::api::easyprospect_v8::create<
-                                easyprospect::ep_v8::api::easyprospect_v8>(
-                                platform);
-
-                    ep->init();
-
                     int r = 0;
                     unsigned int id = 0;
-                    if ((r = ep->create_context(id)) != Success)
+                    if ((r = this->v8_inst_->create_context(id)) != Success)
                         throw std::logic_error("Context error");
 
                     // Exception thrown on error
-                    auto res = ep->run_javascript(id, script_buff.str());
+                    auto res = this->v8_inst_->run_javascript(id, script_buff.str());
 
-                    ep->remove_context(id);
+                    this->v8_inst_->remove_context(id);
 
                     std::string res2 = res->ToString();
 
