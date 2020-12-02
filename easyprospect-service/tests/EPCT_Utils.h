@@ -20,6 +20,16 @@ struct setup_fixture
 {
     setup_fixture()
     {
+        // Get current flag
+        int tmpFlag = _CrtSetDbgFlag( _CRTDBG_REPORT_FLAG );
+
+        // Turn on leak-checking bit.
+       // tmpFlag |= _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_ALLOC_MEM_DF | _CRTDBG_CHECK_EVERY_16_DF |
+       //            _CRTDBG_DELAY_FREE_MEM_DF | _CRTDBG_CHECK_ALWAYS_DF | _CRTDBG_CHECK_CRT_DF;
+
+        // Set flag to the new value.
+        _CrtSetDbgFlag(tmpFlag);
+
         spdlog::debug("setup fixture");
 
         auto main_logger = spdlog::stdout_logger_mt("console");
@@ -33,6 +43,7 @@ struct setup_fixture
         id;
         ep->init(boost::unit_test::framework::master_test_suite().argv[0]);
         ep->create_context(id);
+
 
         spdlog::debug("starting test suite");
     }

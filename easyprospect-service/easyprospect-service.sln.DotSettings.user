@@ -1,7 +1,66 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=4c2dcdfa_002Dc16e_002D4324_002D9865_002D29564dcc292c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;EP_CPP_TEST_main&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Project Location="I:\src\easyprospect.com\easyprospect-service\git\easyprospect-service\tests" Presentation="&amp;lt;EP_CPP_TEST_main&amp;gt;" /&gt;&#xD;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=64ee8575_002D156f_002D4da7_002Dabad_002D8b2133580f92/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Ep_SF_Split_Simple_Catalog #4" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6c7cbd5c_002D8d39_002D4952_002D96f8_002Df8ddd4e77c8d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;EP_CPP_TEST_main&amp;gt; #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;Project Location="I:\src\easyprospect.com\easyprospect-service\git\easyprospect-service\tests" Presentation="&amp;lt;EP_CPP_TEST_main&amp;gt;" /&gt;&#xD;
-&lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=77ff2d7f_002D6dd5_002D42f0_002D9950_002D6450bccdf2f9/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Ep_SF_Split_Simple_Catalog #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=8c37319c_002D1e88_002D460a_002Da98a_002D3245e6c42876/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Ep_SF_Split_Simple_Catalog #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b0ad4bc1_002D3414_002D492d_002D8d6a_002D51da2dd08e5d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Ep_SF_Split_Simple_Catalog #6" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b5281fea_002D23fe_002D4f4d_002D8c6c_002D4668a63de44f/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Ep_SF_Split_Simple_Catalog #5" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d0bc4c62_002D45e8_002D480f_002Db92d_002D26d101befb3d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Ep_SF_Split_Simple_Catalog" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d3e70ef8_002D602b_002D4830_002D837a_002D29e9f64e3a52/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Ep_SF_Split_Simple_Catalog #21" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+  &lt;TestAncestor&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+  &lt;/TestAncestor&gt;&#xD;
+&lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	</wpf:ResourceDictionary>

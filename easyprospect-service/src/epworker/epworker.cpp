@@ -10,6 +10,7 @@
 #include <easyprospect-config/easyprospect-registry.h>
 
 #include "easyprospect-config/easyprospect-config-worker.h"
+#include "easyprospect-web-worker/easyprospect-xml.h"
 
 //#ifdef BOOST_MSVC
 //#ifndef WIN32_LEAN_AND_MEAN // VC_EXTRALEAN
@@ -141,6 +142,8 @@ int main(int argc, char* argv[])
     spdlog::debug(sstr.str());
 
     auto reg = std::make_shared<easyprospect::service::config::easyprospect_registry>();
+
+   // easyprospect::service::web_worker::ep_xml_init(argc, argv);
 
     // Create the worker server
     auto srv = easyprospect::service::web_worker::make_server(res, reg);

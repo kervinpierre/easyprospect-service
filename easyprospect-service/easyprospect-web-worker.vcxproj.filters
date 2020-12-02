@@ -39,6 +39,12 @@
     <ClCompile Include="src\easyprospect-web-worker\easyprospect-process-cntrl-client-win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-xml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\easyprospect-web-worker\easyprospect-service-plugin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-web-worker.h">
@@ -66,6 +72,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\easyprospect-web-worker\easyprospect-process-message-actions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-xml.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-web-worker\easyprospect-service-plugin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -21,6 +21,9 @@
     <ClCompile Include="EPCT_Simple_V8_01.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EPCT_V8_Salesforce.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EPCT_Utils.h">

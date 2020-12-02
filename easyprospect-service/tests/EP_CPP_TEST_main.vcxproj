@@ -89,7 +89,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\include\easyprospect-v8\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\v8\$(configuration)\include;$(SolutionDir)\packages\ep\catch2\$(configuration)\include;$(SolutionDir)\packages\ep\v8pp\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\include;$(SolutionDir)\include\easyprospect-v8\include;$(SolutionDir)\packages\ep\boost\$(configuration)\include;$(SolutionDir)\packages\ep\v8\$(configuration)\include;$(SolutionDir)\packages\ep\catch2\$(configuration)\include;$(SolutionDir)\packages\ep\v8pp\$(configuration)\include;$(SolutionDir)\packages\ep\spdlog\$(configuration)\include;$(SolutionDir)\packages\ep\xerces-c\$(configuration)\include;$(SolutionDir)\packages\ep\xalan-c\$(configuration)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <CompileAs>Default</CompileAs>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
@@ -119,12 +119,12 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\v8pp\$(configuration)\libs\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\packages\ep\boost\$(configuration)\libs;$(SolutionDir)\packages\ep\openssl\$(configuration)\libs;$(SolutionDir)\packages\ep\v8pp\$(configuration)\libs\;$(SolutionDir)\packages\ep\xalan-c\$(configuration)\lib\;$(SolutionDir)\packages\ep\xerces-c\$(configuration)\libs\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>v8pp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>v8pp.lib;xerces-c_3D.lib;xalan-C_1D.lib;XalanMsgLib_1D.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference />
     <ProjectReference>
@@ -270,12 +270,18 @@
     <ClCompile Include="EPCT_Simple_V8_01.cpp" />
     <ClCompile Include="EPCT_TestMethodsSimple.cpp" />
     <ClCompile Include="EPCT_Utils.cpp" />
+    <ClCompile Include="EPCT_V8_Salesforce.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EPCT_TestMethodsSimple.h" />
     <ClInclude Include="EPCT_Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\easyprospect-service-plugin-salesforce.vcxproj">
+      <Project>{2a6ca1c8-2c4d-41a9-902d-b8dc3248fef7}</Project>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
     <ProjectReference Include="..\easyprospect-v8-plugin-print-console.vcxproj">
       <Project>{148f0ba3-133b-4de0-a8c6-241578f262a6}</Project>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>

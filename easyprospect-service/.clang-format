@@ -24,4 +24,5 @@ BreakConstructorInitializers: AfterColon
 FixNamespaceComments: true
 NamespaceIndentation: Inner
 PointerAlignment: Left
+SpaceBeforeParens: Never
 ...

@@ -31,6 +31,7 @@ namespace service
                     this->channel_list_->dispatch(r, u, s);
                 });
 
+            // Initialize V8. Keep a pointer in class scope
             auto platform = platform::NewDefaultPlatform();
             v8_inst_ = ep_v8::api::easyprospect_v8::create<ep_v8::api::easyprospect_v8
                 >(std::move(platform));

@@ -16,7 +16,7 @@ namespace easyprospect
     {
         namespace plugin
         {
-            class easyprospect_plugin_print_console final : public easyprospect_plugin
+            class easyprospect_plugin_print_console final : public easyprospect_v8_plugin
             {
             protected:
                 struct make_shared_enabler
@@ -29,9 +29,9 @@ namespace easyprospect
 
             public:
                 easyprospect_plugin_print_console(const make_shared_enabler&)
-                    : easyprospect_plugin("Console Print Plugin",
-                        ep_plugin_category::TYPE_PRINT,
-                        ep_plugin_type_id::PLUGIN_PRINT_CONSOLE,
+                    : easyprospect_v8_plugin("Console Print Plugin",
+                                             common::plugin::ep_plugin_category::TYPE_PRINT,
+                                             common::plugin::ep_plugin_type_id::PLUGIN_V8_PRINT_CONSOLE,
                         boost::uuids::random_generator()())
                 {
 
