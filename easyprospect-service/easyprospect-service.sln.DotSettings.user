@@ -5,6 +5,7 @@
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=b0ad4bc1_002D3414_002D492d_002D8d6a_002D51da2dd08e5d/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Ep_SF_Split_Simple_Catalog #6" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
     &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog2&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

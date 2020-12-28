@@ -22,6 +22,7 @@ namespace data
                 SF_CATALOG_HEADER           = 4,
                 SF_CATALOG_IMAGE_SETTINGS   = 5,
                 SF_CATALOG_CUSTOM_ATTRIBUTE = 6,
+                STRING                      = 7,
             };
 
             class ep_sf_obj_import final
@@ -106,13 +107,15 @@ namespace data
             class ep_sf_object_relationship final
             {
               private:
+                // Compound key
                 const uint64_t id_;
+                const int64_t  variable_id_; // for 1-to-many relationships
+
                 const int64_t  import_id_;
-                const int64_t  variable_id_;
                 const int64_t  order_;
 
-                const int64_t           src_id_;
-                const int64_t           dst_id_;
+                const uint64_t          src_id_;
+                const uint64_t          dst_id_;
                 const ep_sf_object_type dst_type_;
                 const ep_sf_object_type src_type_;
 
@@ -189,8 +192,10 @@ namespace data
                 boost::optional<std::string> catalog_id_;
 
               public:
-                explicit ep_sf_obj_catalog(const uint64_t id, const ep_sf_object_type type, const int64_t import_id) :
-                    ep_sf_object(id,type,import_id)
+                explicit ep_sf_obj_catalog(const uint64_t id, const ep_sf_object_type type, const int64_t import_id,
+                    const boost::optional<std::string> catalog_id) :
+                    ep_sf_object(id, type, import_id),
+                    catalog_id_(catalog_id)
                 {
                     
                 }
@@ -316,6 +321,15 @@ namespace data
               private:
                 boost::optional<std::string> category_id_;
                 boost::optional<std::string> catalog_id_;
+
+              public:
+                explicit ep_sf_catalog_category_link(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_localized_string final : public ep_sf_object
@@ -323,6 +337,15 @@ namespace data
               private:
                 boost::optional<std::string> value_;
                 boost::optional<std::string> xml_lang_;
+
+              public:
+                explicit ep_sf_catalog_localized_string(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_page_attributes final : public ep_sf_object
@@ -332,6 +355,15 @@ namespace data
                 boost::optional<uint64_t> page_description_;
                 boost::optional<uint64_t> page_keywords_;
                 boost::optional<uint64_t> page_url_;
+
+              public:
+                explicit ep_sf_catalog_page_attributes(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_attribute_reference final : public ep_sf_object
@@ -339,6 +371,15 @@ namespace data
               private:
                 boost::optional<std::string> attribute_id_;
                 boost::optional<bool>        system_;
+
+              public:
+                explicit ep_sf_catalog_attribute_reference(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_attribute_group final : public ep_sf_object
@@ -349,6 +390,15 @@ namespace data
                 boost::optional<uint64_t> variable_attribute_;
 
                 boost::optional<std::string> group_id_;
+
+              public:
+                explicit ep_sf_catalog_attribute_group(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_refinement_definitions final : public ep_sf_object
@@ -356,6 +406,15 @@ namespace data
               private:
                 boost::optional<uint64_t> refinement_definition_;
                 boost::optional<uint64_t> blocked_refinement_definition_;
+
+              public:
+                explicit ep_sf_catalog_refinement_definitions(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_attribute_refinement_bucket final : public ep_sf_object
@@ -367,6 +426,15 @@ namespace data
                 boost::optional<uint64_t>    description_;
 
                 boost::optional<bool> default_;
+
+              public:
+                explicit ep_sf_catalog_attribute_refinement_bucket(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_price_refinement_bucket final : public ep_sf_object
@@ -376,6 +444,15 @@ namespace data
                 boost::optional<double>   threshold_;
 
                 boost::optional<std::string> currency_;
+
+               public:
+                explicit ep_sf_catalog_price_refinement_bucket(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_threshold_refinement_bucket final : public ep_sf_object
@@ -385,6 +462,15 @@ namespace data
                 boost::optional<uint64_t>    threshold_;
                 boost::optional<std::string> presentation_id_;
                 boost::optional<uint64_t>    description_;
+
+              public:
+                explicit ep_sf_catalog_threshold_refinement_bucket(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_period_refinement_bucket final : public ep_sf_object
@@ -394,6 +480,15 @@ namespace data
                 boost::optional<int>         duration_in_days_;
                 boost::optional<std::string> presentation_id_;
                 boost::optional<uint64_t>    description_;
+
+              public:
+                explicit ep_sf_catalog_period_refinement_bucket(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_refinement_buckets final : public ep_sf_object
@@ -403,6 +498,15 @@ namespace data
                 boost::optional<uint64_t> price_bucket_;
                 boost::optional<uint64_t> threshold_bucket_;
                 boost::optional<uint64_t> period_bucket_;
+
+              public:
+                explicit ep_sf_catalog_refinement_buckets(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_refinement_definition final : public ep_sf_object
@@ -420,6 +524,15 @@ namespace data
                 boost::optional<std::string> bucket_type_;
                 boost::optional<std::string> attribute_id_;
                 boost::optional<bool>        system_;
+
+              public:
+                explicit ep_sf_catalog_refinement_definition(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_brand_filter final : public ep_sf_object
@@ -427,6 +540,15 @@ namespace data
               private:
                 boost::optional<uint64_t>    brand_;
                 boost::optional<std::string> operator_;
+
+              public:
+                explicit ep_sf_catalog_product_brand_filter(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_id_filter final : public ep_sf_object
@@ -434,6 +556,15 @@ namespace data
               private:
                 boost::optional<uint64_t>    product_id_;
                 boost::optional<std::string> operator_;
+
+              public:
+                explicit ep_sf_catalog_product_id_filter(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_category_filter final : public ep_sf_object
@@ -442,6 +573,15 @@ namespace data
                 boost::optional<uint64_t>    category_id_;
                 boost::optional<std::string> operator_;
                 boost::optional<std::string> catalog_id_;
+
+              public:
+                explicit ep_sf_catalog_product_category_filter(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_attribute_filter final : public ep_sf_object
@@ -450,6 +590,15 @@ namespace data
                 boost::optional<uint64_t>    attribute_value_;
                 boost::optional<std::string> operator_;
                 boost::optional<std::string> catalog_id_;
+
+              public:
+                explicit ep_sf_catalog_product_attribute_filter(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_specification_condition_group final : public ep_sf_object
@@ -459,6 +608,15 @@ namespace data
                 boost::optional<uint64_t> product_id_condition_;
                 boost::optional<uint64_t> category_condition_;
                 boost::optional<uint64_t> attribute_condition_;
+
+              public:
+                explicit ep_sf_catalog_product_specification_condition_group(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_specification final : public ep_sf_object
@@ -466,6 +624,15 @@ namespace data
               private:
                 boost::optional<uint64_t> included_products_;
                 boost::optional<uint64_t> excluded_products_;
+
+              public:
+                explicit ep_sf_catalog_product_specification(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_product_specification_rule final : public ep_sf_object
@@ -476,20 +643,37 @@ namespace data
                 boost::optional<bool>                     enabled_flag_;
                 boost::optional<boost::posix_time::ptime> last_calculated_;
                 boost::optional<uint64_t>                 product_specification_;
+
+              public:
+                explicit ep_sf_catalog_product_specification_rule(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_catalog_page_meta_tag_rule final : public ep_sf_object
             {
               private:
                 boost::optional<std::string> rule_id_;
+
+              public:
+                explicit ep_sf_catalog_page_meta_tag_rule(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id) :
+                    ep_sf_object(id, type, import_id)
+                {
+                }
             };
 
             class ep_sf_obj_catalog_category final : public ep_sf_object
             {
               private:
-                uint64_t                                  id_;
-                boost::optional<std::string>              xml_lang_;
-                boost::optional<uint64_t>                 display_name_;
+                const boost::optional<std::string>              xml_lang_;
+                const boost::optional<uint64_t>                 display_name_;
                 boost::optional<uint64_t>                 description_;
                 boost::optional<bool>                     online_flag_;
                 boost::optional<boost::posix_time::ptime> online_from_;
@@ -515,9 +699,20 @@ namespace data
                 boost::optional<uint64_t>                 product_specification_rule_;
 
                 boost::optional<std::string> mode_;
-                boost::optional<std::string> category_id_;
+                const boost::optional<std::string> category_id_;
 
               public:
+                explicit ep_sf_obj_catalog_category(
+                    const uint64_t          id,
+                    const ep_sf_object_type type,
+                    const int64_t           import_id,
+                    const boost::optional<uint64_t> display_name,
+                    const boost::optional<std::string>    parent,
+                    const boost::optional<std::string> category_id) :
+                    ep_sf_object(id, type, import_id),
+                    display_name_(display_name), parent_(parent), category_id_(category_id)
+                {
+                }
             };
         } // namespace salesforce
     }     // namespace schema

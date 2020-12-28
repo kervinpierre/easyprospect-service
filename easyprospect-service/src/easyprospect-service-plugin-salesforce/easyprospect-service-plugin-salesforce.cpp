@@ -4,6 +4,7 @@
 //#include <xercesc/framework/StdOutFormatTarget.hpp>
 //#include <xercesc/framework/LocalFileFormatTarget.hpp>
 #include <strstream>
+#include <xercesc/dom/DOMElement.hpp>
 #include <xercesc/dom/DOMNode.hpp>
 #include <xercesc/dom/DOMText.hpp>
 #include <xercesc/dom/DOMAttr.hpp>
@@ -19,6 +20,8 @@
 #include <xercesc/dom/DOMLocator.hpp>
 #include <xercesc/dom/DOMNamedNodeMap.hpp>
 #include <xercesc/dom/DOMNodeList.hpp>
+#include <xercesc/dom/DOMTreeWalker.hpp>
+#include <xercesc/dom/DOMDocumentTraversal.hpp>
 #include <xercesc/dom/DOMXPathException.hpp>
 #include <xercesc/parsers/XercesDOMParser.hpp>
 #include <xalanc/XalanTransformer/XercesDOMWrapperParsedSource.hpp>
@@ -506,7 +509,12 @@ namespace service
                 // https://codesynthesis.com/~boris/blog/2006/11/28/xerces-c-dom-potholes/
                 std::string r;
 
-                for(xercesc::DOMNode* n(doc->getFirstChild()); n != nullptr; n = n->getNextSibling())
+                xercesc::DOMTreeWalker* walker =
+                    doc->createTreeWalker(
+                    doc->getDocumentElement(), xercesc::DOMNodeFilter::SHOW_ALL, NULL, true);
+
+                //for(auto *n = walker->firstChild(); n != nullptr; n = walker->nextSibling())
+                for(auto *n = walker->firstChild(); n != nullptr; n = walker->nextNode())
                 {
                     switch(n->getNodeType())
                     {
@@ -523,7 +531,11 @@ namespace service
                     }
                     case xercesc::DOMNode::ELEMENT_NODE:
                     {
-                        //throw mixed_content();
+                        char* name = xercesc::XMLString::transcode(n->getNodeName());
+
+                        spdlog::debug("element  = {}", name);
+
+                        xercesc::XMLString::release(&name);
                     }
                     case xercesc::DOMNode::ATTRIBUTE_NODE:
                     case xercesc::DOMNode::ENTITY_REFERENCE_NODE:

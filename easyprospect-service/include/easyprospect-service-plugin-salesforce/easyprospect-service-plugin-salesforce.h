@@ -92,7 +92,7 @@ namespace service
                 std::string               in_str,
                 std::string               out_str,
                 std::string               style_str);
-            void sf_catalog_split2(
+            static void sf_catalog_split2(
                 std::shared_ptr<ep_srv_plugin_sf_context> cxt,
                 std::string doc_str,
                 std::string validate_xpath_templates,
