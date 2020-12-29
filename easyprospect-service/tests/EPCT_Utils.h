@@ -12,6 +12,7 @@
 #include <spdlog/async.h>
 #include <spdlog/sinks/stdout_sinks.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/msvc_sink.h>
 #include <boost/test/unit_test.hpp>
 
 using namespace easyprospect::ep_v8::api;
@@ -30,17 +31,26 @@ struct setup_fixture
         // Set flag to the new value.
         _CrtSetDbgFlag(tmpFlag);
 
-        spdlog::debug("setup fixture");
 
-        auto main_logger = spdlog::stdout_logger_mt("console");
+#ifdef BOOST_MSVC
+        auto console_sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+#else
+        auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+#endif
 
-        main_logger->set_level(spdlog::level::debug);
+        std::shared_ptr<spdlog::logger> main_logger;
+        main_logger = std::make_shared<spdlog::logger>("", console_sink);
+
+       // auto main_logger = spdlog::stdout_logger_mt("console");
+
+        main_logger->set_level(spdlog::level::trace);
         spdlog::set_default_logger(main_logger);
+
+        spdlog::debug("setup fixture");
 
         std::shared_ptr<Platform> platform = platform::NewDefaultPlatform();
         ep = easyprospect_v8::create<easyprospect_v8>(platform);
 
-        id;
         ep->init(boost::unit_test::framework::master_test_suite().argv[0]);
         ep->create_context(id);
 

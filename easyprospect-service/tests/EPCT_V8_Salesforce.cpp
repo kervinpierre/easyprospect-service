@@ -38,6 +38,8 @@ BOOST_AUTO_TEST_CASE(Ep_SF_Split_Simple_Catalog)
 
 BOOST_AUTO_TEST_CASE(Ep_SF_Split_Simple_Catalog2)
 {
+    spdlog::debug("Ep_SF_Split_Simple_Catalog2");
+     
     bool res = true;
 
     auto sfo = easyprospect::service::plugin::easyprospect_service_plugin_salesforce::get_instance();
