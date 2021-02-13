@@ -43,6 +43,8 @@
 #include <easyprospect-service-plugin-salesforce/easyprospect-service-plugin-salesforce.h>
 #include <spdlog/spdlog.h>
 
+#include "easyprospect-data-schema/easyprospect-data-schema.h"
+
 namespace easyprospect
 {
 namespace service
@@ -507,14 +509,15 @@ namespace service
                 doc->normalize();
 
                 // https://codesynthesis.com/~boris/blog/2006/11/28/xerces-c-dom-potholes/
-                std::string r;
 
                 xercesc::DOMTreeWalker* walker =
                     doc->createTreeWalker(
                     doc->getDocumentElement(), xercesc::DOMNodeFilter::SHOW_ALL, NULL, true);
 
+                std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object>> objects;
+
                 //for(auto *n = walker->firstChild(); n != nullptr; n = walker->nextSibling())
-                for(auto *n = walker->firstChild(); n != nullptr; n = walker->nextNode())
+                for(auto *n = walker->getRoot(); n != nullptr; n = walker->nextNode())
                 {
                     switch(n->getNodeType())
                     {
@@ -524,19 +527,22 @@ namespace service
                         xercesc::DOMText* t(static_cast<xercesc::DOMText*>(n));
 
                         char* str(xercesc::XMLString::transcode(t->getData()));
-                        r += str;
-                        xercesc::XMLString::release(&str);
+                        spdlog::debug("  text  = '{}'", str);
 
-                        break;
+                        xercesc::XMLString::release(&str);
                     }
+                        break;
+
                     case xercesc::DOMNode::ELEMENT_NODE:
                     {
                         char* name = xercesc::XMLString::transcode(n->getNodeName());
 
-                        spdlog::debug("element  = {}", name);
+                        spdlog::debug("element  = '{}'", name);
 
                         xercesc::XMLString::release(&name);
                     }
+                        break;
+
                     case xercesc::DOMNode::ATTRIBUTE_NODE:
                     case xercesc::DOMNode::ENTITY_REFERENCE_NODE:
                     case xercesc::DOMNode::ENTITY_NODE:
@@ -553,6 +559,9 @@ namespace service
             catch(...)
             {
             }
+
+            spdlog::debug("split completed");
+
         }
 
         void easyprospect_service_plugin_salesforce::sf_catalog_split(
