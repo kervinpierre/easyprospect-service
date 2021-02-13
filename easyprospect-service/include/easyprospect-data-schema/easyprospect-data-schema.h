@@ -144,6 +144,7 @@ namespace data
 
                 auto to_object() const;
 
+                void save() const;
             };
 
             class ep_sf_object_relationship final
@@ -171,8 +172,8 @@ namespace data
                     const int64_t           dst_id,
                     const ep_sf_object_type dst_type,
                     const ep_sf_object_type src_type) :
-                    id_(id),
-                    import_id_(import_id), variable_id_(variable_id), order_(order), src_id_(src_id), dst_id_(dst_id),
+                    id_(id),variable_id_(variable_id),
+                    import_id_(import_id),  order_(order), src_id_(src_id), dst_id_(dst_id),
                     dst_type_(dst_type), src_type_(src_type)
                 {
                     

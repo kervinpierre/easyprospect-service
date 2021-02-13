@@ -272,6 +272,10 @@ namespace data
 
                 return res;
             }
+
+            void ep_sf_object_builder::save() const
+            {
+            }
         } // namespace salesforce
     }     // namespace schema
 } // namespace data
