@@ -273,7 +273,7 @@ namespace data
                 return res;
             }
 
-            void ep_sf_object_builder::save() const
+            void ep_sf_object_builder::save(std::shared_ptr<ep_sf_obj_import_config> conf) const
             {
             }
         } // namespace salesforce

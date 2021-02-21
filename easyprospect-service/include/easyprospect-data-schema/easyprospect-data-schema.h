@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "easyprospect-data/easyprospect-data.h"
+
 namespace easyprospect
 {
 namespace data
@@ -30,6 +32,18 @@ namespace data
                 SF_CATALOG_IMAGE_SETTINGS   = 5,
                 SF_CATALOG_CUSTOM_ATTRIBUTE = 6,
                 STRING                      = 7,
+            };
+            class ep_sf_obj_import_config final
+            {
+            private:
+                const std::string db_host;
+              std::shared_ptr<database::ep_sqlite_db> db;
+
+            public:
+              ep_sf_obj_import_config(std::string h) : db_host(h)
+              {
+                 db = std::make_shared<database::ep_sqlite_db>(db_host);
+              }
             };
 
             class ep_sf_obj_import final
@@ -64,6 +78,19 @@ namespace data
                 std::chrono::system_clock::time_point get_timestamp() const
                 {
                     return timestamp_;
+                }
+            };
+
+            class ep_sf_obj_import_builder final
+            {
+              private:
+                uint64_t                              id_;
+                std::string                           label_;
+                std::chrono::system_clock::time_point timestamp_;
+
+              public:
+                explicit ep_sf_obj_import_builder()
+                {
                 }
             };
 
@@ -144,7 +171,7 @@ namespace data
 
                 auto to_object() const;
 
-                void save() const;
+                void save(std::shared_ptr<ep_sf_obj_import_config> conf) const;
             };
 
             class ep_sf_object_relationship final
