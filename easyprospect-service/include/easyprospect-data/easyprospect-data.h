@@ -26,8 +26,9 @@ namespace data
             explicit ep_sqlite_statement(std::weak_ptr<ep_sqlite_db> db);
 
             auto runnow(std::string sql);
+            auto runnow2(std::string sql);
 
-            void prepare(std::string sql);
+            std::string prepare(std::string sql);
 
             void bind_int(int idx, int val) const
             {
@@ -74,6 +75,8 @@ namespace data
                 return val_res;
             }
 
+            int insert_new_object();
+
             void reset() const
             {
                 sqlite3_reset(stmt_);
@@ -119,12 +122,16 @@ namespace data
                 return db_;
             }
 
+            static std::string get_dll_sql();
+
             auto create_statement()
             {
                 auto res = std::make_shared<ep_sqlite_statement>(shared_from_this());
 
                 return res;
             }
+
+            void initialize_schema();
 
             ~ep_sqlite_db()
             {

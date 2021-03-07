@@ -33,6 +33,7 @@ namespace data
                 SF_CATALOG_CUSTOM_ATTRIBUTE = 6,
                 STRING                      = 7,
             };
+
             class ep_sf_obj_import_config final
             {
             private:

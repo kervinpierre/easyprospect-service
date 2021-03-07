@@ -494,6 +494,7 @@ namespace service
 
         void easyprospect_service_plugin_salesforce::sf_catalog_split2(
             std::shared_ptr<ep_srv_plugin_sf_context> cxt,
+            std::shared_ptr<data::database::ep_sqlite> db,
             std::string                               doc_str,
             std::string
                                         validate_xpath_templates, // if not empty, object added.  E.g. check for a particular child or sibling
@@ -538,6 +539,15 @@ namespace service
                         char* name = xercesc::XMLString::transcode(n->getNodeName());
 
                         spdlog::debug("element  = '{}'", name);
+
+                        // TODO: Switch on name, select builder
+                        if(!strcmp(name, "catalog"))
+                        {
+                            auto bldr = data::schema::salesforce::ep_sf_obj_catalog_builder();
+
+                            auto stmt = db->get_db()->create_statement();
+                            stmt->insert_new_object();
+                        }
 
                         xercesc::XMLString::release(&name);
                     }

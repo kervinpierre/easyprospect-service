@@ -7,6 +7,9 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{0abbe9d7-675a-44a2-b4de-8a8e8a3a3590}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Work Files">
+      <UniqueIdentifier>{c656d319-fd51-44f0-a6ad-a88192c8363a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\easyprospect-data\easyprospect-data.cpp">
@@ -23,5 +26,16 @@
     <ClInclude Include="include\easyprospect-data\easyprospect-data.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\easyprospect-data\ep-incbin-01.in.h">
+      <Filter>Work Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\easyprospect-data\ep-incbin-01.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="tools\incbin\ep-data-01.bat">
+      <Filter>Work Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

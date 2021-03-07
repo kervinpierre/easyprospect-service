@@ -277,6 +277,13 @@
     <ClInclude Include="EPCT_Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\easyprospect-data-schema.vcxproj">
+      <Project>{9231a20d-b032-4692-92ea-fcb1930b1741}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\easyprospect-data.vcxproj">
+      <Project>{55a758b4-ccbc-4b4b-8767-75fd0fc0bb37}</Project>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
     <ProjectReference Include="..\easyprospect-service-plugin-salesforce.vcxproj">
       <Project>{2a6ca1c8-2c4d-41a9-902d-b8dc3248fef7}</Project>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>

@@ -5,6 +5,8 @@
 
 #include <easyprospect-web-worker/easyprospect-service-plugin.h>
 
+#include "easyprospect-data/easyprospect-data.h"
+
 namespace easyprospect
 {
 namespace service
@@ -94,6 +96,7 @@ namespace service
                 std::string               style_str);
             static void sf_catalog_split2(
                 std::shared_ptr<ep_srv_plugin_sf_context> cxt,
+                std::shared_ptr<data::database::ep_sqlite> db,
                 std::string doc_str,
                 std::string validate_xpath_templates,
                 std::map<sf_item_type, int> element_page_size);

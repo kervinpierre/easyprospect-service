@@ -8,6 +8,8 @@
     &lt;TestId&gt;BoostTest::17034538-93F4-3AFF-BFF3-1F030D1578D1::.NETFramework,Version=v4.0::Ep_SF_Split_Simple_Catalog2&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
+	<s:Boolean x:Key="/Default/Housekeeping/CodeStructure/ShowPreprocessorDirectives/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/Housekeeping/CodeStructure/SynchronizeCaretToView/@EntryValue">True</s:Boolean>
 	
 	
 	

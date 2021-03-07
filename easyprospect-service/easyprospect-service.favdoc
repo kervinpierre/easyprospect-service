@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<Favorites xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <folders>
+    <Folder>
+      <name>SF</name>
+      <folders />
+      <favorites>
+        <Favorite>
+          <name>easyprospect-service-plugin-salesforce.cpp</name>
+          <path>src\easyprospect-service-plugin-salesforce\easyprospect-service-plugin-salesforce.cpp</path>
+          <absolutePath>I:\src\easyprospect.com\easyprospect-service\git\easyprospect-service\src\easyprospect-service-plugin-salesforce\easyprospect-service-plugin-salesforce.cpp</absolutePath>
+          <position>
+            <line>495</line>
+            <column>61</column>
+          </position>
+        </Favorite>
+        <Favorite>
+          <name>EPCT_V8_Salesforce.cpp</name>
+          <path>tests\EPCT_V8_Salesforce.cpp</path>
+          <absolutePath>I:\src\easyprospect.com\easyprospect-service\git\easyprospect-service\tests\EPCT_V8_Salesforce.cpp</absolutePath>
+          <position>
+            <line>16</line>
+            <column>17</column>
+          </position>
+        </Favorite>
+        <Favorite>
+          <name>easyprospect-data-schema.h</name>
+          <path>include\easyprospect-data-schema\easyprospect-data-schema.h</path>
+          <absolutePath>I:\src\easyprospect.com\easyprospect-service\git\easyprospect-service\include\easyprospect-data-schema\easyprospect-data-schema.h</absolutePath>
+          <viewKind>7651a701-06e5-11d1-8ebd-00a0c90f26ea</viewKind>
+          <position>
+            <line>276</line>
+            <column>1</column>
+            <lineHash>smk9qqLedsX/aFAu5+WWMuhYt8rj9IOXoDjwfaH5JXc=</lineHash>
+          </position>
+        </Favorite>
+      </favorites>
+    </Folder>
+  </folders>
+  <favorites />
+</Favorites>
