@@ -75,7 +75,8 @@ namespace data
                 return val_res;
             }
 
-            int insert_new_object();
+            int64_t insert_new_object();
+            int64_t insert_new_import(std::string label = "");
 
             void reset() const
             {

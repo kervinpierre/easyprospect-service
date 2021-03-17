@@ -5,6 +5,8 @@
 
 #include <easyprospect-web-worker/easyprospect-service-plugin.h>
 
+
+#include "easyprospect-data-schema/easyprospect-data-schema.h"
 #include "easyprospect-data/easyprospect-data.h"
 
 namespace easyprospect
@@ -97,6 +99,7 @@ namespace service
             static void sf_catalog_split2(
                 std::shared_ptr<ep_srv_plugin_sf_context> cxt,
                 std::shared_ptr<data::database::ep_sqlite> db,
+                std::shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp,
                 std::string doc_str,
                 std::string validate_xpath_templates,
                 std::map<sf_item_type, int> element_page_size);

@@ -4,6 +4,8 @@
 
 #include <easyprospect-service-plugin-salesforce/easyprospect-service-plugin-salesforce.h>
 
+
+#include "easyprospect-data-schema/easyprospect-data-schema.h"
 #include "easyprospect-data/easyprospect-data.h"
 
 BOOST_AUTO_TEST_CASE(Ep_SF_Split_Simple_Catalog)
@@ -78,6 +80,10 @@ BOOST_AUTO_TEST_CASE(Ep_SF_Split_Simple_Catalog2)
     {
         boost::system::error_code ec;
         boost::filesystem::remove(db_path, ec);
+        if(ec)
+        {
+            spdlog::warn("'{}' delete failed with: {}.", db_path.generic_string(), ec.message());     
+        }
 
         spdlog::debug("'{}'  exists, delete: {}.", db_path.generic_string(), ec.message());
     }
@@ -87,8 +93,16 @@ BOOST_AUTO_TEST_CASE(Ep_SF_Split_Simple_Catalog2)
     auto db = dbc->get_db();
     db->initialize_schema();
 
+    auto bldr = std::make_shared<easyprospect::data::schema::salesforce::ep_sf_obj_import_builder>();
+
+    auto stmt = dbc->get_db()->create_statement();
+    auto id   = stmt->insert_new_import();
+    bldr->set_id(id);
+
+    auto imp = bldr->to_import();
+
     easyprospect::service::plugin::easyprospect_service_plugin_salesforce::sf_catalog_split2(
-        cxt, dbc, doc_str, xpath_tmpl, pages);
+        cxt, dbc, imp, doc_str, xpath_tmpl, pages);
 
     BOOST_TEST(true);
 }

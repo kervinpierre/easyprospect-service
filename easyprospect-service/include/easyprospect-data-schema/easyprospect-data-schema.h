@@ -34,6 +34,29 @@ namespace data
                 STRING                      = 7,
             };
 
+            class ep_sf_obj_util
+            {
+              public:
+                static ep_sf_tag_type str_to_tag(std::string name)
+                {
+                    auto res = ep_sf_tag_type::NONE;
+
+                    if(name == "category")
+                    {
+                        res = ep_sf_tag_type::ELEMENT_CATEGORY;
+                    }
+
+                    return res;
+                }
+
+                template <typename C, typename... T>
+                static std::shared_ptr<C> create(T&&... args)
+                {
+                    auto res = std::make_shared<C>(std::forward<T>(args)...);
+                    return res;
+                }
+            };
+
             class ep_sf_obj_import_config final
             {
             private:
@@ -85,13 +108,24 @@ namespace data
             class ep_sf_obj_import_builder final
             {
               private:
-                uint64_t                              id_;
+                uint64_t                              eso_id_;
                 std::string                           label_;
                 std::chrono::system_clock::time_point timestamp_;
 
               public:
                 explicit ep_sf_obj_import_builder()
                 {
+                }
+
+                void set_id(const uint64_t id)
+                {
+                    eso_id_ = id;
+                }
+
+                auto to_import()
+                {
+                    auto res = std::make_shared<ep_sf_obj_import>(eso_id_,label_,timestamp_);
+                    return res;
                 }
             };
 
@@ -160,7 +194,7 @@ namespace data
                     eso_type_ = type;
                 }
 
-                void set_import_id(const int64_t id)
+                void set_import_id(const uint64_t id)
                 {
                     eso_import_id_ = id;
                 }
@@ -170,7 +204,12 @@ namespace data
                     eso_hash_ = "";
                 }
 
-                auto to_object() const;
+                virtual std::shared_ptr<ep_sf_object> to_object() const
+                {
+                     auto res = ep_sf_obj_util::create<ep_sf_object>(eso_id_, eso_type_, eso_import_id_);
+                    //std::shared_ptr<ep_sf_object> res;
+                    return res;
+                }
 
                 void save(std::shared_ptr<ep_sf_obj_import_config> conf) const;
             };
@@ -190,6 +229,11 @@ namespace data
                 const ep_sf_object_type dst_type_;
                 const ep_sf_object_type src_type_;
 
+                // Sometimes an inline value is best for performance
+                const int64_t     dst_int_inline_value_;
+                const float       dst_float_inline_value_;
+                const std::string dst_str_inline_value_;
+
               public:
                 ep_sf_object_relationship() = delete;
                 explicit ep_sf_object_relationship(const uint64_t id, 
@@ -199,10 +243,14 @@ namespace data
                     const int64_t  src_id,
                     const int64_t           dst_id,
                     const ep_sf_object_type dst_type,
-                    const ep_sf_object_type src_type) :
+                    const ep_sf_object_type src_type,
+                    const int64_t           dst_int_inline_value,
+                    const float             dst_float_inline_value,
+                    const std::string       dst_str_inline_value) :
                     id_(id),variable_id_(variable_id),
                     import_id_(import_id),  order_(order), src_id_(src_id), dst_id_(dst_id),
-                    dst_type_(dst_type), src_type_(src_type)
+                    dst_type_(dst_type), src_type_(src_type), dst_int_inline_value_(dst_int_inline_value), 
+                    dst_float_inline_value_(dst_float_inline_value), dst_str_inline_value_(dst_str_inline_value)
                 {
                     
                 }
@@ -245,6 +293,59 @@ namespace data
                 ep_sf_object_type get_dst_type() const
                 {
                     return dst_type_;
+                }
+            };
+
+            class ep_sf_object_relationship_builder final
+            {
+              private:
+                // Compound key
+                uint64_t id_;
+                int64_t  variable_id_; // for 1-to-many relationships
+
+                int64_t import_id_;
+                int64_t order_;
+
+                uint64_t          src_id_;
+                uint64_t          dst_id_;
+                ep_sf_object_type dst_type_;
+                ep_sf_object_type src_type_;
+
+                // Sometimes an inline value is best for performance
+                int64_t     dst_int_inline_value_;
+                float       dst_float_inline_value_;
+                std::string dst_str_inline_value_;
+
+            public:
+                ep_sf_object_relationship_builder()
+                {
+                    id_ = 0;
+                    variable_id_ = 0;
+                }
+
+                void set_id(uint64_t id)
+                {
+                    id_ = id;
+                }
+
+                void set_variable_id(int64_t variable_id)
+                {
+                    variable_id_ =  variable_id;
+                }
+
+                void set_import_id(const int64_t id)
+                {
+                    import_id_ = id;
+                }
+
+                void set_dst_type(const ep_sf_object_type type)
+                {
+                    dst_type_ = type;
+                }
+
+                void set_src_type(const ep_sf_object_type type)
+                {
+                    src_type_ = type;
                 }
             };
 
@@ -295,8 +396,7 @@ namespace data
                 boost::optional<std::string> catalog_id_;
 
               public:
-                explicit ep_sf_obj_catalog_builder() :
-                    ep_sf_object_builder()
+                explicit ep_sf_obj_catalog_builder() : ep_sf_object_builder()
                 {
                     header_                        = boost::none;
                     product_attribute_definitions_ = boost::none;
@@ -306,6 +406,8 @@ namespace data
                     variation_attribute_           = boost::none;
                     category_assignment_           = boost::none;
                     recommendation_                = boost::none;
+
+                    eso_type_ = ep_sf_object_type::SF_CATALOG;
                 }
 
                 void set_header(boost::optional<uint64_t> val)
@@ -396,7 +498,7 @@ namespace data
             class ep_sf_obj_catalog_header_image_settings final : public ep_sf_object
             {
               private:
-                boost::optional<uint64_t> internal_location_;
+                boost::optional<uint64_t> internal_location_d;
                 boost::optional<uint64_t> external_location_;
                 boost::optional<uint64_t> view_types_;
 
@@ -565,7 +667,10 @@ namespace data
                 boost::optional<std::string> view_type_;
 
               public:
-                explicit ep_sf_obj_catalog_header_image_view_types_builder();
+                explicit ep_sf_obj_catalog_header_image_view_types_builder()
+                {
+                    
+                }
 
                 void set_view_type(boost::optional<std::string> val)
                 {
@@ -1977,28 +2082,7 @@ namespace data
                 auto to_catalog_category() const;
             };
 
-            class ep_sf_obj_util
-            {
-            public:
-                static ep_sf_tag_type str_to_tag(std::string name)
-                {
-                    auto res = ep_sf_tag_type::NONE;
 
-                    if(name == "category")
-                    {
-                        res = ep_sf_tag_type::ELEMENT_CATEGORY;
-                    }
-
-                    return res;
-                }
-
-                template <typename C, typename... T>
-                static std::shared_ptr<C> create(T&&... args)
-                {
-                    auto res = std::make_shared<C>(std::forward<T>(args)...);
-                    return res;
-                }
-            };
         } // namespace salesforce
     }     // namespace schema
 } // namespace data

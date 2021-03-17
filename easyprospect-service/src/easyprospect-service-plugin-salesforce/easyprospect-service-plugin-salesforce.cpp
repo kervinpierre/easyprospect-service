@@ -495,14 +495,16 @@ namespace service
         void easyprospect_service_plugin_salesforce::sf_catalog_split2(
             std::shared_ptr<ep_srv_plugin_sf_context> cxt,
             std::shared_ptr<data::database::ep_sqlite> db,
-            std::string                               doc_str,
-            std::string
-                                        validate_xpath_templates, // if not empty, object added.  E.g. check for a particular child or sibling
-            std::map<sf_item_type, int> element_page_size)
+            std::shared_ptr <data::schema::salesforce::ep_sf_obj_import> imp,
+                             std::string                               doc_str,
+                             std::string
+                             validate_xpath_templates, // if not empty, object added.  E.g. check for a particular child or sibling
+                             std::map<sf_item_type, int> element_page_size)
         {
             const auto doc_obj = parse_str(cxt, doc_str, cxt->get_catalog_xsd());
 
             auto doc = doc_obj->get_doc();
+            std::shared_ptr<data::schema::salesforce::ep_sf_obj_catalog_builder> catalog_bdr;
 
             // xercesc::DOMElement* root              = doc->getDocumentElement();
             try
@@ -543,10 +545,104 @@ namespace service
                         // TODO: Switch on name, select builder
                         if(!strcmp(name, "catalog"))
                         {
-                            auto bldr = data::schema::salesforce::ep_sf_obj_catalog_builder();
+                            std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>> stack;
+
+                            catalog_bdr = std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_builder>();
+                            stack.push_back(catalog_bdr);
+                            auto ret = stack.front();
+                          //  auto cat2 =
+                           //     std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_builder>(ret);
+                            auto stmt = db->get_db()->create_statement();
+                            auto id = stmt->insert_new_object();
+                            catalog_bdr->set_id(id);
+                            catalog_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "header"))
+                        {
+                            auto header_bdr =
+                                std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_builder>();
 
                             auto stmt = db->get_db()->create_statement();
-                            stmt->insert_new_object();
+                            auto id   = stmt->insert_new_object();
+                            header_bdr->set_id(id);
+                            header_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "category"))
+                        {
+                            auto category_bdr = std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_category_builder>();
+
+                            auto stmt = db->get_db()->create_statement();
+                            auto id   = stmt->insert_new_object();
+                            category_bdr->set_id(id);
+                            category_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "image-settings"))
+                        {
+                            auto img_settings_bdr =
+                                std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_settings_builder>();
+
+                            auto stmt = db->get_db()->create_statement();
+                            auto id   = stmt->insert_new_object();
+                            img_settings_bdr->set_id(id);
+                            img_settings_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "internal-location"))
+                        {
+                            auto int_loc_bdr =
+                                std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_internal_location_builder>();
+
+                            auto stmt = db->get_db()->create_statement();
+                            auto id   = stmt->insert_new_object();
+                            int_loc_bdr->set_id(id);
+                            int_loc_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "view-types"))
+                        {
+                            auto view_types_bdr =
+                                std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_view_types_builder>();
+
+                            auto stmt = db->get_db()->create_statement();
+                            auto id   = stmt->insert_new_object();
+                            view_types_bdr->set_id(id);
+                            view_types_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "view-type"))
+                        {
+                            auto rel_bdr =
+                                std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
+
+                            auto stmt = db->get_db()->create_statement();
+                            rel_bdr->set_dst_type(data::schema::salesforce::ep_sf_object_type::STRING);
+                            rel_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "variation-attribute-id"))
+                        {
+                            // get image_settings but that id on there
+                        }
+                        else if(!strcmp(name, "alt-pattern"))
+                        {
+                            // get image_settings but that id on there
+                        }
+                        else if(!strcmp(name, "title-pattern"))
+                        {
+                            // get image_settings but that id on there
+                        }
+                        else if(!strcmp(name, "display-name"))
+                        {
+                            auto str_bdr =
+                                std::make_shared<data::schema::salesforce::ep_sf_catalog_localized_string_builder>();
+
+                            auto stmt = db->get_db()->create_statement();
+                            str_bdr->set_import_id(imp->get_id());
+                        }
+                        else if(!strcmp(name, "parent"))
+                        {
+                            // get image_settings but that id on there
+                        }
+                        else
+                        {
+                            // unknown tag
+                            spdlog::warn("Unknown tag name '{}'", name);
                         }
 
                         xercesc::XMLString::release(&name);
@@ -562,7 +658,8 @@ namespace service
                     case xercesc::DOMNode::DOCUMENT_TYPE_NODE:
                     case xercesc::DOMNode::DOCUMENT_FRAGMENT_NODE:
                     case xercesc::DOMNode::NOTATION_NODE:
-                    default: ;
+                    default:
+                        spdlog::warn(fmt::format("Unhandled node type '{}'", n->getNodeType()));
                     }
                 }
             }

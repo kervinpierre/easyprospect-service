@@ -121,11 +121,22 @@ namespace data
             return res;
         }
 
-        int ep_sqlite_statement::insert_new_object()
+        int64_t ep_sqlite_statement::insert_new_object()
         {
             auto db = db_.lock();
-            prepare("INSERT INTO ep_sf_object;");
+            runnow("INSERT INTO ep_sf_object (eso_type, eso_import_id, eso_hash) VALUES (0, 0, '')");
             int res = sqlite3_last_insert_rowid(db->get_db());
+
+            return res;
+        }
+
+        int64_t ep_sqlite_statement::insert_new_import(std::string label)
+        {
+            std::string curr_label = label;
+
+            auto db = db_.lock();
+            runnow("INSERT INTO ep_sf_obj_import (label, timestamp) VALUES ('" + curr_label + "', CURRENT_TIMESTAMP)");
+            auto res = sqlite3_last_insert_rowid(db->get_db());
 
             return res;
         }

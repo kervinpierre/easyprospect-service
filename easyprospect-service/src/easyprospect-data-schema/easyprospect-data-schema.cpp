@@ -8,13 +8,7 @@ namespace data
     {
         namespace salesforce
         {
-            auto
-            ep_sf_object_builder::to_object() const
-            {
-                auto res = ep_sf_obj_util::create<ep_sf_object>(eso_id_, eso_type_, eso_import_id_);
 
-                return res;
-            }
 
             auto
             ep_sf_obj_catalog_builder::to_catalog() const
