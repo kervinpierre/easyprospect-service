@@ -279,6 +279,7 @@
   <ItemGroup>
     <ProjectReference Include="..\easyprospect-data-schema.vcxproj">
       <Project>{9231a20d-b032-4692-92ea-fcb1930b1741}</Project>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
     <ProjectReference Include="..\easyprospect-data.vcxproj">
       <Project>{55a758b4-ccbc-4b4b-8767-75fd0fc0bb37}</Project>

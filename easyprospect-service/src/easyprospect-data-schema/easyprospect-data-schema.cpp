@@ -267,6 +267,15 @@ namespace data
                 return res;
             }
 
+            std::shared_ptr<ep_sf_object> ep_sf_object_builder::
+            to_object() const
+            {
+                auto res = ep_sf_obj_util::create<ep_sf_object>(
+                    eso_id_, eso_type_, eso_import_id_);
+                //std::shared_ptr<ep_sf_object> res;
+                return res;
+            }
+
             void ep_sf_object_builder::save(std::shared_ptr<ep_sf_obj_import_config> conf) const
             {
             }

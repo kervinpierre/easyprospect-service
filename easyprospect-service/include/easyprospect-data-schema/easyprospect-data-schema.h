@@ -49,6 +49,7 @@ namespace data
                     return res;
                 }
 
+                
                 template <typename C, typename... T>
                 static std::shared_ptr<C> create(T&&... args)
                 {
@@ -176,6 +177,8 @@ namespace data
                 std::string       eso_hash_;
 
               public:
+                virtual ~ep_sf_object_builder() = default;
+
                 ep_sf_object_builder()
                 {
                     eso_id_ = 0;
@@ -204,12 +207,7 @@ namespace data
                     eso_hash_ = "";
                 }
 
-                virtual std::shared_ptr<ep_sf_object> to_object() const
-                {
-                     auto res = ep_sf_obj_util::create<ep_sf_object>(eso_id_, eso_type_, eso_import_id_);
-                    //std::shared_ptr<ep_sf_object> res;
-                    return res;
-                }
+                virtual std::shared_ptr<ep_sf_object> to_object() const;
 
                 void save(std::shared_ptr<ep_sf_obj_import_config> conf) const;
             };
