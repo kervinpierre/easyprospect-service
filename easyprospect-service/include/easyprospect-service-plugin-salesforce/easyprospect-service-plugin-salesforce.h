@@ -96,11 +96,14 @@ namespace service
                 std::string               in_str,
                 std::string               out_str,
                 std::string               style_str);
-            static std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>> from_xml(
-                xercesc::DOMNode*                                           node,
-                std::shared_ptr<data::database::ep_sqlite>                  db,
-                std::
-                          shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp);
+            static void from_xml(
+                std::deque<std::shared_ptr<
+                    data::schema::salesforce::ep_sf_object_builder>>&
+                parse_stack,
+                xercesc::DOMNode* node,
+                std::shared_ptr<data::database::ep_sqlite> db,
+                std::shared_ptr<data::schema
+                    ::salesforce::ep_sf_obj_import> imp);
             static void sf_catalog_split2(
                 std::shared_ptr<ep_srv_plugin_sf_context> cxt,
                 std::shared_ptr<data::database::ep_sqlite> db,

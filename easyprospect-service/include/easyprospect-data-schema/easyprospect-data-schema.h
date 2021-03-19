@@ -147,6 +147,8 @@ namespace data
                     
                 }
 
+                virtual ~ep_sf_object() = default;
+
                 uint64_t get_id() const
                 {
                     return eso_id_;
@@ -212,14 +214,12 @@ namespace data
                 void save(std::shared_ptr<ep_sf_obj_import_config> conf) const;
             };
 
-            class ep_sf_object_relationship final
+            class ep_sf_object_relationship final : public ep_sf_object
             {
               private:
-                // Compound key
-                const uint64_t id_;
+                // Compound key with ID
                 const int64_t  variable_id_; // for 1-to-many relationships
 
-                const int64_t  import_id_;
                 const int64_t  order_;
 
                 const uint64_t          src_id_;
@@ -234,8 +234,9 @@ namespace data
 
               public:
                 ep_sf_object_relationship() = delete;
-                explicit ep_sf_object_relationship(const uint64_t id, 
-                                                    const int64_t import_id,
+                explicit ep_sf_object_relationship(const uint64_t id,
+                    const ep_sf_object_type type, 
+                     const int64_t import_id,
                     const int64_t  variable_id,
                     const int64_t  order,
                     const int64_t  src_id,
@@ -245,22 +246,12 @@ namespace data
                     const int64_t           dst_int_inline_value,
                     const float             dst_float_inline_value,
                     const std::string       dst_str_inline_value) :
-                    id_(id),variable_id_(variable_id),
-                    import_id_(import_id),  order_(order), src_id_(src_id), dst_id_(dst_id),
+                    ep_sf_object(id, type, import_id),
+                    variable_id_(variable_id), order_(order), src_id_(src_id), dst_id_(dst_id),
                     dst_type_(dst_type), src_type_(src_type), dst_int_inline_value_(dst_int_inline_value), 
                     dst_float_inline_value_(dst_float_inline_value), dst_str_inline_value_(dst_str_inline_value)
                 {
                     
-                }
-
-                uint64_t get_id() const
-                {
-                    return id_;
-                }
-
-                int64_t get_import_id() const
-                {
-                    return import_id_;
                 }
 
                 int64_t get_variable_id() const
@@ -294,14 +285,12 @@ namespace data
                 }
             };
 
-            class ep_sf_object_relationship_builder final
+            class ep_sf_object_relationship_builder final : public ep_sf_object_builder
             {
               private:
                 // Compound key
-                uint64_t id_;
                 int64_t  variable_id_; // for 1-to-many relationships
 
-                int64_t import_id_;
                 int64_t order_;
 
                 uint64_t          src_id_;
@@ -317,23 +306,12 @@ namespace data
             public:
                 ep_sf_object_relationship_builder()
                 {
-                    id_ = 0;
                     variable_id_ = 0;
-                }
-
-                void set_id(uint64_t id)
-                {
-                    id_ = id;
                 }
 
                 void set_variable_id(int64_t variable_id)
                 {
                     variable_id_ =  variable_id;
-                }
-
-                void set_import_id(const int64_t id)
-                {
-                    import_id_ = id;
                 }
 
                 void set_dst_type(const ep_sf_object_type type)

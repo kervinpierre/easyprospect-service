@@ -492,22 +492,23 @@ namespace service
             // xalanc::XalanTransformer::ICUCleanUp();
         }
 
-        std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>
+        void
         easyprospect_service_plugin_salesforce::from_xml(
+            std::deque<std::shared_ptr<
+                data::schema::salesforce::ep_sf_object_builder>>& parse_stack,
             xercesc::DOMNode* node,
             std::shared_ptr<data::database::ep_sqlite> db,
-            std::shared_ptr<data::schema::salesforce::ep_sf_obj_import>       imp )
+            std::shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp)
         {
-            std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>> parse_stack;
 
             switch(node->getNodeType())
             {
             case xercesc::DOMNode::TEXT_NODE:
             case xercesc::DOMNode::CDATA_SECTION_NODE:
             {
-                xercesc::DOMText* t(static_cast<xercesc::DOMText*>(node));
+                auto* const t(dynamic_cast<xercesc::DOMText*>(node));
+                auto* str(xercesc::XMLString::transcode(t->getData()));
 
-                char* str(xercesc::XMLString::transcode(t->getData()));
                 spdlog::debug("  text  = '{}'", str);
 
                 xercesc::XMLString::release(&str);
@@ -546,17 +547,34 @@ namespace service
                 else if(!strcmp(name, "header"))
                 {
                     auto header_bdr = std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_builder>();
-                    parse_stack.push_back(header_bdr);
+                    auto parent_builder = parse_stack.back();
+                    auto parent = parent_builder->to_object();
 
+                    if(parent->get_type() != data::schema::salesforce::ep_sf_object_type::SF_CATALOG)
+                    {
+                        // ERROR: unexpected type
+                    }
+
+                    auto catalog
+                        = std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog>(parent);
+                    auto cat_builder
+                        = std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_builder>(parent_builder);
+
+                    parse_stack.push_back(header_bdr);
+                    
                     auto stmt = db->get_db()->create_statement();
                     auto id   = stmt->insert_new_object();
                     header_bdr->set_id(id);
                     header_bdr->set_import_id(imp->get_id());
+
+                    cat_builder->set_header(id);
+
                 }
                 else if(!strcmp(name, "category"))
                 {
                     auto category_bdr =
                         std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_category_builder>();
+                    parse_stack.push_back(category_bdr);
 
                     auto stmt = db->get_db()->create_statement();
                     auto id   = stmt->insert_new_object();
@@ -567,6 +585,7 @@ namespace service
                 {
                     auto img_settings_bdr =
                         std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_settings_builder>();
+                    parse_stack.push_back(img_settings_bdr);
 
                     auto stmt = db->get_db()->create_statement();
                     auto id   = stmt->insert_new_object();
@@ -577,6 +596,7 @@ namespace service
                 {
                     auto int_loc_bdr = std::make_shared<
                         data::schema::salesforce::ep_sf_obj_catalog_header_image_internal_location_builder>();
+                    parse_stack.push_back(int_loc_bdr);
 
                     auto stmt = db->get_db()->create_statement();
                     auto id   = stmt->insert_new_object();
@@ -587,6 +607,7 @@ namespace service
                 {
                     auto view_types_bdr =
                         std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_view_types_builder>();
+                    parse_stack.push_back(view_types_bdr);
 
                     auto stmt = db->get_db()->create_statement();
                     auto id   = stmt->insert_new_object();
@@ -596,6 +617,7 @@ namespace service
                 else if(!strcmp(name, "view-type"))
                 {
                     auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
+                    parse_stack.push_back(rel_bdr);
 
                     auto stmt = db->get_db()->create_statement();
                     rel_bdr->set_dst_type(data::schema::salesforce::ep_sf_object_type::STRING);
@@ -603,15 +625,18 @@ namespace service
                 }
                 else if(!strcmp(name, "variation-attribute-id"))
                 {
-                    // get image_settings but that id on there
+                    auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
+                    parse_stack.push_back(rel_bdr);
                 }
                 else if(!strcmp(name, "alt-pattern"))
                 {
-                    // get image_settings but that id on there
+                    auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
+                    parse_stack.push_back(rel_bdr);
                 }
                 else if(!strcmp(name, "title-pattern"))
                 {
-                    // get image_settings but that id on there
+                    auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
+                    parse_stack.push_back(rel_bdr);
                 }
                 else if(!strcmp(name, "display-name"))
                 {
@@ -622,7 +647,8 @@ namespace service
                 }
                 else if(!strcmp(name, "parent"))
                 {
-                    // get image_settings but that id on there
+                    auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
+                    parse_stack.push_back(rel_bdr);
                 }
                 else
                 {
@@ -652,11 +678,11 @@ namespace service
             {
                 xercesc::DOMNode* curr_child = list->item(i);
 
-                auto ir = from_xml(curr_child,db,imp);
-                parse_stack.insert(parse_stack.end(), ir.begin(), ir.end());
+                from_xml(parse_stack,curr_child,db, imp);
             }
 
-            return parse_stack;
+            auto completed = parse_stack.back();
+            parse_stack.pop_back();
         }
 
         void easyprospect_service_plugin_salesforce::sf_catalog_split2(
@@ -677,15 +703,14 @@ namespace service
             {
                 doc->normalize();
 
-                from_xml(doc->getDocumentElement(), db, imp);
+                std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>> parse_stack;
+                from_xml(parse_stack, doc->getDocumentElement(), db, imp);
 
                 // https://codesynthesis.com/~boris/blog/2006/11/28/xerces-c-dom-potholes/
 
                 xercesc::DOMTreeWalker* walker =
                     doc->createTreeWalker(
                     doc->getDocumentElement(), xercesc::DOMNodeFilter::SHOW_ALL, NULL, true);
-
-                std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>> parse_stack;
 
                 //for(auto *n = walker->firstChild(); n != nullptr; n = walker->nextSibling())
                 for(auto *n = walker->getRoot(); n != nullptr; n = walker->nextNode())
