@@ -49,7 +49,25 @@ namespace data
                     return res;
                 }
 
-                
+                static std::string to_string(const ep_sf_object_type t)
+                {
+                    switch(t)
+                    {
+                    case ep_sf_object_type::NONE: return "NONE";
+                    case ep_sf_object_type::IMPORT: return "IMPORT";
+                    case ep_sf_object_type::RELATIONSHIP: return "RELATIONSHIP";
+                    case ep_sf_object_type::SF_CATALOG: return "SF_CATALOG";
+                    case ep_sf_object_type::SF_CATALOG_HEADER: return "SF_CATALOG_HEADER";
+                    case ep_sf_object_type::SF_CATALOG_IMAGE_SETTINGS:
+                        return "SF_CATALOG_IMAGE_SETTINGS";
+                    case ep_sf_object_type::SF_CATALOG_CUSTOM_ATTRIBUTE:
+                        return "SF_CATALOG_CUSTOM_ATTRIBUTE";
+                    case ep_sf_object_type::STRING:
+                        return "STRING";
+                    default: throw std::logic_error("Invalid type");
+                    }
+                }
+
                 template <typename C, typename... T>
                 static std::shared_ptr<C> create(T&&... args)
                 {

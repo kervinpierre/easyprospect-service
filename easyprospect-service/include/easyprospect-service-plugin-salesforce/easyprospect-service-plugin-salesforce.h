@@ -96,7 +96,8 @@ namespace service
                 std::string               in_str,
                 std::string               out_str,
                 std::string               style_str);
-            static void from_xml(
+            static std::shared_ptr<data::schema::salesforce::
+            ep_sf_object_builder> from_xml(
                 std::deque<std::shared_ptr<
                     data::schema::salesforce::ep_sf_object_builder>>&
                 parse_stack,
