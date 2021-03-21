@@ -31,7 +31,8 @@ namespace data
                 SF_CATALOG_HEADER           = 4,
                 SF_CATALOG_IMAGE_SETTINGS   = 5,
                 SF_CATALOG_CUSTOM_ATTRIBUTE = 6,
-                STRING                      = 7,
+                SF_CATEGORY                 = 7,
+                STRING                      = 8,
             };
 
             class ep_sf_obj_util
@@ -445,6 +446,8 @@ namespace data
                 }
 
                 auto to_catalog() const;
+
+                std::shared_ptr<ep_sf_object> to_object() const override;
             };
 
             class ep_sf_obj_catalog_header final : public ep_sf_object
@@ -486,7 +489,7 @@ namespace data
                     custom_attributes_ = val;
                 }
 
-                auto to_catalog_header() const;
+                std::shared_ptr<ep_sf_obj_catalog_header> to_catalog_header() const;
             };
 
             class ep_sf_obj_catalog_header_image_settings final : public ep_sf_object

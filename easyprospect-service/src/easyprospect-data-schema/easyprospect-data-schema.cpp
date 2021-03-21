@@ -27,7 +27,7 @@ namespace data
                 return res;
             }
 
-            auto
+            std::shared_ptr<ep_sf_obj_catalog_header>
             ep_sf_obj_catalog_header_builder::to_catalog_header() const
             {
                 auto res = ep_sf_obj_util::create<ep_sf_obj_catalog_header>(eso_id_, eso_type_, eso_import_id_);
@@ -278,6 +278,13 @@ namespace data
 
             void ep_sf_object_builder::save(std::shared_ptr<ep_sf_obj_import_config> conf) const
             {
+            }
+
+            std::shared_ptr<ep_sf_object> ep_sf_obj_catalog_builder::
+            to_object() const
+            {
+                  auto res = to_catalog();
+                  return res;
             }
         } // namespace salesforce
     }     // namespace schema

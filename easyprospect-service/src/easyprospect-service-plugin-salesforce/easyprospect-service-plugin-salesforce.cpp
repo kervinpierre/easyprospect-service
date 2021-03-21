@@ -492,6 +492,117 @@ namespace service
             // xalanc::XalanTransformer::ICUCleanUp();
         }
 
+        std::multimap<std::string, std::string>
+        easyprospect_service_plugin_salesforce::get_attribute(xercesc::DOMNode* node)
+        {
+            std::multimap<std::string, std::string> res;
+
+            // https://cpp.hotexamples.com/examples/-/DOMNode/getAttributes/cpp-domnode-getattributes-method-examples.html
+            if(node->hasAttributes())
+            {
+                // const auto* ns    (xercesc::XMLString::transcode(node->getNamespaceURI()));
+
+                auto* attrs = node->getAttributes();
+                if(attrs != nullptr)
+                {
+                    auto attr_count = attrs->getLength();
+                    for(auto i = 0; i < attr_count; i++)
+                    {
+                        auto* attr = attrs->item(i);
+
+                        // const auto* attrPrefix (xercesc::XMLString::transcode(attr->getPrefix()));
+                        // ns                      = xercesc::XMLString::transcode(attr->getNamespaceURI());
+                        std::string attnamestr;
+                        std::string attvaluestr;
+
+                        auto*       attname(xercesc::XMLString::transcode(attr->getLocalName()));
+                        if(attname == nullptr)
+                        {
+                            spdlog::debug("attribute name is (null)");
+                        }
+                        else
+                        {
+                            spdlog::debug("attribute name='{}'", attname);
+                            attnamestr = attname;
+                            xercesc::XMLString::release(&attname);
+                        }
+
+                        auto* attvalue(xercesc::XMLString::transcode(attr->getNodeValue()));
+                        if(attvalue == nullptr)
+                        {
+                            spdlog::debug("attribute value is (null)");
+                        }
+                        else
+                        {
+                            spdlog::debug("attribute value='{}'", attvalue);
+                            attvaluestr = attvalue;
+                            xercesc::XMLString::release(&attvalue);
+                        }
+
+                        if(!attnamestr.empty())
+                        {
+                            res.insert({attnamestr, attvaluestr});
+                        }
+                    }
+                }
+            }
+
+            return res;
+        }
+
+        template <typename B>
+        std::shared_ptr<typename std::enable_if<std::is_base_of<data::schema::salesforce::ep_sf_object_builder, B>::value, B>::type> 
+        easyprospect_service_plugin_salesforce::put_new_parser_object(
+            std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>& parse_stack,
+            bool& pop_stack,
+            std::shared_ptr<data::database::ep_sqlite>                                   db,
+            std::shared_ptr<data::schema::salesforce::ep_sf_obj_import>                  imp)
+        {
+            auto object_bdr = std::make_shared<B>();
+            parse_stack.push_back(object_bdr);
+            pop_stack = true;
+
+            auto stmt = db->get_db()->create_statement();
+            auto id   = stmt->insert_new_object();
+            object_bdr->set_id(id);
+            object_bdr->set_import_id(imp->get_id());
+
+            return object_bdr;
+        }
+
+        template<typename P, typename B>
+        auto easyprospect_service_plugin_salesforce::get_obj_parent(
+            std::shared_ptr<data::schema::salesforce::ep_sf_object_builder> parent_builder, 
+                             data::schema::salesforce::ep_sf_object_type expected_parent_type)
+        {
+            auto parent         = parent_builder->to_object();
+
+            if(parent->get_type() != expected_parent_type)
+            {
+                // ERROR: unexpected type
+                spdlog::error(
+                    "Unexpected parent object type {}. But expected {}.",
+                    data::schema::salesforce::ep_sf_obj_util::to_string(parent->get_type()),
+                    data::schema::salesforce::ep_sf_obj_util::to_string(expected_parent_type));
+            }
+
+            auto typed_parent = std::dynamic_pointer_cast<P>(parent);
+            if(typed_parent == nullptr)
+            {
+                spdlog::error("Error casting parent to specific type");
+            }
+
+            auto typed_parent_builder = std::dynamic_pointer_cast<B>(parent_builder);
+            if(typed_parent_builder == nullptr)
+            {
+                spdlog::error("Error casting parent builder to specific type");
+            }
+
+            auto res = std::make_pair(typed_parent, typed_parent_builder);
+
+            return res;
+        }
+
         std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>
         easyprospect_service_plugin_salesforce::from_xml(
             std::deque<std::shared_ptr<
@@ -545,61 +656,36 @@ namespace service
                 }
                 else if(!strcmp(name, "header"))
                 {
-                    auto header_bdr = std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_builder>();
-                    auto parent_builder = parse_stack.back();
-                    auto parent = parent_builder->to_object();
+                    auto catalog = get_obj_parent<
+                        data::schema::salesforce::ep_sf_obj_catalog,
+                        data::schema::salesforce::ep_sf_obj_catalog_builder>(
+                        parse_stack.back(), data::schema::salesforce::ep_sf_object_type::SF_CATALOG);
 
-                    if(parent->get_type() != data::schema::salesforce::ep_sf_object_type::SF_CATALOG)
-                    {
-                        // ERROR: unexpected type
-                        spdlog::error("header was found in object type {}", data::schema::salesforce::ep_sf_obj_util::to_string(parent->get_type()));
-                    }
-
-                    auto catalog
-                        = std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog>(parent);
-                    auto cat_builder
-                        = std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_builder>(parent_builder);
-
-                    parse_stack.push_back(header_bdr);
-                    pop_stack = true;
+                    auto header_bdr =
+                        put_new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_header_builder>(
+                            parse_stack,pop_stack, db, imp);
                     
-                    auto stmt = db->get_db()->create_statement();
-                    auto id   = stmt->insert_new_object();
-                    header_bdr->set_id(id);
-                    header_bdr->set_import_id(imp->get_id());
-
-                    cat_builder->set_header(id);
-
+                    auto header = header_bdr->to_catalog_header();
+                    catalog.second->set_header(header->get_id());
                 }
                 else if(!strcmp(name, "category"))
                 {
-                    auto category_bdr =
-                        std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_category_builder>();
+                    auto catalog = get_obj_parent<
+                        data::schema::salesforce::ep_sf_obj_catalog,
+                        data::schema::salesforce::ep_sf_obj_catalog_builder>(
+                        parse_stack.back(), data::schema::salesforce::ep_sf_object_type::SF_CATALOG);
 
-                    auto parent_builder = parse_stack.back();
-                    auto parent         = parent_builder->to_object();
+                    auto category_bdr = put_new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_category_builder>(
+                        parse_stack, pop_stack, db, imp);
 
-                    if(parent->get_type() != data::schema::salesforce::ep_sf_object_type::SF_CATALOG)
-                    {
-                        // ERROR: unexpected type
-                        spdlog::error(
-                            "category was found in object type {}",
-                            data::schema::salesforce::ep_sf_obj_util::to_string(parent->get_type()));
-                    }
+                    auto category = category_bdr->to_catalog_category();
 
-                    auto catalog = std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog>(parent);
-                    auto cat_builder =
-                        std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_builder>(parent_builder);
+                    // 1. Create/retrieve relationship object if needed
+                    // 2. Do not push relationship object on the stack. / Don't supply a stack
+                    // 3. Add current category in a 1-to-many relationship
+                    // 4. Add relationship builder to catalog builder parent directly
 
-                    parse_stack.push_back(category_bdr);
-                    pop_stack = true;
-
-                    auto stmt = db->get_db()->create_statement();
-                    auto id   = stmt->insert_new_object();
-                    category_bdr->set_id(id);
-                    category_bdr->set_import_id(imp->get_id());
-
-                    cat_builder->set_header(id);
+                   // catalog.second->set_category();  set_category_id(category->get_id());
                 }
                 else if(!strcmp(name, "image-settings"))
                 {
@@ -662,53 +748,12 @@ namespace service
 
                     img_settings_builder->set_internal_location(id);
 
-                    // https://cpp.hotexamples.com/examples/-/DOMNode/getAttributes/cpp-domnode-getattributes-method-examples.html
-                    if(node->hasAttributes())
+                    auto attrs = get_attribute(node);
+
+                    auto basePath = attrs.find("base-path");
+                    if(basePath!=attrs.end())
                     {
-                       // const auto* ns    (xercesc::XMLString::transcode(node->getNamespaceURI()));
-
-                        auto *attrs = node->getAttributes();
-                        if(attrs!=nullptr)
-                        {
-                            auto attr_count = attrs->getLength();
-                            for(auto i=0; i<attr_count; i++)
-                            {
-                                auto *attr = attrs->item(i);
-
-                               // const auto* attrPrefix (xercesc::XMLString::transcode(attr->getPrefix()));
-                                //ns                      = xercesc::XMLString::transcode(attr->getNamespaceURI());
-                                std::string attnamestr;
-                                std::string attvaluestr;
-                                auto *attname(xercesc::XMLString::transcode(attr->getLocalName()));
-                                if(attname==nullptr)
-                                {
-                                    spdlog::debug("attribute name is (null)");
-                                }
-                                else
-                                {
-                                    spdlog::debug("attribute name='{}'", attname);
-                                    attnamestr = attname;
-                                    xercesc::XMLString::release(&attname);
-                                }
-
-                                auto* attvalue(xercesc::XMLString::transcode(attr->getNodeValue()));
-                                if(attvalue == nullptr)
-                                {
-                                    spdlog::debug("attribute value is (null)");
-                                }
-                                else
-                                {
-                                    spdlog::debug("attribute value='{}'", attvalue);
-                                    attvaluestr = attvalue;
-                                    xercesc::XMLString::release(&attvalue);
-                                }
-
-                                if(attnamestr == "base-path")
-                                {
-                                    int_loc_bdr->set_base_path(attvaluestr);
-                                }
-                            }
-                        }
+                        int_loc_bdr->set_base_path(basePath->second);
                     }
                 }
                 else if(!strcmp(name, "view-types"))
