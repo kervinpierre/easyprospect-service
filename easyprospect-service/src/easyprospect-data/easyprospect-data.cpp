@@ -1,7 +1,7 @@
-#include <easyprospect-data/easyprospect-data.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/optional/optional.hpp>
 #include <boost/variant2/variant.hpp>
+#include <easyprospect-data/easyprospect-data.h>
 
 #include <easyprospect-data/ep-incbin-01.h>
 
@@ -13,15 +13,14 @@ namespace data
     {
         ep_sqlite_statement::ep_sqlite_statement(std::weak_ptr<ep_sqlite_db> db) : db_(db)
         {
-
         }
 
         auto ep_sqlite_statement::runnow(std::string sql)
         {
-            auto db  = db_.lock();
-            char *errmsg = NULL;
-            auto res = sqlite3_exec(db->get_db(), sql.c_str(), nullptr, nullptr, &errmsg);
-            if(res!=SQLITE_OK)
+            auto  db     = db_.lock();
+            char* errmsg = NULL;
+            auto  res    = sqlite3_exec(db->get_db(), sql.c_str(), nullptr, nullptr, &errmsg);
+            if(res != SQLITE_OK)
             {
                 spdlog::error("Error initializing database: {}", errmsg);
 
@@ -92,8 +91,90 @@ namespace data
 
             return res;
         }
-        
-        std::string ep_sqlite_statement::prepare(std::string sql) 
+
+        auto ep_sqlite_statement::get_rows(std::string sql, std::shared_ptr<ep_sqlite_resultset_type> res)
+        {
+            boost::trim(sql);
+            sql.erase(std::remove(sql.begin(), sql.end(), '\r'), sql.end());
+            sql.erase(std::remove(sql.begin(), sql.end(), '\n'), sql.end());
+            sql.erase(std::remove(sql.begin(), sql.end(), '\t'), sql.end());
+
+            int resInt = 0;
+
+            last_rc_ = sqlite3_step(stmt_);
+            switch(last_rc_)
+            {
+            case SQLITE_DONE:
+                break;
+
+            case SQLITE_ROW:
+            {
+                res = std::make_shared<ep_sqlite_resultset_type>();
+
+                int cols = sqlite3_column_count(stmt_);
+
+                std::vector<int> col_header;
+
+                for(int i = 0; i < cols; i++)
+                {
+                    auto *cn       = sqlite3_column_name(stmt_, i);
+                    col_header[i] = sqlite3_column_type(stmt_, i);
+                    auto *dt       = sqlite3_column_decltype(stmt_, i);
+                }
+
+                do
+                {
+                    ep_sqlite_resultset_row_type result_row;
+
+                    for(auto i = 0; i < col_header.size(); i++)
+                    {
+                        switch(col_header[i])
+                        {
+                        case SQLITE_INTEGER:
+                        {
+                            auto val_res = sqlite3_column_int(stmt_, i);
+                            result_row.emplace_back(val_res);
+                        }
+                        break;
+
+                        case SQLITE_FLOAT:
+                            break;
+
+                        case SQLITE_BLOB:
+                            break;
+
+                        case SQLITE_NULL:
+                        {
+                            result_row.push_back(false);
+                        }
+                        break;
+
+                        case SQLITE_TEXT:
+                        {
+                            auto val_res = sqlite3_column_text(stmt_, i);
+                            std::string val_str(reinterpret_cast<const char *>(val_res));
+                            result_row.emplace_back(val_str);
+                        }
+                        break;
+
+                        default:;
+                        }
+                    }
+
+                    res->push_back(result_row);
+
+                    last_rc_ = ::sqlite3_step(stmt_);
+                } while(last_rc_ == SQLITE_ROW);
+            }
+            break;
+
+            default:;
+            }
+
+            return resInt;
+        }
+
+        std::string ep_sqlite_statement::prepare(std::string sql)
         {
             boost::trim(sql);
             std::string res;
@@ -105,10 +186,10 @@ namespace data
 
             auto db = db_.lock();
 
-            const char *tail = nullptr;
-            auto pres = sqlite3_prepare_v2(db->get_db(), sql.c_str(), -1, &stmt_, &tail);
+            const char* tail = nullptr;
+            auto        pres = sqlite3_prepare_v2(db->get_db(), sql.c_str(), -1, &stmt_, &tail);
 
-            if(tail && strlen(tail)>0)
+            if(tail && strlen(tail) > 0)
             {
                 int count = sql.length() - strlen(tail);
                 if(count > 0)
@@ -141,9 +222,20 @@ namespace data
             return res;
         }
 
+        int ep_sqlite_statement::load(std::string sql, std::shared_ptr<ep_sqlite_resultset_type> res)
+        {
+            // TODO: kp. Select an object & table, return a c++ table object. 1st row is table names
+
+            int resInt=0;
+
+            get_rows(sql, res);
+
+            return resInt;
+        }
+
         std::string ep_sqlite_db::get_dll_sql()
         {
-            std::string gddl_str(reinterpret_cast<const char *>(gddl_sqlData));
+            std::string gddl_str(reinterpret_cast<const char*>(gddl_sqlData));
 
             return gddl_str;
         }

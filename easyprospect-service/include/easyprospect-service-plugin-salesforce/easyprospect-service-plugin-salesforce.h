@@ -104,11 +104,33 @@ namespace service
             static std::shared_ptr<typename std::enable_if<
                 std::is_base_of<data::schema::salesforce::ep_sf_object_builder, B>::value,
                 B>::type>
-            put_new_parser_object(
+            new_parser_object(
                 std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>& parse_stack,
                 bool&                                                                        pop_stack,
                 std::shared_ptr<data::database::ep_sqlite>                                   db,
                 std::shared_ptr<data::schema::salesforce::ep_sf_obj_import>                  imp);
+
+            template <typename B>
+            std::shared_ptr<typename std::enable_if<
+                std::is_base_of<data::schema::salesforce::ep_sf_object_builder, B>::value,
+                B>::type>
+            new_parser_object(
+                boost::optional<std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>>&
+                                                                            parse_stack,
+                bool&                                                       pop_stack,
+                std::shared_ptr<data::database::ep_sqlite>                  db,
+                std::shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp);
+
+            template <typename B>
+            static std::shared_ptr<typename std::enable_if<
+                std::is_base_of<data::schema::salesforce::ep_sf_object_builder, B>::value,
+                B>::type>
+            new_parser_object(
+                std::shared_ptr<std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>>
+                                                                            parse_stack,
+                bool&                                                       pop_stack,
+                std::shared_ptr<data::database::ep_sqlite>                  db,
+                std::shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp);
 
             template <class P, class B>
             static auto get_obj_parent(
@@ -116,15 +138,13 @@ namespace service
                 parent_builder,
                 data::schema::salesforce::ep_sf_object_type
                 expected_parent_type);
-            static std::shared_ptr<data::schema::salesforce::
-            ep_sf_object_builder> from_xml(
-                std::deque<std::shared_ptr<
-                    data::schema::salesforce::ep_sf_object_builder>>&
-                parse_stack,
-                xercesc::DOMNode* node,
-                std::shared_ptr<data::database::ep_sqlite> db,
-                std::shared_ptr<data::schema
-                    ::salesforce::ep_sf_obj_import> imp);
+
+            static std::shared_ptr<data::schema::salesforce::ep_sf_object_builder> from_xml(
+                std::shared_ptr<std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>>
+                                                                            parse_stack,
+                xercesc::DOMNode*                                           node,
+                std::shared_ptr<data::database::ep_sqlite>                  db,
+                std::shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp);
 
             static void sf_catalog_split2(
                 std::shared_ptr<ep_srv_plugin_sf_context> cxt,

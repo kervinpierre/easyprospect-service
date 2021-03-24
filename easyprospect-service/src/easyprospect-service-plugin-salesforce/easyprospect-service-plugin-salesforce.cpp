@@ -552,15 +552,20 @@ namespace service
 
         template <typename B>
         std::shared_ptr<typename std::enable_if<std::is_base_of<data::schema::salesforce::ep_sf_object_builder, B>::value, B>::type> 
-        easyprospect_service_plugin_salesforce::put_new_parser_object(
-            std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>& parse_stack,
+        easyprospect_service_plugin_salesforce::new_parser_object(
+            std::shared_ptr<std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>> parse_stack,
             bool& pop_stack,
             std::shared_ptr<data::database::ep_sqlite>                                   db,
             std::shared_ptr<data::schema::salesforce::ep_sf_obj_import>                  imp)
         {
             auto object_bdr = std::make_shared<B>();
-            parse_stack.push_back(object_bdr);
-            pop_stack = true;
+
+            // If no stack, just create and return the object
+            if(parse_stack)
+            {
+                parse_stack->push_back(object_bdr);
+                pop_stack = true;
+            }
 
             auto stmt = db->get_db()->create_statement();
             auto id   = stmt->insert_new_object();
@@ -605,8 +610,8 @@ namespace service
 
         std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>
         easyprospect_service_plugin_salesforce::from_xml(
-            std::deque<std::shared_ptr<
-                data::schema::salesforce::ep_sf_object_builder>>& parse_stack,
+            std::shared_ptr<std::deque<std::shared_ptr<
+                data::schema::salesforce::ep_sf_object_builder>>> parse_stack,
             xercesc::DOMNode* node,
             std::shared_ptr<data::database::ep_sqlite> db,
             std::shared_ptr<data::schema::salesforce::ep_sf_obj_import> imp)
@@ -645,24 +650,18 @@ namespace service
                 }
                 else if(!strcmp(name, "catalog"))
                 {
-                    auto catalog_bdr = std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_builder>();
-                    parse_stack.push_back(catalog_bdr);
-                    pop_stack = true;
-
-                    auto stmt = db->get_db()->create_statement();
-                    auto id   = stmt->insert_new_object();
-                    catalog_bdr->set_id(id);
-                    catalog_bdr->set_import_id(imp->get_id());
+                    auto catalog_bdr = new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_builder>(
+                        parse_stack, pop_stack, db, imp);
                 }
                 else if(!strcmp(name, "header"))
                 {
                     auto catalog = get_obj_parent<
                         data::schema::salesforce::ep_sf_obj_catalog,
                         data::schema::salesforce::ep_sf_obj_catalog_builder>(
-                        parse_stack.back(), data::schema::salesforce::ep_sf_object_type::SF_CATALOG);
+                        parse_stack->back(), data::schema::salesforce::ep_sf_object_type::SF_CATALOG);
 
                     auto header_bdr =
-                        put_new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_header_builder>(
+                        new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_header_builder>(
                             parse_stack,pop_stack, db, imp);
                     
                     auto header = header_bdr->to_catalog_header();
@@ -673,9 +672,9 @@ namespace service
                     auto catalog = get_obj_parent<
                         data::schema::salesforce::ep_sf_obj_catalog,
                         data::schema::salesforce::ep_sf_obj_catalog_builder>(
-                        parse_stack.back(), data::schema::salesforce::ep_sf_object_type::SF_CATALOG);
+                        parse_stack->back(), data::schema::salesforce::ep_sf_object_type::SF_CATALOG);
 
-                    auto category_bdr = put_new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_category_builder>(
+                    auto category_bdr = new_parser_object<data::schema::salesforce::ep_sf_obj_catalog_category_builder>(
                         parse_stack, pop_stack, db, imp);
 
                     auto category = category_bdr->to_catalog_category();
@@ -685,14 +684,34 @@ namespace service
                     // 3. Add current category in a 1-to-many relationship
                     // 4. Add relationship builder to catalog builder parent directly
 
-                   // catalog.second->set_category();  set_category_id(category->get_id());
+                    std::shared_ptr<data::schema::salesforce::ep_sf_object_relationship_builder> rel_bdr;
+                    std::shared_ptr<data::schema::salesforce::ep_sf_object_relationship> rel;
+
+                    auto rel_table_id = catalog.first->get_category();
+                    if(rel_table_id)
+                    {
+                        // Retrieve the builder
+                        rel = rel_bdr->to_relationship();
+                    }
+                    else
+                    {
+                        rel_bdr = new_parser_object<data::schema::salesforce::ep_sf_object_relationship_builder>(
+                            nullptr, pop_stack, db, imp);
+
+                        rel = rel_bdr->to_relationship();
+                        catalog.second->set_category(rel->get_id());
+                    }
+
+
+
+                   //  set_category_id(category->get_id());
                 }
                 else if(!strcmp(name, "image-settings"))
                 {
                     auto img_settings_bdr =
                         std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_settings_builder>();
 
-                    auto parent_builder = parse_stack.back();
+                    auto parent_builder = parse_stack->back();
                     auto parent         = parent_builder->to_object();
 
                     if(parent->get_type() != data::schema::salesforce::ep_sf_object_type::SF_CATALOG_HEADER)
@@ -707,7 +726,7 @@ namespace service
                     auto hdr_builder =
                         std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_header_builder>(parent_builder);
 
-                    parse_stack.push_back(img_settings_bdr);
+                    parse_stack->push_back(img_settings_bdr);
                     pop_stack = true;
 
                     auto stmt = db->get_db()->create_statement();
@@ -722,7 +741,7 @@ namespace service
                     auto int_loc_bdr = std::make_shared<
                         data::schema::salesforce::ep_sf_obj_catalog_header_image_internal_location_builder>();
 
-                    auto parent_builder = parse_stack.back();
+                    auto parent_builder = parse_stack->back();
                     auto parent         = parent_builder->to_object();
 
                     if(parent->get_type() != data::schema::salesforce::ep_sf_object_type::SF_CATALOG_IMAGE_SETTINGS)
@@ -738,7 +757,7 @@ namespace service
                         std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_header_image_settings_builder>(
                             parent_builder);
                     
-                    parse_stack.push_back(int_loc_bdr);
+                    parse_stack->push_back(int_loc_bdr);
                     pop_stack = true;
 
                     auto stmt = db->get_db()->create_statement();
@@ -760,7 +779,7 @@ namespace service
                 {
                     auto view_types_bdr =
                         std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_image_view_types_builder>();
-                    parse_stack.push_back(view_types_bdr);
+                    parse_stack->push_back(view_types_bdr);
                     pop_stack = true;
 
                     auto stmt = db->get_db()->create_statement();
@@ -771,7 +790,7 @@ namespace service
                 else if(!strcmp(name, "view-type"))
                 {
                     auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
-                    parse_stack.push_back(rel_bdr);
+                    parse_stack->push_back(rel_bdr);
                     pop_stack = true;
 
                     auto stmt = db->get_db()->create_statement();
@@ -781,19 +800,19 @@ namespace service
                 else if(!strcmp(name, "variation-attribute-id"))
                 {
                     auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
-                    parse_stack.push_back(rel_bdr);
+                    parse_stack->push_back(rel_bdr);
                     pop_stack = true;
                 }
                 else if(!strcmp(name, "alt-pattern"))
                 {
                     auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
-                    parse_stack.push_back(rel_bdr);
+                    parse_stack->push_back(rel_bdr);
                     pop_stack = true;
                 }
                 else if(!strcmp(name, "title-pattern"))
                 {
                     auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
-                    parse_stack.push_back(rel_bdr);
+                    parse_stack->push_back(rel_bdr);
                     pop_stack = true;
                 }
                 else if(!strcmp(name, "display-name"))
@@ -806,7 +825,7 @@ namespace service
                 else if(!strcmp(name, "parent"))
                 {
                     auto rel_bdr = std::make_shared<data::schema::salesforce::ep_sf_object_relationship_builder>();
-                    parse_stack.push_back(rel_bdr);
+                    parse_stack->push_back(rel_bdr);
                     pop_stack = true;
                 }
                 else
@@ -846,9 +865,9 @@ namespace service
             if(pop_stack)
             {
                 // Only the pop the stack if we pushed it
-                completed = parse_stack.back();
+                completed = parse_stack->back();
 
-                parse_stack.pop_back();
+                parse_stack->pop_back();
             }
 
             return completed;
@@ -872,7 +891,8 @@ namespace service
             {
                 doc->normalize();
 
-                std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>> parse_stack;
+                auto parse_stack =
+                    std::make_shared<std::deque<std::shared_ptr<data::schema::salesforce::ep_sf_object_builder>>>();
                 auto root_buider = from_xml(parse_stack, doc->getDocumentElement(), db, imp);
 
                 // https://codesynthesis.com/~boris/blog/2006/11/28/xerces-c-dom-potholes/
@@ -908,7 +928,7 @@ namespace service
                         if(!strcmp(name, "catalog"))
                         {
                             auto catalog_bdr = std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_builder>();
-                            parse_stack.push_back(catalog_bdr);
+                            parse_stack->push_back(catalog_bdr);
                             //auto ret = parse_stack.front();
                             //auto cat2 =
                             //    std::dynamic_pointer_cast<data::schema::salesforce::ep_sf_obj_catalog_builder>(ret);
@@ -921,7 +941,7 @@ namespace service
                         {
                             auto header_bdr =
                                 std::make_shared<data::schema::salesforce::ep_sf_obj_catalog_header_builder>();
-                            parse_stack.push_back(header_bdr);
+                            parse_stack->push_back(header_bdr);
 
                             auto stmt = db->get_db()->create_statement();
                             auto id   = stmt->insert_new_object();

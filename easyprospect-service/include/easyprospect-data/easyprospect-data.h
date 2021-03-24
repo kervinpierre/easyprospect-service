@@ -4,6 +4,7 @@
 #include <sqlite/sqlite3.h>
 #include <stdexcept>
 #include <string>
+#include <boost/variant2/variant.hpp>
 
 namespace easyprospect
 {
@@ -11,6 +12,10 @@ namespace data
 {
     namespace database
     {
+        using ep_sqlite_resultset_col_type = boost::variant2::variant<int, double, std::string, bool, std::vector<unsigned char>>;
+        using ep_sqlite_resultset_row_type = std::vector<ep_sqlite_resultset_col_type>;
+        using ep_sqlite_resultset_type = std::vector<ep_sqlite_resultset_row_type>;
+
         class ep_sqlite_db;
 
         class ep_sqlite_statement final
@@ -27,6 +32,10 @@ namespace data
 
             auto runnow(std::string sql);
             auto runnow2(std::string sql);
+
+            auto get_rows(std::string sql, std::shared_ptr<ep_sqlite_resultset_type> res);
+
+            auto get_rows(std::string sql);
 
             std::string prepare(std::string sql);
 
@@ -77,6 +86,11 @@ namespace data
 
             int64_t insert_new_object();
             int64_t insert_new_import(std::string label = "");
+
+            // 1. Retrieve object row
+            // 2. Based on type in row, return specific class row
+            // 3. Return all data in a 
+            int load(std::string sql, std::shared_ptr<ep_sqlite_resultset_type> res);
 
             void reset() const
             {

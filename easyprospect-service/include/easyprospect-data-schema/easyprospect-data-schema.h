@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "easyprospect-data/easyprospect-data.h"
+#include <easyprospect-data/easyprospect-data.h>
 
 namespace easyprospect
 {
@@ -80,13 +81,18 @@ namespace data
             class ep_sf_obj_import_config final
             {
             private:
-                const std::string db_host;
-              std::shared_ptr<database::ep_sqlite_db> db;
+                const std::string db_host_;
+              std::shared_ptr<database::ep_sqlite_db> db_;
 
             public:
-              ep_sf_obj_import_config(std::string h) : db_host(h)
+              ep_sf_obj_import_config(std::string h) : db_host_(h)
               {
-                 db = std::make_shared<database::ep_sqlite_db>(db_host);
+                 db_ = std::make_shared<database::ep_sqlite_db>(db_host_);
+              }
+
+                std::shared_ptr<database::ep_sqlite_db> get_db()
+              {
+                    return db_;
               }
             };
 
@@ -231,6 +237,22 @@ namespace data
                 virtual std::shared_ptr<ep_sf_object> to_object() const;
 
                 void save(std::shared_ptr<ep_sf_obj_import_config> conf) const;
+
+                void load(std::shared_ptr<ep_sf_obj_import_config> conf)
+                {
+                    std::string obj_str = fmt::format("SELECT * FROM ep_sf_object JOIN WHERE eso_id = {}", eso_id_);
+
+                    auto db = conf->get_db();
+
+                    auto stmt = db->create_statement();
+
+                    auto tbl_res = std::make_shared<database::ep_sqlite_resultset_type>();
+                    auto loadRes = stmt->load(obj_str, tbl_res);
+                    if(loadRes)
+                    {
+                        spdlog::warn("load returned {}", loadRes);
+                    }
+                }
             };
 
             class ep_sf_object_relationship final : public ep_sf_object
@@ -342,6 +364,10 @@ namespace data
                 {
                     src_type_ = type;
                 }
+
+                std::shared_ptr<ep_sf_object_relationship> to_relationship() const;
+
+                std::shared_ptr<ep_sf_object> to_object() const override;
             };
 
             class ep_sf_obj_catalog final : public ep_sf_object
@@ -373,6 +399,11 @@ namespace data
                     catalog_id_(catalog_id)
                 {
                     
+                }
+
+                boost::optional<uint64_t> get_category() const
+                {
+                    return category_;
                 }
             };
 
@@ -2076,7 +2107,7 @@ namespace data
                     category_id_ = val;
                 }
 
-                auto to_catalog_category() const;
+                std::shared_ptr<ep_sf_obj_catalog_category> to_catalog_category() const;
             };
 
 

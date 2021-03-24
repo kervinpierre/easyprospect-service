@@ -260,7 +260,8 @@ namespace data
                 return res;
             }
 
-            auto ep_sf_obj_catalog_category_builder::to_catalog_category() const
+            std::shared_ptr<ep_sf_obj_catalog_category>
+            ep_sf_obj_catalog_category_builder::to_catalog_category() const
             {
                 auto res = ep_sf_obj_util::create<ep_sf_obj_catalog_category>(eso_id_, eso_type_, eso_import_id_, display_name_, parent_, category_id_);
 
@@ -278,6 +279,32 @@ namespace data
 
             void ep_sf_object_builder::save(std::shared_ptr<ep_sf_obj_import_config> conf) const
             {
+            }
+
+            std::shared_ptr<ep_sf_object_relationship> ep_sf_object_relationship_builder::to_relationship() const
+            {
+                auto res = ep_sf_obj_util::create<ep_sf_object_relationship>(
+                    eso_id_,
+                    eso_type_,
+                    eso_import_id_,
+                    variable_id_,
+                    order_,
+                    src_id_,
+                    dst_id_,
+                    dst_type_,
+                    src_type_,
+                    dst_int_inline_value_,
+                    dst_float_inline_value_,
+                     dst_str_inline_value_);
+
+                return res;
+            }
+
+            std::shared_ptr<ep_sf_object> ep_sf_object_relationship_builder::
+            to_object() const
+            {
+                auto res = to_relationship();
+                return res;
             }
 
             std::shared_ptr<ep_sf_object> ep_sf_obj_catalog_builder::
